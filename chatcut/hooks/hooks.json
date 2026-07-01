@@ -1,0 +1,17 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "mcp__chatcut__.*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "sh \"${PLUGIN_ROOT}/bin/chatcut-capture-hook.sh\" tool; pwsh -NoProfile -ExecutionPolicy Bypass -File \"${PLUGIN_ROOT}/bin/chatcut-capture-hook.ps1\" tool; powershell -NoProfile -ExecutionPolicy Bypass -File \"${PLUGIN_ROOT}/bin/chatcut-capture-hook.ps1\" tool; exit 0",
+            "timeout": 15,
+            "statusMessage": "ChatCut capture: recording tool use"
+          }
+        ]
+      }
+    ]
+  }
+}
