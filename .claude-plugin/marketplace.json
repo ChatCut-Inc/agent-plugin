@@ -1,0 +1,19 @@
+{
+  "name": "chatcut-inc",
+  "owner": {
+    "name": "ChatCut",
+    "email": "dev@chatcut.io"
+  },
+  "metadata": {
+    "description": "ChatCut Agent Plugin marketplace - edit and create ChatCut video projects with AI.",
+    "version": "0.2.16"
+  },
+  "plugins": [
+    {
+      "name": "chatcut",
+      "source": "./chatcut",
+      "description": "Edit and create videos in ChatCut: import media, edit timelines, add captions/subtitles, transcribe, create motion graphics, add B-roll, generate image/video/voice/music/sound assets, and export.",
+      "category": "Design"
+    }
+  ]
+}

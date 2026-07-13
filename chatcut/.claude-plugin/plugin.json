@@ -1,0 +1,37 @@
+{
+  "name": "chatcut",
+  "version": "0.2.16",
+  "description": "ChatCut plugin for editable video editing and creation workflows (timeline, captions/subtitles, transcription, motion graphics, B-roll, asset generation, export) via the ChatCut MCP server.",
+  "author": {
+    "name": "ChatCut",
+    "email": "dev@chatcut.io",
+    "url": "https://chatcut.io"
+  },
+  "homepage": "https://chatcut.io",
+  "repository": "https://github.com/ChatCut-Inc/agent-plugin.git",
+  "license": "GPL-3.0-only",
+  "keywords": [
+    "chatcut",
+    "video",
+    "video-editing",
+    "editor",
+    "captions",
+    "subtitles",
+    "transcription",
+    "timeline",
+    "local-video",
+    "claude-code",
+    "mcp"
+  ],
+  "mcpServers": {
+    "chatcut": {
+      "type": "http",
+      "url": "https://api.chatcut.io/api/external-mcp/mcp",
+      "oauth_resource": "https://api.chatcut.io/api/external-mcp/mcp",
+      "http_headers": {
+        "x-chatcut-mcp-surface": "claude"
+      }
+    }
+  },
+  "skills": "./skills/"
+}
