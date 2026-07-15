@@ -26,8 +26,8 @@
   "mcpServers": {
     "chatcut": {
       "type": "http",
-      "url": "https://api.chatcut.io/api/external-mcp/mcp",
-      "oauth_resource": "https://api.chatcut.io/api/external-mcp/mcp",
+      "url": "https://api-pr-2508.chatcut.org/api/external-mcp/mcp",
+      "oauth_resource": "https://api-pr-2508.chatcut.org/api/external-mcp/mcp",
       "http_headers": {
         "x-chatcut-mcp-client": "claude_code",
         "x-chatcut-mcp-surface": "embedded-preview"
