@@ -1,0 +1,265 @@
+{
+  "baseUrl": "https://cdn.jsdelivr.net/gh/ChatCut-Inc/chatcut-widget-media@v2026-07-15/widget-media/",
+  "entries": {
+    "scenario/ai-cinematic-short-film": {
+      "kind": "image",
+      "path": "scenarios/seedance-video.jpg"
+    },
+    "scenario/app-promo": {
+      "kind": "image",
+      "path": "scenarios/app-promo-mg.jpg"
+    },
+    "scenario/explainer": {
+      "kind": "image",
+      "path": "scenarios/explainer.jpg"
+    },
+    "scenario/long-video-to-shorts": {
+      "kind": "image",
+      "path": "scenarios/footage-to-shorts.jpg"
+    },
+    "scenario/motion-graphics": {
+      "kind": "image",
+      "path": "scenarios/motion-graphics.jpg"
+    },
+    "scenario/talking-head": {
+      "kind": "image",
+      "path": "scenarios/talking-head.jpg"
+    },
+    "design-style/01c302d0-3b90-51e3-ae43-4a8a9ce947b5": {
+      "kind": "image",
+      "path": "design-styles/01c302d0-3b90-51e3-ae43-4a8a9ce947b5.jpg"
+    },
+    "design-style/035ef37f-5da9-5607-9f3c-bc7c062ae7a9": {
+      "kind": "image",
+      "path": "design-styles/035ef37f-5da9-5607-9f3c-bc7c062ae7a9.jpg"
+    },
+    "design-style/15480d1f-0910-592a-a45a-3b4f4467d09f": {
+      "kind": "image",
+      "path": "design-styles/15480d1f-0910-592a-a45a-3b4f4467d09f.jpg"
+    },
+    "design-style/1a08a7ea-e138-5ee0-922f-8a92219211d6": {
+      "kind": "image",
+      "path": "design-styles/1a08a7ea-e138-5ee0-922f-8a92219211d6.jpg"
+    },
+    "design-style/1be3c6ae-bf35-58a4-b8d3-9d50d6dd49ac": {
+      "kind": "image",
+      "path": "design-styles/1be3c6ae-bf35-58a4-b8d3-9d50d6dd49ac.jpg"
+    },
+    "design-style/242f1a73-713b-5e6f-aea5-df7c370ac5da": {
+      "kind": "image",
+      "path": "design-styles/242f1a73-713b-5e6f-aea5-df7c370ac5da.jpg"
+    },
+    "design-style/270e88b2-7952-5755-bcb4-f13d29edfe8d": {
+      "kind": "image",
+      "path": "design-styles/270e88b2-7952-5755-bcb4-f13d29edfe8d.jpg"
+    },
+    "design-style/34abad33-4214-58ce-b10e-5ed301bbb8d5": {
+      "kind": "image",
+      "path": "design-styles/34abad33-4214-58ce-b10e-5ed301bbb8d5.jpg"
+    },
+    "design-style/3dc17649-3a10-5abb-9d11-dac31e22c839": {
+      "kind": "image",
+      "path": "design-styles/3dc17649-3a10-5abb-9d11-dac31e22c839.jpg"
+    },
+    "design-style/406e5dba-1903-5b22-8805-c6dd56170f65": {
+      "kind": "image",
+      "path": "design-styles/406e5dba-1903-5b22-8805-c6dd56170f65.jpg"
+    },
+    "design-style/45b2c117-1239-509b-8273-ea9418947646": {
+      "kind": "image",
+      "path": "design-styles/45b2c117-1239-509b-8273-ea9418947646.jpg"
+    },
+    "design-style/53417178-6788-5241-b0d6-8925371029e0": {
+      "kind": "image",
+      "path": "design-styles/53417178-6788-5241-b0d6-8925371029e0.jpg"
+    },
+    "design-style/5f0d36ec-2d10-59aa-a965-6c5ef6174432": {
+      "kind": "image",
+      "path": "design-styles/5f0d36ec-2d10-59aa-a965-6c5ef6174432.jpg"
+    },
+    "design-style/62cf874c-cd8e-5c82-9073-5763e9c79fbb": {
+      "kind": "image",
+      "path": "design-styles/62cf874c-cd8e-5c82-9073-5763e9c79fbb.jpg"
+    },
+    "design-style/6d03e24c-da30-5289-a198-81fabab76656": {
+      "kind": "image",
+      "path": "design-styles/6d03e24c-da30-5289-a198-81fabab76656.jpg"
+    },
+    "design-style/8fb8c58b-3568-5afd-bc66-91f6aaacd182": {
+      "kind": "image",
+      "path": "design-styles/8fb8c58b-3568-5afd-bc66-91f6aaacd182.jpg"
+    },
+    "design-style/903852ac-5c36-508a-834f-02e9830cd2af": {
+      "kind": "image",
+      "path": "design-styles/903852ac-5c36-508a-834f-02e9830cd2af.jpg"
+    },
+    "design-style/95d9f34a-8602-5250-ad9f-5f754cc5efbf": {
+      "kind": "image",
+      "path": "design-styles/95d9f34a-8602-5250-ad9f-5f754cc5efbf.jpg"
+    },
+    "design-style/972c825a-5e8d-5992-9379-a8d6b1a1ab68": {
+      "kind": "image",
+      "path": "design-styles/972c825a-5e8d-5992-9379-a8d6b1a1ab68.jpg"
+    },
+    "design-style/b1dafe2b-3914-5a83-b1e5-a33ea013d104": {
+      "kind": "image",
+      "path": "design-styles/b1dafe2b-3914-5a83-b1e5-a33ea013d104.jpg"
+    },
+    "design-style/b92da493-689c-5c29-a83f-c9d3b8e28c5e": {
+      "kind": "image",
+      "path": "design-styles/b92da493-689c-5c29-a83f-c9d3b8e28c5e.jpg"
+    },
+    "design-style/dd6428ed-41e3-5eb0-92b6-9fbf69c96898": {
+      "kind": "image",
+      "path": "design-styles/dd6428ed-41e3-5eb0-92b6-9fbf69c96898.jpg"
+    },
+    "design-style/f7027c39-106f-58d9-9e10-a01c94fbddb5": {
+      "kind": "image",
+      "path": "design-styles/f7027c39-106f-58d9-9e10-a01c94fbddb5.jpg"
+    },
+    "design-style/fc851c93-fd07-546e-afb4-d2a186196ada": {
+      "kind": "image",
+      "path": "design-styles/fc851c93-fd07-546e-afb4-d2a186196ada.jpg"
+    },
+    "voice/baqiqingshu": {
+      "kind": "audio",
+      "path": "voice-samples/doubao-baqiqingshu.mp3"
+    },
+    "voice/dayi": {
+      "kind": "audio",
+      "path": "voice-samples/doubao-dayi.mp3"
+    },
+    "voice/huiben": {
+      "kind": "audio",
+      "path": "voice-samples/doubao-huiben.mp3"
+    },
+    "voice/jitangnv": {
+      "kind": "audio",
+      "path": "voice-samples/doubao-jitangnv.mp3"
+    },
+    "voice/liuchang": {
+      "kind": "audio",
+      "path": "voice-samples/doubao-liuchang.mp3"
+    },
+    "voice/morgan": {
+      "kind": "audio",
+      "path": "voice-samples/doubao-morgan.mp3"
+    },
+    "voice/naiqimengwa": {
+      "kind": "audio",
+      "path": "voice-samples/doubao-naiqimengwa.mp3"
+    },
+    "voice/popo": {
+      "kind": "audio",
+      "path": "voice-samples/doubao-popo.mp3"
+    },
+    "voice/qingcang": {
+      "kind": "audio",
+      "path": "voice-samples/doubao-qingcang.mp3"
+    },
+    "voice/ruyayichen": {
+      "kind": "audio",
+      "path": "voice-samples/doubao-ruyayichen.mp3"
+    },
+    "voice/shuanglangshaonian": {
+      "kind": "audio",
+      "path": "voice-samples/doubao-shuanglangshaonian.mp3"
+    },
+    "voice/tangseng": {
+      "kind": "audio",
+      "path": "voice-samples/doubao-tangseng.mp3"
+    },
+    "voice/vivi": {
+      "kind": "audio",
+      "path": "voice-samples/doubao-vivi.mp3"
+    },
+    "voice/wenroumama": {
+      "kind": "audio",
+      "path": "voice-samples/doubao-wenroumama.mp3"
+    },
+    "voice/xiaohe": {
+      "kind": "audio",
+      "path": "voice-samples/doubao-xiaohe.mp3"
+    },
+    "voice/xiaotian": {
+      "kind": "audio",
+      "path": "voice-samples/doubao-xiaotian.mp3"
+    },
+    "voice/yingtaowanzi": {
+      "kind": "audio",
+      "path": "voice-samples/doubao-yingtaowanzi.mp3"
+    },
+    "voice/yuanboxiaoshu": {
+      "kind": "audio",
+      "path": "voice-samples/doubao-yuanboxiaoshu.mp3"
+    },
+    "voice/yunzhou": {
+      "kind": "audio",
+      "path": "voice-samples/doubao-yunzhou.mp3"
+    },
+    "voice/zhixingnv": {
+      "kind": "audio",
+      "path": "voice-samples/doubao-zhixingnv.mp3"
+    },
+    "voice/alex": {
+      "kind": "audio",
+      "path": "voice-samples/elevenlabs-alex.mp3"
+    },
+    "voice/amelia": {
+      "kind": "audio",
+      "path": "voice-samples/elevenlabs-amelia.mp3"
+    },
+    "voice/arabella": {
+      "kind": "audio",
+      "path": "voice-samples/elevenlabs-arabella.mp3"
+    },
+    "voice/brittney": {
+      "kind": "audio",
+      "path": "voice-samples/elevenlabs-brittney.mp3"
+    },
+    "voice/david": {
+      "kind": "audio",
+      "path": "voice-samples/elevenlabs-david.mp3"
+    },
+    "voice/frederick": {
+      "kind": "audio",
+      "path": "voice-samples/elevenlabs-frederick.mp3"
+    },
+    "voice/hope": {
+      "kind": "audio",
+      "path": "voice-samples/elevenlabs-hope.mp3"
+    },
+    "voice/james": {
+      "kind": "audio",
+      "path": "voice-samples/elevenlabs-james.mp3"
+    },
+    "voice/jane": {
+      "kind": "audio",
+      "path": "voice-samples/elevenlabs-jane.mp3"
+    },
+    "voice/jessica": {
+      "kind": "audio",
+      "path": "voice-samples/elevenlabs-jessica.mp3"
+    },
+    "voice/jon": {
+      "kind": "audio",
+      "path": "voice-samples/elevenlabs-jon.mp3"
+    },
+    "voice/maria": {
+      "kind": "audio",
+      "path": "voice-samples/elevenlabs-maria.mp3"
+    },
+    "voice/mark": {
+      "kind": "audio",
+      "path": "voice-samples/elevenlabs-mark.mp3"
+    },
+    "voice/peter": {
+      "kind": "audio",
+      "path": "voice-samples/elevenlabs-peter.mp3"
+    },
+    "voice/sully": {
+      "kind": "audio",
+      "path": "voice-samples/elevenlabs-sully.mp3"
+    }
+  }
+}

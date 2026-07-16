@@ -1,0 +1,16 @@
+{
+  "mcpServers": {
+    "chatcut": {
+      "http_headers": {
+        "x-chatcut-mcp-surface": "codex"
+      },
+      "oauth_resource": "https://api.chatcut.io/api/external-mcp/mcp",
+      "url": "https://api.chatcut.io/api/external-mcp/mcp",
+      "type": "http",
+      "headers": {
+        "x-chatcut-mcp-client": "claude-code",
+        "x-chatcut-mcp-surface": "embedded-preview"
+      }
+    }
+  }
+}
