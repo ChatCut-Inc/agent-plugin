@@ -4,8 +4,8 @@
       "http_headers": {
         "x-chatcut-mcp-surface": "codex"
       },
-      "oauth_resource": "https://api.chatcut.io/api/external-mcp/mcp",
-      "url": "https://api.chatcut.io/api/external-mcp/mcp",
+      "oauth_resource": "https://api.chatcut.dev/api/external-mcp/mcp",
+      "url": "https://api.chatcut.dev/api/external-mcp/mcp",
       "type": "http",
       "headers": {
         "x-chatcut-mcp-client": "claude-code",

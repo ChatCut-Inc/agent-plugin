@@ -164,7 +164,7 @@ claude plugin details chatcut@chatcut-inc
 ```
 
 Expected: the server shows `Status: ✔ Connected` with URL
-`https://api.chatcut.io/api/external-mcp/mcp`, and the plugin inventory lists
+`https://api.chatcut.dev/api/external-mcp/mcp`, and the plugin inventory lists
 15 skills plus 1 MCP server. If the server shows "Needs authentication",
 rerun the login step. If the plugin is missing, rerun
 `claude plugin marketplace list` to confirm the marketplace name and

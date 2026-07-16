@@ -24,7 +24,7 @@ Use it to import media, change a project timeline, create motion graphics, gener
 The plugin connects to ChatCut through the hosted ChatCut MCP endpoint:
 
 ```text
-https://api.chatcut.io/api/external-mcp/mcp
+https://api.chatcut.dev/api/external-mcp/mcp
 ```
 
 The host handles authentication when the plugin is installed or first used (`codex mcp login chatcut`, or `claude mcp login plugin:chatcut:chatcut` in Claude Code). Follow the sign-in flow to connect your ChatCut account.
