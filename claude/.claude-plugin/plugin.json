@@ -1,0 +1,38 @@
+{
+  "name": "chatcut",
+  "version": "0.2.18",
+  "description": "ChatCut plugin for editable video editing and creation workflows from Claude Code.",
+  "author": {
+    "name": "ChatCut",
+    "email": "dev@chatcut.io",
+    "url": "https://chatcut.io"
+  },
+  "homepage": "https://chatcut.io",
+  "repository": "https://github.com/ChatCut-Inc/agent-plugin.git",
+  "license": "GPL-3.0-only",
+  "keywords": [
+    "chatcut",
+    "video",
+    "video-editing",
+    "editor",
+    "captions",
+    "subtitles",
+    "transcription",
+    "timeline",
+    "local-video",
+    "claude-code",
+    "mcp"
+  ],
+  "mcpServers": {
+    "chatcut": {
+      "type": "http",
+      "url": "https://api.chatcut.io/api/external-mcp/mcp",
+      "oauth_resource": "https://api.chatcut.io/api/external-mcp/mcp",
+      "headers": {
+        "x-chatcut-mcp-client": "claude_code",
+        "x-chatcut-mcp-surface": "embedded-preview"
+      }
+    }
+  },
+  "skills": "./skills/"
+}

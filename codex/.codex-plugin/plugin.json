@@ -1,0 +1,46 @@
+{
+  "name": "chatcut",
+  "version": "0.2.18",
+  "description": "ChatCut Codex plugin for editable video editing and creation workflows from Codex.",
+  "author": {
+    "name": "ChatCut",
+    "email": "dev@chatcut.io",
+    "url": "https://chatcut.io"
+  },
+  "homepage": "https://chatcut.io",
+  "repository": "https://github.com/ChatCut-Inc/agent-plugin.git",
+  "license": "GPL-3.0-only",
+  "keywords": [
+    "chatcut",
+    "video",
+    "video-editing",
+    "editor",
+    "captions",
+    "subtitles",
+    "transcription",
+    "timeline",
+    "local-video",
+    "codex",
+    "mcp"
+  ],
+  "mcpServers": "./.mcp.json",
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "ChatCut",
+    "shortDescription": "Edit and create videos in ChatCut from Codex",
+    "longDescription": "Workflow skills and MCP server configuration for routing video editing and creation work to ChatCut: importing local or attached media, creating editable projects, editing timelines, adding captions/subtitles, transcribing and cleaning talking-head videos, adding B-roll or overlays, using generation tools for image/video/voice/sound/music/shader assets, exporting, and verifying editor-visible changes.",
+    "developerName": "ChatCut",
+    "category": "Design",
+    "capabilities": ["Read", "Write"],
+    "websiteURL": "https://chatcut.io",
+    "defaultPrompt": [
+      "Edit this local video in ChatCut",
+      "Add captions or subtitles to this video",
+      "Trim pauses and clean up a talking-head video",
+      "Add a simple motion graphic overlay"
+    ],
+    "brandColor": "#111827",
+    "composerIcon": "./assets/logo-light.png",
+    "logo": "./assets/logo-light.png"
+  }
+}
