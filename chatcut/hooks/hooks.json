@@ -1,0 +1,29 @@
+{
+  "description": "ChatCut: require loading the chatcut-plugin-basics-claude skill before any ChatCut tool call each session. gate.mjs denies ChatCut tool calls until mark-read.mjs records that the skill was loaded.",
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "mcp__plugin_chatcut_chatcut__.*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node",
+            "args": ["${CLAUDE_PLUGIN_ROOT}/hooks/gate.mjs"]
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Skill",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node",
+            "args": ["${CLAUDE_PLUGIN_ROOT}/hooks/mark-read.mjs"]
+          }
+        ]
+      }
+    ]
+  }
+}

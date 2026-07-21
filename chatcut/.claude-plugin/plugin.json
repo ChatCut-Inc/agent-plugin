@@ -1,6 +1,6 @@
 {
   "name": "chatcut",
-  "version": "0.2.18",
+  "version": "0.2.19",
   "description": "ChatCut plugin for editable video editing and creation workflows from Claude Code.",
   "author": {
     "name": "ChatCut",
