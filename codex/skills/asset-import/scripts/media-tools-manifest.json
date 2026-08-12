@@ -1,0 +1,41 @@
+{
+  "version": "8.1-chatcut.1",
+  "platforms": {
+    "darwin-arm64": {
+      "ffmpeg": {
+        "filename": "ffmpeg",
+        "url": "https://github.com/ChatCut-Inc/agent-plugin-marketplace/releases/download/media-tools-v8.1-chatcut.1/ffmpeg-8.1-darwin-arm64.gz",
+        "archiveBytes": 22526283,
+        "archiveSha256": "e3593e4765a4f400c7ef3d47b3404a4fbfeec0e1fd19377dcdbfc5cee41ac629",
+        "extractedBytes": 51860280,
+        "extractedSha256": "9a08d61f9328e8164ba560ee7a79958e357307fcfeea6fe626b7d66cdc287028"
+      },
+      "ffprobe": {
+        "filename": "ffprobe",
+        "url": "https://github.com/ChatCut-Inc/agent-plugin-marketplace/releases/download/media-tools-v8.1-chatcut.1/ffprobe-8.1-darwin-arm64.gz",
+        "archiveBytes": 22451198,
+        "archiveSha256": "a20fc161097a6645cc7bc3094a9b8e8dbb36c9250327e08e14523c5a75b08389",
+        "extractedBytes": 51685256,
+        "extractedSha256": "aab17ac7379c1178aaf400c3ef36cdb67db0b75b1a23eeef2cb9f658be8844e6"
+      }
+    },
+    "win32-x64": {
+      "ffmpeg": {
+        "filename": "ffmpeg.exe",
+        "url": "https://github.com/ChatCut-Inc/agent-plugin-marketplace/releases/download/media-tools-v8.1-chatcut.1/ffmpeg-8.1-win32-x64.exe.gz",
+        "archiveBytes": 37009049,
+        "archiveSha256": "a75f6aa80ab5268db12dc4ba5ec011a0bc4fe2bb224409930aef7d306544f7fd",
+        "extractedBytes": 101897728,
+        "extractedSha256": "1326dde4c84ff1f96fe6b8916c5bed29e163e9b5dccf995f6f3db069d143ec5e"
+      },
+      "ffprobe": {
+        "filename": "ffprobe.exe",
+        "url": "https://github.com/ChatCut-Inc/agent-plugin-marketplace/releases/download/media-tools-v8.1-chatcut.1/ffprobe-8.1-win32-x64.exe.gz",
+        "archiveBytes": 36905074,
+        "archiveSha256": "ca6b4114afdcd4fa1a1b8008d6832493ed1a1912ce630807eb526c5b3a0786e8",
+        "extractedBytes": 101692928,
+        "extractedSha256": "b49ccc7c6547b141ad5a2f6ec69cc04323d7133d7704d70b331b904c63eecb07"
+      }
+    }
+  }
+}

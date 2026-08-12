@@ -15,6 +15,12 @@ Use it to import media, change a project timeline, create motion graphics, gener
 - `claude/skills/` - Claude-specific adapters plus direct symlinks to the same canonical agent skills.
 - `codex/assets/` - plugin icons and brand assets, shared with Claude through a symlink.
 
+The marketplace distribution is binary-free. Media import uses compatible
+FFmpeg tools from `PATH` when available; otherwise it downloads only the pinned
+release assets for the current platform, verifies their size and SHA-256, and
+stores them in a shared cache capped at two versions and 500 MiB. No background
+updater or resident service is installed.
+
 ## Requirements
 
 - A ChatCut account.
