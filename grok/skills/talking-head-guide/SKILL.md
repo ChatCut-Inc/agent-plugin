@@ -15,6 +15,8 @@ user-invocable: true
 
 - **Claude Code:** The user may provide the source in the conversation or upload it directly in the open ChatCut editor. Use `asset-import` when a conversation attachment or local path still needs to be imported into ChatCut. For an editor upload, continue from the registered project asset without importing it again.
 - **Codex:** Ask the user to attach or drop the source into the conversation, then follow `asset-import`. Do not use or redirect the user to the editor's Browser upload path: it can currently crash the Codex Browser runtime.
+- **Grok Build:** Prefer ChatCut Desktop `push_asset` when `chatcut_desktop` tools are available. On the hosted `chatcut` server, use `asset-import` (`import_media`) for local or attached files, or tell the user to upload in the ChatCut editor URL.
+- **Grok Bot:** Do not read laptop paths. Use assets already in the targeted ChatCut project, chat attachments, or `/workspace` through `asset-import`. Otherwise send the clean `editorUrl` and ask the user to upload in ChatCut, then `browse_assets`.
 
 If this workflow is running through a Codex/connector host and the task creates, targets, or opens a ChatCut project for the user, satisfy any returned `browserHandoff.required=true`, `Codex internal Browser handoff`, or equivalent live project handoff before starting nontrivial edits and again before final delivery if the visible editor no longer matches the project.
 
@@ -234,7 +236,7 @@ Default rules:
 
 Load only the reference for the branch the user selected. Do not preload references for unrequested treatments; default cleanup requires no reference.
 
-For A-roll editing scenarios other than cleanup — including highlight extraction, restructure, hook / short version, target-script / script alignment, or building versions, highlights, and excerpts — read `.claude/skills/talking-head-guide/references/other-a-roll-editing-scenarios.md` completely before planning or editing that A-roll branch.
+For A-roll editing scenarios other than cleanup — including highlight extraction, restructure, hook / short version, target-script / script alignment, or building versions, highlights, and excerpts — read `references/other-a-roll-editing-scenarios.md` completely before planning or editing that A-roll branch.
 
 ### A-roll / transcript-based editing workflow
 
@@ -262,34 +264,34 @@ This section only adds talking-head timing, frame-composition, subject/caption p
 
 For talking-head MG work, treat the video as one edited piece, not as isolated graphics.
 
-When talking-head Motion Graphics is selected, including a plan-only or handoff-analysis request, first activate the Motion Graphics Skill available on the current surface: call `Skill` with `skill: "motion-graphic-gen"` when that generator Skill is available; on Codex, where it is intentionally absent, call `Skill` with `skill: "create-motion-graphics"` instead. Then read `.claude/skills/talking-head-guide/references/motion-graphics.md` completely before planning, generating, placing, or reviewing MG. This talking-head guide supplies the scene-specific editorial context but does not replace the active Motion Graphics Skill.
+When talking-head Motion Graphics is selected, including a plan-only or handoff-analysis request, first activate the Motion Graphics Skill available on the current surface: call `Skill` with `skill: "motion-graphic-gen"` when that generator Skill is available; on Codex, Grok Build, and Grok Bot, where it is intentionally absent, call `Skill` with `skill: "create-motion-graphics"` instead. Then read `references/motion-graphics.md` completely before planning, generating, placing, or reviewing MG. This talking-head guide supplies the scene-specific editorial context but does not replace the active Motion Graphics Skill.
 
 ---
 
 ## B-roll
 
-For B-roll, read `.claude/skills/talking-head-guide/references/b-roll.md` completely before sourcing, choosing, placing, or reviewing it.
+For B-roll, read `references/b-roll.md` completely before sourcing, choosing, placing, or reviewing it.
 
 ---
 
 ## Multicam (multiple camera angles of the same take)
 
-For Multicam, read `.claude/skills/talking-head-guide/references/multicam.md` completely before aligning or switching multiple camera angles of the same take.
+For Multicam, read `references/multicam.md` completely before aligning or switching multiple camera angles of the same take.
 
 ---
 
 ## Track roles (turn on auto-ducking)
 
-For Track roles, read `.claude/skills/talking-head-guide/references/audio-and-music.md` completely before assigning audio roles or changing ducking behavior.
+For Track roles, read `references/audio-and-music.md` completely before assigning audio roles or changing ducking behavior.
 
 ---
 
 ## Background Music
 
-For Background Music, read `.claude/skills/talking-head-guide/references/audio-and-music.md` completely before adding or fitting it.
+For Background Music, read `references/audio-and-music.md` completely before adding or fitting it.
 
 ---
 
 ## Captions
 
-For Captions, read `.claude/skills/talking-head-guide/references/captions.md` completely before editing them.
+For Captions, read `references/captions.md` completely before editing them.

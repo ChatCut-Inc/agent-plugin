@@ -155,9 +155,7 @@ for the creation or cloning action that needs it.
 
 ### Load live capabilities and state when relevant
 
-Use `ToolSearch` to load `manage_avatar` and `submit_avatar_video` if they are not
-already visible. Call `manage_avatar` for live capabilities before
-offering creation or advanced options.
+If `manage_avatar` and `submit_avatar_video` are not already visible, discover them with the host tool catalog (`search_tool` on Grok, or the equivalent tool search on this host). Call `manage_avatar` for live capabilities before offering creation or advanced options.
 
 If the user has neither selected an exact identity nor supplied a prospective
 likeness source, list the current official and saved identities before recommending
@@ -220,8 +218,8 @@ or fallback. When
 the user has ready saved avatars, place their cards before official recommendations.
 Ask one most important missing question at a time and do not repeat answered questions.
 
-The raw tags below are the embedded ChatCut protocol only. In a published Codex or
-Claude Code plugin, the Widget Forms Skill's host adapter takes priority: never emit
+The raw tags below are the embedded ChatCut protocol only. In a published Codex,
+Claude Code, Grok Build, or Grok Bot plugin, the Widget Forms Skill's host adapter takes priority: never emit
 raw ChatCut tags. Map each live identity to the host's visual-choice surface using
 `identityId` as its stable value and `name` as its label. In Codex, pass
 `previewVideoUrl` as `previewVideo` and `previewImageUrl` as `preview` so the image is

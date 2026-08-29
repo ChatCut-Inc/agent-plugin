@@ -66,6 +66,10 @@ After installing and authenticating the plugin, try prompts like:
 - `Transcribe this clip and add captions.`
 - `Export the current project.`
 
+Grok Bot (phone or away from a laptop):
+
+- `Continue my ChatCut project <name or editor URL>. Shorten the intro and fix the captions.`
+
 ## Repository
 
 The public plugin repository is:

@@ -1,15 +1,15 @@
 ---
 name: create-motion-graphics
-description: "Use whenever an ACP or local CLI agent in ChatCut Desktop needs to add, create, hand-author, patch, or place Motion Graphic JSX assets in a project. Covers direct inline JSX authoring, visual language, editable properties, asset binding, timeline placement, and local verification. Not for the built-in ChatCut Agent."
+description: "Use whenever Grok Build needs to add, create, hand-author, patch, or place Motion Graphic JSX assets in a ChatCut project through hosted or Desktop MCP. Covers direct inline JSX authoring, visual language, editable properties, asset binding, timeline placement, and verification. Not for the built-in ChatCut Agent."
 ---
 
 # Create Motion Graphics
 
-Use this skill when an ACP or local CLI task in ChatCut Desktop requires a Motion Graphic asset authored or patched as inline JSX. The built-in ChatCut Agent uses `motion-graphic-gen` and `submit_motion_graphic` instead.
+Use this skill when Grok Build requires a Motion Graphic asset authored or patched as inline JSX. The built-in ChatCut Agent uses `motion-graphic-gen` and `submit_motion_graphic` instead.
 
-ACP/local CLI Motion Graphics are direct-authored. Use `create_motion_graphic_from_code` for new JSX assets and `edit_asset` for existing MG JSX. This surface does not provide `submit_motion_graphic`; do not translate the request into a Gemini prompt or generation brief. If the direct-authoring tools are missing, stop and report that the ChatCut tool surface is out of date.
+Motion Graphics on this host are direct-authored. Use `create_motion_graphic_from_code` for new JSX assets and `edit_asset` for existing MG JSX. This surface does not provide `submit_motion_graphic`; do not translate the request into a Gemini prompt or generation brief. If the direct-authoring tools are missing, stop and report that the ChatCut tool surface is out of date.
 
-Pass Motion Graphic source inline through the Desktop MCP tool path. Do not stage code in the ChatCut repository, `ai-working/`, `/tmp`, a local HTTP server, generated code files, or guessed application paths when the tool accepts inline JSX directly.
+Pass Motion Graphic source inline through the ChatCut MCP tool (`create_motion_graphic_from_code` / `edit_asset`). Do not stage code in the ChatCut repository, `ai-working/`, `/tmp`, a local HTTP server, generated code files, or guessed application paths when the tool accepts inline JSX directly. Never emit ChatCut `<widget>` tags; load `widget-forms` for style pickers.
 
 ## Core Principles
 
@@ -43,7 +43,7 @@ Separate visual direction from batch permission. A user-named text/custom style 
 - If there is no active Design Style and the user has not named a style, stop before authoring and ask the user to choose a direction.
 - Generic quality adjectives are goals, not a named visual style. If the user only says the MGs should feel clean, premium, modern, professional, polished, or similar, use visual preset thumbnails instead of inventing a direction.
 - Prefer catalog Design Style presets: call `manage_design_style` with `action: "list_presets"`, present 3-6 reasonable visual choices, and let the user pick or override.
-- Load `widget-forms` and emit one ChatCut `<widget><form-visual>` picker with the exact preset ids. Do not call `ask_followup_questions` or `visualize.show_widget`.
+- Load `widget-forms` and present 3-6 catalog preset ids as visual choices on this host. Do not emit ChatCut `<widget>` tags. Do not call `ask_followup_questions` or `visualize.show_widget`.
 - You may recommend one choice, but still show the choice set. The point is visual alignment, not a single best guess.
 - When it isn't obvious, also ask whether the MG sits over the video as an overlay or takes the whole frame.
 

@@ -242,7 +242,7 @@ Decide the host path before loading `widget-forms` or asking for clone inputs:
   instruction followed by exactly `<clone-voice/>`, then stop. The dialog owns
   recording/upload, authorization, naming, preview generation, and the rest of
   the interactive flow.
-- In external Codex / Claude hosts, never emit `<clone-voice/>`; those hosts do
+- In external Codex / Claude / Grok Build / Grok Bot hosts, never emit `<clone-voice/>`; those hosts do
   not render or dispatch the native editor action. Use the Agent-driven
   attachment flow below.
 
@@ -288,7 +288,7 @@ Classify the request before rendering anything:
   the source-choice branch.
 - **Clone action selected:** only now enter the host-specific cloning route
   above. In the native editor, show the short instruction plus
-  `<clone-voice/>`. In external Codex / Claude hosts, begin the attachment
+  `<clone-voice/>`. In external Codex / Claude / Grok Build / Grok Bot hosts, begin the attachment
   workflow below. The Agent must proactively provide that host-specific entry
   in its very next reply. Do not wait for the user to ask again, tell them to
   open a menu or panel, or leave the clone choice as an unhandled pill. In the
@@ -483,7 +483,7 @@ Use this flow in either of these cases:
 
 - the native ChatCut Agent already has a readable attachment or accessible
   ChatCut audio asset that the user supplied for this cloning request; or
-- an external Codex / Claude host is collecting the reference as a conversation
+- an external Codex / Claude / Grok Build / Grok Bot host is collecting the reference as a conversation
   attachment because it cannot open the native editor dialog.
 
 Never call the clone action until the user submits explicit permission. ChatCut
@@ -578,7 +578,7 @@ authorization checkbox, use the same product copy as the Create Voice
 dialog rather than paraphrasing it:
 
 - Chinese: `我确认拥有该音色或已获得克隆授权，并承诺不将其用于冒充他人、欺诈或其他违法用途。`
-- English: `I confirm that I own this voice or have permission to clone it, and will not use it for impersonation, fraud, or unlawful purposes.`
+- English: `I confirm that I own this voice or have permission to clone it, and will not use it for impersonation, fraud, or unlawful purposes. I understand ChatCut keeps the source recording even if I later delete the project asset.`
 - Spanish: `Confirmo que esta voz me pertenece o que tengo permiso para clonarla, y que no la utilizaré para suplantar identidades, cometer fraude ni otros fines ilícitos.`
 
 Use ChatCut's detected language tag rather than asking the user to identify the
