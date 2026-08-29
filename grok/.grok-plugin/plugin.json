@@ -1,0 +1,23 @@
+{
+  "name": "chatcut",
+  "version": "0.2.25",
+  "description": "Edit and create videos in ChatCut from Grok Build: import media, edit timelines, captions, motion graphics, generation, export.",
+  "author": {
+    "name": "ChatCut",
+    "email": "dev@chatcut.io",
+    "url": "https://chatcut.io"
+  },
+  "homepage": "https://chatcut.io",
+  "repository": "https://github.com/ChatCut-Inc/agent-plugin.git",
+  "license": "GPL-3.0-only",
+  "keywords": [
+    "chatcut",
+    "video-editing",
+    "captions",
+    "subtitles",
+    "transcription",
+    "timeline",
+    "mcp",
+    "grok-build"
+  ]
+}

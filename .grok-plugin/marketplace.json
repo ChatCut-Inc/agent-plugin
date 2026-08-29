@@ -1,0 +1,39 @@
+{
+  "name": "chatcut-inc",
+  "description": "ChatCut plugins for Grok Build",
+  "owner": {
+    "name": "ChatCut",
+    "email": "dev@chatcut.io",
+    "url": "https://chatcut.io"
+  },
+  "plugins": [
+    {
+      "name": "chatcut",
+      "description": "Edit and create videos in ChatCut from Grok Build: import media, edit timelines, captions, motion graphics, generation, export.",
+      "category": "productivity",
+      "homepage": "https://chatcut.io",
+      "author": {
+        "name": "ChatCut",
+        "email": "dev@chatcut.io",
+        "url": "https://chatcut.io"
+      },
+      "license": "GPL-3.0-only",
+      "keywords": [
+        "chatcut",
+        "video-editing",
+        "captions",
+        "timeline",
+        "mcp"
+      ],
+      "domains": [
+        "chatcut.io",
+        "api.chatcut.io",
+        "app.chatcut.io"
+      ],
+      "source": {
+        "type": "local",
+        "path": "./grok"
+      }
+    }
+  ]
+}

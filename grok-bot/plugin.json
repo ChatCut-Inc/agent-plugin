@@ -1,0 +1,24 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "chatcut",
+  "description": "Edit and create videos in ChatCut from Grok Bot: import media, edit timelines, captions, motion graphics, generation, export. Opens the ChatCut web editor on the Agent Computer.",
+  "version": "0.2.25",
+  "author": {
+    "name": "ChatCut",
+    "url": "https://chatcut.io"
+  },
+  "license": "GPL-3.0-only",
+  "repository": "https://github.com/ChatCut-Inc/agent-plugin",
+  "homepage": "https://chatcut.io",
+  "keywords": [
+    "chatcut",
+    "video-editing",
+    "captions",
+    "timeline",
+    "mcp",
+    "grok-bot"
+  ],
+  "logo": "assets/logo-light.png",
+  "skills": "./skills/",
+  "mcpServers": "mcp.json"
+}

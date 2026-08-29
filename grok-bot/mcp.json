@@ -1,0 +1,13 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/mcp.schema.json",
+  "mcpServers": {
+    "chatcut": {
+      "type": "http",
+      "url": "https://api.chatcut.io/api/external-mcp/mcp",
+      "headers": {
+        "x-chatcut-mcp-client": "grok_bot",
+        "x-chatcut-mcp-surface": "grok-bot"
+      }
+    }
+  }
+}
