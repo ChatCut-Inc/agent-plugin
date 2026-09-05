@@ -1,4 +1,4 @@
-// Shared by both packaged host skills; only touches the optional receipt file.
+// Shared by the packaged host skills; only touches the optional receipt file.
 import { readFileSync, lstatSync, writeFileSync, renameSync } from "node:fs";
 import { homedir } from "node:os";
 import { join } from "node:path";
@@ -9,10 +9,10 @@ const PENDING_RECEIPT_TTL_MS = 7 * 86400000;
 if (
   !["pending", "acknowledge"].includes(action) ||
   !["production", "beta", "local"].includes(environment) ||
-  !["codex", "claude"].includes(host)
+  !["codex", "claude", "copilot"].includes(host)
 ) {
   throw new Error(
-    "Usage: acquisition-receipt.mjs pending|acknowledge production|beta|local codex|claude [exact-linked-code]",
+    "Usage: acquisition-receipt.mjs pending|acknowledge production|beta|local codex|claude|copilot [exact-linked-code]",
   );
 }
 const file = join(
