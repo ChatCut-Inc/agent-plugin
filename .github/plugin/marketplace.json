@@ -1,0 +1,40 @@
+{
+  "name": "chatcut-inc",
+  "owner": {
+    "name": "ChatCut",
+    "email": "dev@chatcut.io",
+    "url": "https://chatcut.io"
+  },
+  "metadata": {
+    "description": "ChatCut plugins for GitHub Copilot CLI",
+    "version": "1.0.0"
+  },
+  "plugins": [
+    {
+      "name": "chatcut",
+      "source": "./copilot",
+      "description": "Edit and create videos in ChatCut from GitHub Copilot CLI: import media, edit timelines, add captions and motion graphics, generate assets, and export.",
+      "version": "0.2.26",
+      "category": "Design",
+      "homepage": "https://chatcut.io",
+      "author": {
+        "name": "ChatCut",
+        "email": "dev@chatcut.io",
+        "url": "https://chatcut.io"
+      },
+      "license": "GPL-3.0-only",
+      "keywords": [
+        "chatcut",
+        "video",
+        "video-editing",
+        "captions",
+        "subtitles",
+        "transcription",
+        "timeline",
+        "github-copilot",
+        "copilot-cli",
+        "mcp"
+      ]
+    }
+  ]
+}

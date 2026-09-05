@@ -1,0 +1,29 @@
+{
+  "name": "chatcut",
+  "version": "0.2.26",
+  "description": "ChatCut plugin for editable video editing and creation workflows from GitHub Copilot CLI.",
+  "author": {
+    "name": "ChatCut",
+    "email": "dev@chatcut.io",
+    "url": "https://chatcut.io"
+  },
+  "homepage": "https://chatcut.io",
+  "repository": "https://github.com/ChatCut-Inc/agent-plugin.git",
+  "license": "GPL-3.0-only",
+  "keywords": [
+    "chatcut",
+    "video",
+    "video-editing",
+    "editor",
+    "captions",
+    "subtitles",
+    "transcription",
+    "timeline",
+    "local-video",
+    "github-copilot",
+    "copilot-cli",
+    "mcp"
+  ],
+  "mcpServers": "./.mcp.json",
+  "skills": "./skills/"
+}
