@@ -1,0 +1,36 @@
+{
+  "name": "chatcut-inc",
+  "owner": {
+    "name": "ChatCut",
+    "email": "dev@chatcut.io",
+    "url": "https://chatcut.io"
+  },
+  "metadata": {
+    "description": "ChatCut plugins for Claude Code"
+  },
+  "plugins": [
+    {
+      "name": "chatcut",
+      "source": "./claude",
+      "description": "Edit and create videos in ChatCut from Claude Code: import media, edit timelines, captions, motion graphics, generation, export.",
+      "category": "productivity",
+      "homepage": "https://chatcut.io",
+      "author": {
+        "name": "ChatCut",
+        "email": "dev@chatcut.io",
+        "url": "https://chatcut.io"
+      },
+      "license": "GPL-3.0-only",
+      "keywords": [
+        "chatcut",
+        "video",
+        "video-editing",
+        "captions",
+        "subtitles",
+        "transcription",
+        "timeline",
+        "mcp"
+      ]
+    }
+  ]
+}
