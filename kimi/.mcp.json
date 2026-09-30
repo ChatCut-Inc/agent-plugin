@@ -1,0 +1,18 @@
+{
+  "mcpServers": {
+    "chatcut": {
+      "transport": "http",
+      "auth": "oauth",
+      "url": "https://api.chatcut.io/api/external-mcp/mcp",
+      "oauth_resource": "https://api.chatcut.io/api/external-mcp/mcp",
+      "http_headers": {
+        "x-chatcut-mcp-client": "kimi_work",
+        "x-chatcut-mcp-surface": "embedded-preview"
+      },
+      "note": "Official ChatCut remote MCP endpoint. OAuth 2.0 with dynamic client registration (DCR) + PKCE; the server derives userId from the token.",
+      "authorization": "OAuth 2.0 with dynamic client registration",
+      "riskLevel": "caution",
+      "riskNote": "Hosted third-party connector. Media imported through this connector is uploaded to ChatCut's cloud (S3). Do not import files the user has not agreed to upload."
+    }
+  }
+}
