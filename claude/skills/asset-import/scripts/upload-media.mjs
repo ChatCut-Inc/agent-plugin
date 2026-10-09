@@ -2,23 +2,19 @@
 
 import { spawn, spawnSync } from "node:child_process";
 import { createHash, randomUUID } from "node:crypto";
-import { createReadStream, createWriteStream, existsSync } from "node:fs";
+import { createReadStream, existsSync } from "node:fs";
 import {
-  chmod,
   mkdir,
   mkdtemp,
   readFile,
   realpath,
-  rename,
   rm,
   stat,
   writeFile,
 } from "node:fs/promises";
 import { basename, dirname, extname, join, parse } from "node:path";
 import { fileURLToPath } from "node:url";
-import { homedir, tmpdir } from "node:os";
-import { pipeline } from "node:stream/promises";
-import { createGunzip } from "node:zlib";
+import { tmpdir } from "node:os";
 
 const MAX_DIMENSION = 1920;
 const SKIP_MAX_SOURCE_BITRATE_BPS = 8_000_000;
@@ -59,33 +55,6 @@ const SDR_BT709_COLOR_ARGS = [
   "-color_range",
   "tv",
 ];
-const BUNDLED_FFMPEG_VERSION = "8.1";
-const BUNDLED_MEDIA_TOOLS = {
-  "darwin-arm64": {
-    ffmpeg: {
-      filename: "ffmpeg",
-      sha256:
-        "9a08d61f9328e8164ba560ee7a79958e357307fcfeea6fe626b7d66cdc287028",
-    },
-    ffprobe: {
-      filename: "ffprobe",
-      sha256:
-        "aab17ac7379c1178aaf400c3ef36cdb67db0b75b1a23eeef2cb9f658be8844e6",
-    },
-  },
-  "win32-x64": {
-    ffmpeg: {
-      filename: "ffmpeg.exe",
-      sha256:
-        "1326dde4c84ff1f96fe6b8916c5bed29e163e9b5dccf995f6f3db069d143ec5e",
-    },
-    ffprobe: {
-      filename: "ffprobe.exe",
-      sha256:
-        "b49ccc7c6547b141ad5a2f6ec69cc04323d7133d7704d70b331b904c63eecb07",
-    },
-  },
-};
 
 const scriptPath = fileURLToPath(import.meta.url);
 
@@ -246,97 +215,10 @@ function assertTool(bin, label) {
   }
 }
 
-function bundledPlatform() {
-  return `${process.platform}-${process.arch}`;
-}
-
-async function sha256File(path) {
-  const hash = createHash("sha256");
-  await new Promise((resolve, reject) => {
-    const stream = createReadStream(path);
-    stream.on("data", (chunk) => hash.update(chunk));
-    stream.on("error", reject);
-    stream.on("end", resolve);
-  });
-  return hash.digest("hex");
-}
-
-async function materializeBundledTool(label) {
-  const platform = bundledPlatform();
-  const tool = BUNDLED_MEDIA_TOOLS[platform]?.[label];
-  if (!tool) return undefined;
-
-  const archive = join(
-    dirname(scriptPath),
-    "ffmpeg",
-    platform,
-    `${tool.filename}.gz`,
-  );
-  if (!existsSync(archive)) return undefined;
-
-  const cacheRoot =
-    process.env.CHATCUT_MEDIA_IMPORT_CACHE_DIR ||
-    join(homedir(), ".chatcut", "cache", "ffmpeg");
-  const cacheDir = join(cacheRoot, BUNDLED_FFMPEG_VERSION, platform);
-  const destination = join(cacheDir, tool.filename);
-  await mkdir(cacheDir, { recursive: true });
-
-  if (
-    existsSync(destination) &&
-    (await sha256File(destination)) === tool.sha256
-  ) {
-    return destination;
-  }
-  await rm(destination, { force: true });
-
-  const temporary = `${destination}.${process.pid}.${randomUUID()}.tmp`;
-  try {
-    await pipeline(
-      createReadStream(archive),
-      createGunzip(),
-      createWriteStream(temporary, { mode: 0o755 }),
-    );
-    const actualSha256 = await sha256File(temporary);
-    if (actualSha256 !== tool.sha256) {
-      fail(
-        `Bundled ${label} checksum mismatch: expected ${tool.sha256}, got ${actualSha256}.`,
-      );
-    }
-    await chmod(temporary, 0o755);
-    try {
-      await rename(temporary, destination);
-    } catch (error) {
-      if (
-        !existsSync(destination) ||
-        (await sha256File(destination)) !== tool.sha256
-      ) {
-        throw error;
-      }
-    }
-    return destination;
-  } finally {
-    await rm(temporary, { force: true });
-  }
-}
-
 async function resolveMediaTool(configured, label) {
   if (configured) {
     assertTool(configured, label);
     return configured;
-  }
-
-  try {
-    const bundled = await materializeBundledTool(label);
-    if (bundled) {
-      const result = spawnSync(bundled, ["-version"], { stdio: "ignore" });
-      if (!result.error && result.status === 0) {
-        logProgress(`using bundled ${label} ${BUNDLED_FFMPEG_VERSION}`);
-        return bundled;
-      }
-      logProgress(`bundled ${label} could not run; trying PATH`);
-    }
-  } catch (error) {
-    logProgress(`bundled ${label} unavailable: ${error.message}; trying PATH`);
   }
 
   assertTool(label, label);
