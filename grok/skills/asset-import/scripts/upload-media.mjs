@@ -65,7 +65,7 @@ function usage() {
   node <path-to-upload-media.mjs> --token <token> --endpoint <url> --asset-id <assetId> <file>
   node <path-to-upload-media.mjs> --token <token> --endpoint <url> --transcription-only --asset-id <assetId> <file>
 
-Get the token once from push_asset (backend agent) or import_media (external MCP), then pass all
+Get the upload-session token once from import_media, then pass all
 readable media files to this script, up to ${MAX_INPUT_FILES} at a time. Files run in parallel. Non-SVG assets are
 registered before expensive conversion; transcription audio is uploaded and
 started before asset transcode/upload; the final asset upload slot is requested
@@ -2197,7 +2197,7 @@ async function runSingleImport(index, total, sourceFile, options) {
     result: publicAssetResultJson(registeredAssetId),
     metadata: metadataJson(sourceFile, assetType, placeholderUpload, undefined),
     agentNext:
-      "Asset is registered and can be edited now; upload is still pending. For source-frame inspection, use this item's sourcePath locally when readable. Wait for target=upload only before byte-dependent work that requires ChatCut/cloud bytes, such as export/render, pull_asset, or remote inspect_asset when no local sourcePath is available.",
+      "Asset is registered and can be edited now; upload is still pending. For source-frame inspection, use this item's sourcePath locally when readable. Wait for target=upload only before byte-dependent work that requires ChatCut/cloud bytes, such as cloud export/render, request_asset_download, or remote inspect_asset when no local sourcePath is available.",
   };
 
   const deferredUpload = async () => {
@@ -2259,7 +2259,7 @@ async function runSessionImport(options) {
         schemaVersion: 1,
         mode: "session-imported",
         agentNext:
-          "Registered assetIds can be edited immediately. For most editing tasks, wait only for target=transcription before transcript/caption/script-aware work. For source-frame inspection, use each import's sourcePath locally when readable. Wait for target=upload only before byte-dependent work that requires ChatCut/cloud bytes, such as export/render, pull_asset, or remote inspect_asset when no local sourcePath is available.",
+          "Registered assetIds can be edited immediately. For most editing tasks, wait only for target=transcription before transcript/caption/script-aware work. For source-frame inspection, use each import's sourcePath locally when readable. Wait for target=upload only before byte-dependent work that requires ChatCut/cloud bytes, such as cloud export/render, request_asset_download, or remote inspect_asset when no local sourcePath is available.",
         count: options.inputs.length,
         imports: finalItems,
       },
@@ -2273,7 +2273,7 @@ async function runSessionImport(options) {
       schemaVersion: 1,
       mode: "session-imported",
       agentNext:
-        "Registered assetIds can be edited immediately. For most editing tasks, wait only for target=transcription before transcript/caption/script-aware work. For source-frame inspection, use each import's sourcePath locally when readable. Wait for target=upload only before byte-dependent work that requires ChatCut/cloud bytes, such as export/render, pull_asset, or remote inspect_asset when no local sourcePath is available.",
+        "Registered assetIds can be edited immediately. For most editing tasks, wait only for target=transcription before transcript/caption/script-aware work. For source-frame inspection, use each import's sourcePath locally when readable. Wait for target=upload only before byte-dependent work that requires ChatCut/cloud bytes, such as cloud export/render, request_asset_download, or remote inspect_asset when no local sourcePath is available.",
       count: options.inputs.length,
       imports: partialItems,
     },
@@ -2292,7 +2292,7 @@ async function main() {
   if (!options.sessionToken) {
     usage();
     fail(
-      "--token is required. Call push_asset or import_media to create an upload session first.",
+      "--token is required. Call import_media to create an upload session first.",
     );
   }
   if (!options.endpoint) {
