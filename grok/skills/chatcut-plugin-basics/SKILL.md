@@ -1,13 +1,13 @@
 ---
 name: chatcut-plugin-basics
-description: "Must read before using the hosted ChatCut plugin in Grok Bot or Cursor, including creating projects, opening the editor, or editing/creating videos. Also use when ChatCut tools are missing or need authentication. For ChatCut Desktop, follow its own instructions unless the user explicitly chooses the hosted plugin/web surface."
+description: "Must read before using the hosted ChatCut plugin in Grok Bot, including creating projects, opening the editor, or editing/creating videos. Also use when ChatCut tools are missing or need authentication. For ChatCut Desktop, follow its own instructions unless the user explicitly chooses the hosted plugin/web surface."
 ---
 
 # ChatCut Plugin Basics
 
 ## Purpose
 
-Host scope: this skill is written for Cursor-compatible plugin hosts, including Grok Bot. Use the host's native plugin authentication, browser, attachment, ordinary-chat, and image-bubble capabilities within the limits defined by `widget-forms`.
+Host scope: this skill is written for Grok Bot using the Cursor-compatible plugin format. Use the host's native plugin authentication, browser, attachment, ordinary-chat, and image-bubble capabilities within the limits defined by `widget-forms`.
 
 Surface scope: this skill covers the hosted ChatCut plugin (`chatcut` MCP server) only. When the conversation uses ChatCut Desktop (`chatcut_desktop*` servers), follow the desktop server's own instructions and skip this skill unless the user explicitly chooses the plugin/web surface — desktop media is registered locally (no uploads) and delivery happens in the ChatCut Desktop window, not a browser.
 
@@ -53,7 +53,10 @@ Visual understanding has two distinct surfaces:
 - To inspect raw imported or attached source media, use host-native visual/file capabilities on the source bytes when available. Do not create a temporary timeline just to inspect source assets.
 - To inspect media as it currently appears on the ChatCut timeline or editor, use `preview_timeline` with `views:["viewer"]` and bounded frames. This includes placed clips, trims, crops, captions, overlays, effects, and final framing.
 
-Export is a connector boundary in plugin sessions: load `export`, call `submit_export`, then use `track_export` when needed so the host returns the finished render `downloadUrl`.
+Export is a connector boundary in plugin sessions: load `export`, call
+`submit_export`, then use `track_export`. The default browser export downloads on
+the rendering computer and has no `downloadUrl`; deliver only the actual completed
+result according to the export Skill.
 
 ## Data Model
 

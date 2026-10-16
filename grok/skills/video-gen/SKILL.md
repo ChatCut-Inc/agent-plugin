@@ -1,7 +1,6 @@
 ---
 name: video-gen
 description: AI video generation via Seedance, Kling, Gemini Omni, MiniMax H3, and MiniMax H3 Max. Use when the user wants to generate a video clip — text-to-video, image-to-video, first/last-frame transitions, reference-guided generation — or wants to modify / edit / extend an existing generated clip.
-user-invocable: true
 ---
 
 # Video Gen
@@ -68,7 +67,9 @@ Model-specific params (e.g., Kling `mode`, Seedance `refImages` / `refVideos` / 
 
 `firstFrame` / `lastFrame` / `refImages` / `refVideos` / `refAudios` all take a project asset reference. Prefer a full UUID or short prefix from `browse_assets`; `asset://<id>` and same-project asset URLs returned by asset tools are also accepted. Per-slot type: frame slots and `refImages` → image; `refVideos` → video; `refAudios` → audio.
 
-External URLs and base64 are not accepted. If the source is a public URL, download it into the sandbox workspace, import the local file through `asset-import` + `push_asset`, and pass the resulting asset id.
+External URLs and base64 are not accepted. If the source is a public URL, download
+it into the host workspace, follow [asset-import](../asset-import/SKILL.md) using
+`import_media`, and pass the returned asset id.
 
 ## Workflow
 

@@ -1,23 +1,34 @@
-# ChatCut for Grok Bot and Cursor
+# ChatCut for Grok Bot
 
-ChatCut is an editable AI video editor connected to Grok Bot and Cursor through a hosted Model Context Protocol (MCP) server. The plugin can create and open ChatCut projects, import media, edit timelines, transcribe and clean speech-led videos, add captions and motion graphics, generate media, manage voice workflows, verify results, and export finished work.
+ChatCut lets Grok Bot agents turn natural-language requests into editable video
+projects through a hosted Model Context Protocol (MCP) server. Agents can create
+projects, import media, edit timelines, transcribe speech, add captions and motion
+graphics, generate media, and export finished work. Available tools and generation
+models depend on the connected ChatCut account and its current access.
 
 Edits remain editable in the ChatCut timeline. The plugin does not replace a project with a locally flattened video unless the user explicitly requests a rendered deliverable.
 
 ## Requirements
 
-- A Grok Bot or Cursor account with plugin access.
+- A Grok Bot account with plugin access.
 - A ChatCut account.
 - Network access to `https://api.chatcut.io` and `https://app.chatcut.io`.
-- Node.js 18 or newer only when importing a conversation attachment or other file readable by the agent. No Node installation is required for ordinary project editing.
+- Node.js 18+ for the bundled import helpers. The upload-helper route also
+  requires separately available `ffmpeg` and `ffprobe` on the computer running
+  it. Ordinary MCP editing does not require these local tools.
+- Paid ChatCut generation uses ChatCut credits and may require a paid plan.
+  Installing the plugin does not include generation credits.
 
 ## Install and connect
 
-1. Open **Plugins** in Grok Bot or Cursor.
-2. Find **ChatCut** and select **Add**.
+After marketplace approval:
+
+1. Open **Connect apps** in Grok Bot.
+2. Find **ChatCut** and select **Add**. If it is not listed, it is not yet
+   available through that marketplace.
 3. Select **Authorize** or **Authenticate** and complete ChatCut sign-in in the browser.
 4. If the host shows **Waiting for authorization**, select **Reopen** and finish the browser flow.
-5. Confirm ChatCut appears under installed plugins, then start a fresh conversation.
+5. Confirm ChatCut appears under installed plugins and its tools are connected.
 
 The plugin connects to:
 
@@ -26,6 +37,8 @@ https://api.chatcut.io/api/external-mcp/mcp
 ```
 
 Authentication uses OAuth. No API key or access token is stored in this repository.
+Follow the official [Grok Bot connection guide](https://cursor.com/help/grok-bot/connect-plugins)
+for reconnecting an existing installation.
 
 ## Example requests
 
@@ -57,18 +70,12 @@ Authentication uses OAuth. No API key or access token is stored in this reposito
 ## Plugin structure
 
 ```text
-.cursor-plugin/plugin.json   Cursor and Grok Bot plugin manifest
+.cursor-plugin/plugin.json   Cursor-format manifest consumed by Grok Bot
 mcp.json                     Hosted ChatCut MCP connection
 skills/                      ChatCut workflow skills
 assets/                      Plugin logo and widget media manifest
-LICENSE                      GNU General Public License v3.0
+LICENSE                      Apache License 2.0
 ```
-
-## Development and marketplace submission
-
-The plugin should be committed to a public Git repository before submission. Test the repository locally with Cursor's local plugin workflow, verify OAuth sign-in and at least one read-only ChatCut tool call, then submit the repository URL at [cursor.com/marketplace/publish](https://cursor.com/marketplace/publish).
-
-Do not commit OAuth tokens, user media, generated project data, or local configuration files.
 
 ## Support
 
@@ -78,4 +85,4 @@ Do not commit OAuth tokens, user media, generated project data, or local configu
 
 ## License
 
-This plugin package is licensed under the GNU General Public License v3.0 only (`GPL-3.0-only`). See [LICENSE](LICENSE).
+This plugin package is licensed under the Apache License 2.0 (`Apache-2.0`). See [LICENSE](LICENSE).

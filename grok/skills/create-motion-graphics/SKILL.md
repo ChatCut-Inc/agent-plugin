@@ -1,15 +1,22 @@
 ---
 name: create-motion-graphics
-description: "Use whenever an ACP or local CLI agent in ChatCut Desktop needs to add, create, hand-author, patch, or place Motion Graphic JSX assets in a project. Covers direct inline JSX authoring, visual language, editable properties, asset binding, timeline placement, and local verification. Not for the built-in ChatCut Agent."
+description: "Use whenever Grok Bot needs to add, create, hand-author, patch, or place Motion Graphic JSX assets in a ChatCut project. Covers direct inline JSX authoring, visual language, editable properties, asset binding, timeline placement, and verification."
 ---
 
 # Create Motion Graphics
 
-Use this skill when an ACP or local CLI task in ChatCut Desktop requires a Motion Graphic asset authored or patched as inline JSX. The built-in ChatCut Agent uses `motion-graphic-gen` and `submit_motion_graphic` instead.
+Use this skill when Grok Bot needs a Motion Graphic asset authored or
+patched as inline JSX in ChatCut.
 
-ACP/local CLI Motion Graphics are direct-authored. Use `create_motion_graphic_from_code` for new JSX assets and `edit_asset` for existing MG JSX. This surface does not provide `submit_motion_graphic`; do not translate the request into a Gemini prompt or generation brief. If the direct-authoring tools are missing, stop and report that the ChatCut tool surface is out of date.
+Use `create_motion_graphic_from_code` for new JSX assets and `edit_asset` for
+existing MG JSX. Do not translate a direct-authoring request into a generation
+prompt or brief. If the direct-authoring tools are missing, stop and report
+that the ChatCut tool surface is out of date.
 
-Pass Motion Graphic source inline through the Desktop MCP tool path. Do not stage code in the ChatCut repository, `ai-working/`, `/tmp`, a local HTTP server, generated code files, or guessed application paths when the tool accepts inline JSX directly.
+Pass Motion Graphic source inline through the ChatCut MCP tool. Do not stage
+code in the ChatCut repository, `ai-working/`, `/tmp`, a local HTTP server,
+generated code files, or guessed application paths when the tool accepts inline
+JSX directly.
 
 ## Core Principles
 
@@ -137,7 +144,7 @@ Images and videos rendered inside Motion Graphics must already be registered as 
 
 ## Design Principles
 
-The active Desktop agent is the designer for direct-authored Motion Graphics. Do not merely satisfy constraints or place text in a wrapper. Before writing JSX, design the settled frame as a specific visual object.
+The active Grok Bot agent is the designer for direct-authored Motion Graphics. Do not merely satisfy constraints or place text in a wrapper. Before writing JSX, design the settled frame as a specific visual object.
 
 Before writing code, decide:
 

@@ -7,6 +7,17 @@ description: Hosted ChatCut plugin sessions only (the `chatcut` MCP server). Imp
 
 Check `browse_assets` first when a file may already be imported.
 
+Grok Bot normally runs on a cloud computer. First confirm that the host exposes
+readable bytes for the requested attachment; a chat attachment card alone does
+not establish a filesystem path. If bytes are unavailable, use the host's
+supported file handoff with the user's permission, without scanning unrelated
+files or bypassing a denied transfer.
+
+A ChatCut tab on the user's laptop cannot reach the cloud computer's loopback
+server. Use the upload-helper route unless the editor browser and source files
+are confirmed to share the same computer and network namespace. Follow the
+host's local-execution and file-transfer permissions.
+
 ## Same-machine editor import (preferred)
 
 1. Open the target project using `browserHandoff.url` or `editorUrl`. Keep exactly one editor tab for this project open, on the same machine/network namespace as your shell. A remote sandbox's localhost is not the user's localhost.
@@ -42,6 +53,11 @@ Relink always reads the supplied file, even if the editor has cached bytes. The 
 
 For a remote sandbox, unavailable editor, or blocked browser connection:
 
+This route requires Node.js 18+, `ffmpeg`, and `ffprobe` on the computer running
+the helper. No media-tool binaries are bundled in this plugin. If these tools
+are unavailable, report the dependency and use the ChatCut editor upload flow;
+do not claim that Node alone is enough or install software silently.
+
 1. Download a public URL to a local file when needed.
 2. Call `import_media` with `{"action":"create_session"}`.
 3. Run this skill's `scripts/upload-media.mjs` once with the returned token and endpoint and at most four local files. Split larger sets into batches of four and create one session per batch.
@@ -52,6 +68,19 @@ For a remote sandbox, unavailable editor, or blocked browser connection:
 
 Resolve the helper relative to this skill; do not search the workspace. Run it in the foreground and read its final JSON from stdout. Do not detach it or invent status files. Do not replace it with handwritten `ffprobe`, `ffmpeg`, `curl`, metadata, transcode, or presigned-upload commands. MCP OAuth stays inside the MCP client; only the short-lived import token goes to the helper. Media bytes upload directly to storage and must not pass through the ChatCut backend.
 
-Use each returned `imports[].result.assetId` for timeline work. Wait for `track_progress` target `transcription` before transcript or caption work. Wait for target `upload` only before byte-dependent work such as cloud export, `pull_asset`, or remote frame inspection.
+Use each returned `imports[].result.assetId` for timeline work. Wait for
+`track_progress` target `transcription` before transcript or caption work. Wait
+for target `upload` only before byte-dependent work such as cloud export,
+`request_asset_download`, or remote frame inspection.
 
 If the helper returns an error with `retry`, create a fresh import session when requested and rerun exactly the returned arguments. If host policy denies transfer of the user's file, stop instead of trying a local-editing or alternate-upload workaround; tell the user the upload was denied and ask them to use the ChatCut editor upload UI or grant the required permission.
+
+## Download an existing source
+
+Follow the delivery contract returned by `request_asset_download`. A URL marked
+as a user-authenticated download belongs in the user's signed-in browser; Grok's
+cloud shell does not share that browser session. An unauthenticated HTTP 401 from
+that URL is not evidence that the MCP connection expired. Do not extract browser
+cookies or substitute a raw storage URL. For agent inspection, use readable
+original bytes or the supported `inspect_asset` path. Only download directly when
+the tool explicitly returns an agent-readable signed URL.
