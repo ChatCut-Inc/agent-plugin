@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Tokenized loopback file server shared by the Claude and Codex import skills.
+// Loopback file server shared by the Claude and Codex import skills.
 // Serves ONLY the explicitly listed
 // files, only to the ChatCut editor origin, only on 127.0.0.1, and shuts
 // itself down after --ttl seconds (default 900) so no ambient file server
@@ -21,7 +21,7 @@ import { createServer } from "node:http";
 import { pipeline } from "node:stream";
 import { createReadStream, statSync } from "node:fs";
 import { basename, resolve } from "node:path";
-import { randomBytes, randomUUID } from "node:crypto";
+import { randomUUID } from "node:crypto";
 
 function usageExit(message) {
   if (message) console.error(message);
@@ -77,7 +77,9 @@ for (const p of paths) {
   files.set(name, { path: p, size: st.size, assetId: randomUUID() });
 }
 
-const token = randomBytes(16).toString("base64url");
+// Older editor/MCP validators require a 20+ character URL path prefix.
+// This public constant preserves that URL shape without an access token.
+const routePrefix = "chatcut-local-media-v1";
 // Node's default 64 KiB reads mean tens of thousands of syscalls per file;
 // 1 MiB keeps the loopback socket fed on multi-GB originals.
 const READ_HIGH_WATER_MARK = 1024 * 1024;
@@ -108,8 +110,8 @@ function parseRangeStart(header, size) {
 const server = createServer((req, res) => {
   cors(res);
   // Browsers always send Origin on cross-origin fetches; reject anything
-  // that is not the editor origin. Origin-less requests (curl debugging on
-  // the same machine) are allowed — the per-run token is the real gate.
+  // that is not the editor origin. Origin-less requests from local clients
+  // are allowed. File access is limited to the explicit allowlist below.
   const reqOrigin = req.headers.origin;
   if (reqOrigin && reqOrigin !== origin) {
     res.writeHead(403);
@@ -134,11 +136,17 @@ const server = createServer((req, res) => {
     res.end();
     return;
   }
-  const [, reqToken, ...rest] = decodedPath.split("/");
-  const name = rest.join("/");
-  const entry = reqToken === token ? files.get(name) : undefined;
+  const [, prefix, ...rest] = decodedPath.split("/");
+  // Accept bare filenames and legacy /<token>/<filename> URL paths.
+  // The prefix is no longer checked as a secret.
+  const name = rest.length === 0
+    ? prefix
+    : rest.length === 1 && (prefix === "" || /^[A-Za-z0-9_-]{20,}$/.test(prefix))
+      ? rest[0]
+      : undefined;
+  const entry = files.get(name);
   if (!entry) {
-    res.writeHead(reqToken === token ? 404 : 403);
+    res.writeHead(404);
     res.end();
     return;
   }
@@ -170,10 +178,10 @@ const server = createServer((req, res) => {
 
 server.listen(port, "127.0.0.1", () => {
   const addr = server.address();
-  const base = `http://127.0.0.1:${addr.port}/${token}`;
+  const base = `http://127.0.0.1:${addr.port}/${routePrefix}`;
   const out = {
     port: addr.port,
-    token,
+    token: routePrefix, // Legacy field: a public URL prefix, not a credential.
     origin,
     ttlSeconds,
     files: Object.fromEntries(

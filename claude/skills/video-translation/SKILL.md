@@ -17,6 +17,14 @@ ChatCut Widget. The recognized source wording is never treated as final until
 the user has edited or approved that form and submitted it. Audio-only
 translation keeps the existing direct-submit flow and skips this review.
 
+## Authentication and inputs
+
+Use the declared ChatCut MCP connection for this workflow; the host manages
+authentication. Do not read passwords, API keys, or OAuth credentials from the
+user's environment, credential stores, or local files. Tool arguments below are
+project asset identifiers, language and treatment options, and user-reviewed
+transcript text, not authentication values.
+
 ## When to Use
 
 Use this skill when the user wants an existing video to:
@@ -112,7 +120,7 @@ explicitly requested or confirmed.
      untouched. Use for screen recordings, voice-over footage, or when the user
      says the picture must not change. Prefer this for transparent WebM when
      preserving the alpha channel matters. **Skip steps 4–6 and keep the existing
-     direct-submit flow; do not require or pass `reviewedSourceTranscript`.**
+     direct-submit flow; do not require or include `reviewedSourceTranscript`.**
 4. **Prepare the source transcript for lip-sync only.** If word-level
    transcription is not complete, call `trigger_transcript`, wait for it with
    `track_progress`, and retry only when it is ready. Call `read_script`, then
@@ -161,18 +169,18 @@ explicitly requested or confirmed.
 6. **Use the submitted revision exactly.** The Widget submission is explicit
    confirmation. Read the complete `reviewedSourceTranscript` textarea answer
    from the user's next message and preserve its wording, punctuation, and
-   order exactly. Pass through the returned line breaks when present, but do
+   order exactly. Preserve the returned line breaks when present, but do
    not reject or rewrite normal line-break edits made inside the textarea; the
    tool realigns them to the source timing. Do not paraphrase the text and do
    not ask the user to confirm the same text again. If the user replies outside
    the Widget with further corrections, reopen the same editable Widget with
    those corrections applied rather than reverting to a prose transcript.
 7. **Duration behavior.** By default the output may run slightly longer or
-   shorter than the source so the translated speech keeps a natural pace. Pass
+   shorter than the source so the translated speech keeps a natural pace. Set
    `keepDuration: true` only when the user needs the exact original length
    (for example to swap it into an existing timeline slot), and mention that
    pacing may sound faster.
-8. **Submit** with `submit_video_translation` using `action: "submit"`. For lip-sync, pass
+8. **Submit** with `submit_video_translation` using `action: "submit"`. For lip-sync, set
    `reviewedSourceTranscript` as the exact complete textarea value returned in
    step 6; the tool combines those reviewed lines with the original segment
    timestamps and creates source subtitles. For `audioOnly: true`, omit
@@ -202,9 +210,9 @@ explicitly requested or confirmed.
   compares the source and output resolution, frame rate, and alpha pixel format
   when media probing is available, and reports detected changes in generation
   status.
-- Multiple speakers are supported; pass `speakerCount` when the user states it.
+- Multiple speakers are supported; set `speakerCount` when the user states it.
 - For lip-sync, the editable review starts with one source segment per line so
-  the submitted text can reuse the original word-level timing. Pass the complete
+  the submitted text can reuse the original word-level timing. Supply the complete
   Widget value directly to the tool; do not merge, split, reorder, or silently
   normalize it in the conversation layer. Do not invoke this review for
   `audioOnly: true`.

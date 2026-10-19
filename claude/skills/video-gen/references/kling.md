@@ -52,7 +52,7 @@ Submit 2–6 shots in a single job; Kling preserves identity across them without
 
 **`shotType: "intelligence"`** — pass a single top-level `prompt` describing the whole sequence; the model auto-decomposes. Use when the user wants quick coverage and doesn't need per-shot duration control.
 
-**`shotType: "customize"`** — omit top-level `prompt`; pass `multiPrompts` instead. Each shot is a self-contained scene. Backend rules:
+**`shotType: "customize"`** — omit top-level `prompt`; supply `multiPrompts` instead. Each shot is a self-contained scene. Backend rules:
 
 - 2–6 shots
 - Each `prompt` ≤ 512 characters

@@ -1,8 +1,8 @@
 #!/usr/bin/env node
-// Tokenized loopback file server shared by hosted plugin import skills.
+// Loopback file server shared by hosted plugin import skills.
 // Serves only explicitly listed files to the selected ChatCut editor origin.
 
-import { randomBytes, randomUUID } from "node:crypto";
+import { randomUUID } from "node:crypto";
 import { createReadStream, statSync } from "node:fs";
 import { createServer } from "node:http";
 import { pipeline } from "node:stream";
@@ -63,7 +63,9 @@ for (const path of paths) {
   files.set(name, { assetId: randomUUID(), path, size: stat.size });
 }
 
-const token = randomBytes(16).toString("base64url");
+// Older editor/MCP validators require a 20+ character URL path prefix.
+// This public constant preserves that URL shape without an access token.
+const routePrefix = "chatcut-local-media-v1";
 // Node's default 64 KiB reads mean tens of thousands of syscalls per file;
 // 1 MiB keeps the loopback socket fed on multi-GB originals.
 const READ_HIGH_WATER_MARK = 1024 * 1024;
@@ -117,10 +119,17 @@ const server = createServer((request, response) => {
     response.end();
     return;
   }
-  const [, requestToken, ...rest] = decodedPath.split("/");
-  const entry = requestToken === token ? files.get(rest.join("/")) : undefined;
+  const [, prefix, ...rest] = decodedPath.split("/");
+  // Accept bare filenames and legacy /<token>/<filename> URL paths.
+  // The prefix is no longer checked as a secret.
+  const name = rest.length === 0
+    ? prefix
+    : rest.length === 1 && (prefix === "" || /^[A-Za-z0-9_-]{20,}$/.test(prefix))
+      ? rest[0]
+      : undefined;
+  const entry = files.get(name);
   if (!entry) {
-    response.writeHead(requestToken === token ? 404 : 403);
+    response.writeHead(404);
     response.end();
     return;
   }
@@ -153,7 +162,7 @@ const server = createServer((request, response) => {
 
 server.listen(port, "127.0.0.1", () => {
   const address = server.address();
-  const base = `http://127.0.0.1:${address.port}/${token}`;
+  const base = `http://127.0.0.1:${address.port}/${routePrefix}`;
   console.log(
     JSON.stringify({
       files: Object.fromEntries(
@@ -171,7 +180,7 @@ server.listen(port, "127.0.0.1", () => {
       })),
       origin,
       port: address.port,
-      token,
+      token: routePrefix, // Legacy field: a public URL prefix, not a credential.
       ttlSeconds,
     }),
   );

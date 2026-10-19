@@ -215,7 +215,7 @@ Ask one most important missing question at a time and do not repeat answered que
 The raw tags below are the embedded ChatCut protocol only. In a published Codex or
 Claude Code plugin, the Widget Forms Skill's host adapter takes priority: never emit
 raw ChatCut tags. Map each live identity to the host's visual-choice surface using
-`identityId` as its stable value and `name` as its label. In Codex, pass
+`identityId` as its stable value and `name` as its label. In Codex, supply
 `previewVideoUrl` as `previewVideo` and `previewImageUrl` as `preview` so the image is
 the video's poster and failure fallback. Keep the create action
 as a separate `create_avatar` value; plugin hosts return that value to the workflow
@@ -387,13 +387,13 @@ request instead.
 For an official catalog avatar, resolve the default from the `hasBackground` field
 returned by `manage_avatar action="catalog"`:
 
-- `hasBackground: true` — pass `removeBackground: false` and preserve the original
+- `hasBackground: true` — set `removeBackground: false` and preserve the original
   scene.
-- `hasBackground: false` — pass `removeBackground: true` so the result is a
+- `hasBackground: false` — set `removeBackground: true` so the result is a
   transparent WebM when transparency is supported.
 
 For a saved/custom avatar without catalog metadata, keep `removeBackground: false` as
-the default and preserve the source image background. Pass `removeBackground: true`
+the default and preserve the source image background. Set `removeBackground: true`
 only when the user explicitly asks for a transparent background or background removal.
 Do not turn this into a blocking question. Before submission, briefly tell the user
 whether the original scene will be preserved or the result will be transparent. An

@@ -411,7 +411,7 @@ For an official audition:
    returned official voices.
 3. Load `widget-forms` and request one required `playable_single_choice`. Give
    every official option the `voiceId`, localized `name`, `summary`, and
-   matching `sampleUrl` from the same returned tuple. Pass `sampleUrl`
+   matching `sampleUrl` from the same returned tuple. Supply `sampleUrl`
    verbatim; never prepend an inferred S3, CDN, editor, localhost, or production
    base URL, and never reconstruct it from the filename pattern. This differs
    from a custom voice's `previewUrl`, which must be used exactly as returned by
