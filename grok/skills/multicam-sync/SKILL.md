@@ -1,7 +1,6 @@
 ---
 name: multicam-sync
 description: Synchronize footage from a multi-camera / multi-recorder shoot — several cameras plus separate audio recorders covering one session, imported as loose clips — and make a speaker-follow draft by default unless the user explicitly asks for sync only. Use when a user drops in multiple clips from the same recording and wants them aligned, asks for multicam / 多机位 / multi-angle sync, wants a "cut to whoever is talking" edit, or refers to camera A/B, angles, or separate lav or field recordings that need to line up with picture.
-user-invocable: true
 ---
 
 # Multicam Sync
@@ -60,7 +59,7 @@ may be a bad match, a clock difference, or dropped frames, and each needs review
    usually a dedicated audio recorder, not a camera.
 2. **Use the renderer when available**: on the separate master timeline, put the
    untrimmed clips on ordinary source tracks, then call `multicam_sync` with the
-   same-take items and the reference. This is the preferred Web/Desktop path. It
+   same-take items and the reference, only if that tool is advertised. It
    uses existing source timing when decisive, otherwise audio correlation; it does
    not create a multicam object.
 

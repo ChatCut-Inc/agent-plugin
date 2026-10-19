@@ -1,14 +1,14 @@
 {
   "name": "chatcut",
-  "version": "1.10.15",
-  "description": "ChatCut plugin for editable video editing and creation workflows from Grok Bot and Cursor.",
+  "version": "1.10.16",
+  "description": "Let Grok Bot agents create and edit videos in ChatCut through natural-language requests, with editable timelines, captions, motion graphics, media generation, and export.",
   "author": {
     "name": "ChatCut",
     "email": "dev@chatcut.io"
   },
   "homepage": "https://chatcut.io",
   "repository": "https://github.com/ChatCut-Inc/agent-plugin.git",
-  "license": "GPL-3.0-only",
+  "license": "Apache-2.0",
   "keywords": [
     "chatcut",
     "video",
@@ -19,7 +19,6 @@
     "transcription",
     "timeline",
     "grok-bot",
-    "cursor",
     "mcp"
   ],
   "logo": "assets/logo-light.png",

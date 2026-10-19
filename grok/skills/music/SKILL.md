@@ -1,7 +1,6 @@
 ---
 name: music
 description: Shared ChatCut entry point for newly generated music, soundtrack, theme music, 配乐, background music, an intro theme, a music bed, BGM, or vocal songs. If vocals are unspecified, ask whether the user wants a vocal song or instrumental music before choosing a generator. Use `submit_music` for either branch, with `generationType` selecting instrumental or song mode.
-user-invocable: true
 ---
 
 # Music

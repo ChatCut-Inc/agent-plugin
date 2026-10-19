@@ -1,7 +1,6 @@
 ---
 name: voice
 description: Text-to-Speech (TTS), voice cloning, voiceover, narration placement/sync, and custom sound effects (SFX) generator. Use when the user wants generated speech from text, wants to clone a consented voice from uploaded reference audio, wants to correct a misspoken word or short phrase in recorded speech, wants to add/replace/align narration or voiceover for an existing video/timeline, wants to keep existing voiceover synced after visual retiming edits, needs voice audition/selection, or explicitly wants a newly generated/custom sound effect that is not available in the Sound Effects library.
-user-invocable: true
 ---
 
 # Voice & Sound Effects Generator
@@ -236,8 +235,12 @@ required below.
 
 When the user explicitly chooses an audio-bearing timeline item, resolve it and
 its source range with `preview_timeline`. Reuse a 10-second-to-3-minute audio
-asset directly. For video, `pull_asset`, extract the chosen range as supported
-audio with ffmpeg, then load `asset-import` and `push_asset` the result. For any
+asset directly. For video, use a readable host-local original or obtain the
+source through the advertised `request_asset_download` tool and download its
+returned URL. Extract the chosen range as supported audio with an available
+ffmpeg, then follow [asset-import](../asset-import/SKILL.md) with `import_media`.
+If source download or local processing is unavailable, ask for a prepared audio
+reference. For any
 source over 3 minutes, use a clean 30–60-second excerpt; under 10 seconds, ask
 for a longer reference. Continue with the resulting audio asset id; the source
 choice is not authorization.

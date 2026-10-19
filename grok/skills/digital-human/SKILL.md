@@ -1,7 +1,6 @@
 ---
 name: digital-human
 description: Create and manage script- or audio-driven AI avatar videos from an official or saved presenter, an imported portrait, or a representative still prepared from video. Use for 数字人、数字分身、虚拟人、照片开口说话、人像口播、改稿不重拍, AI avatar, AI avatar video, avatar video, talking avatar, talking photo, photo avatar, video avatar, AI presenter, virtual presenter, virtual spokesperson, digital human, or a person's digital twin, including choosing or creating the avatar and deciding its voice, script, aspect ratio, and output quality. Do not use for a static profile-picture avatar, game or 3D character creation, an industrial digital twin, ordinary B-roll, generic image-to-video, video translation, talking-head editing, lip-sync dubbing alone, or TTS-only requests.
-user-invocable: true
 ---
 
 # Digital Human
@@ -205,7 +204,7 @@ previews are available in ChatCut's Digital Humans library when appearance matte
 When the user has ready saved avatars, place them before official recommendations.
 Ask one most important missing question at a time and do not repeat answered questions.
 
-Keep the create action as a separate `create_avatar` value. In Grok Bot and Cursor it
+Keep the create action as a separate `create_avatar` value. In Grok Bot it
 returns that value to the workflow; it does not open ChatCut's editor-native avatar
 dialog automatically.
 For a saved identity whose `list` row has no preview URLs, call `manage_avatar
