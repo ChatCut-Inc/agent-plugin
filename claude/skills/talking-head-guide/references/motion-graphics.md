@@ -80,7 +80,7 @@ Choose what the MG expresses, not just what text it repeats. The content may be 
 
 #### 2. Timing
 
-Choose the timeline anchor first. The MG should land with the relevant speech beat or section boundary, not trail after the speaker has already made the point. Use `find_transcript`; pass `includeWordTimestamps: true` when the MG has internal rhythm such as list items appearing one by one or multi-step reveals.
+Choose the timeline anchor first. The MG should land with the relevant speech beat or section boundary, not trail after the speaker has already made the point. Use `find_transcript`; set `includeWordTimestamps: true` when the MG has internal rhythm such as list items appearing one by one or multi-step reveals.
 
 Write internal timing values relative to the MG's own start time. The timeline item start is the absolute video position; internal timing is the MG-internal rhythm after that start. Exit when the point is fully made.
 
