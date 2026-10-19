@@ -54,7 +54,7 @@ After submission, use `track_progress` tool to check status or wait for completi
 ## Ask Before Submit
 
 - Never auto-upgrade size.
-- Only pass `imageSize: "2K"` or `"4K"` when the user explicitly asks. Warn that 2K/4K are EXPERIMENTAL and may be slower.
+- Only set `imageSize: "2K"` or `"4K"` when the user explicitly asks. Warn that 2K/4K are EXPERIMENTAL and may be slower.
 
 ## Reference Images
 

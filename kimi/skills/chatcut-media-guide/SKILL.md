@@ -16,7 +16,7 @@ Check `browse_assets` first when a file may already be imported.
 node <this-skill-dir>/scripts/serve-local-media.mjs --origin <editor-origin> /path/to/source.mp4
 ```
 
-Keep it alive using the host's background-process support while calling MCP. It serves only the listed files over tokenized `127.0.0.1` URLs and exits after 900 seconds.
+Keep it alive using the host's background-process support while calling MCP. It serves only the listed files over `127.0.0.1` URLs without an access token and exits after 900 seconds. URLs use the public `chatcut-local-media-v1` path prefix to remain compatible with existing editors. Legacy token-prefixed URLs remain supported; the JSON `token` field contains that public prefix, not a credential.
 
 3. Import multiple files in **one** `import_media` call: `{"action":"from_editor","files":[...]}`. Copy each file's `assetId`, `url`, `filename`, and `sizeBytes` from the printed `imports` array into `files`, omitting its per-file `action`. URLs may come from different running helpers. Send 1–16 files per call; for larger sets, submit successive batches of 16. Up to eight files are processed concurrently; the editor streams each one straight into its local store, so a card with transfer progress appears as soon as the download starts. The original top-level single-file arguments still work.
 4. Inspect every entry in `results`: successful entries have `ok:true` and `status:"locally_imported"`; failed entries have an `error`. Results preserve input order and include `assetId` and `filename`, with top-level `succeeded`/`failed` counts. Retry only failed files with the same asset IDs. Keep the helpers alive until all files succeed, and keep the editor open for server sync, background upload, and transcription.

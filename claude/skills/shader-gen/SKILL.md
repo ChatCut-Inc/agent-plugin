@@ -32,7 +32,7 @@ Generate only when no catalog entry matches the user's intent closely enough.
 
 ### `builtin:zoom` uses the same track-bound placement as every effect
 
-Effects always have timeline geometry. For a whole-clip effect, pass `targetItemId`; ChatCut resolves it to a clip-anchored range covering that clip. For an explicit timeline range, pass `trackId` + `trackBoundFrom` + `trackBoundDurationInFrames`.
+Effects always have timeline geometry. For a whole-clip effect, supply `targetItemId`; ChatCut resolves it to a clip-anchored range covering that clip. For an explicit timeline range, supply `trackId` + `trackBoundFrom` + `trackBoundDurationInFrames`.
 
 ```text
 # Zoom on the entire video clip
@@ -60,8 +60,8 @@ Omit `propertyOverrides` entirely for default zoom. Send only the keys you want 
 
 Effect items have two placements, both with a concrete time range:
 
-- **Clip-anchored**: pass `targetItemId` for the whole clip, or include an explicit range that intersects the clip. The stored range is local to that clip and follows it when it moves.
-- **Adjustment-track**: pass `trackId` + `trackBoundFrom` + `trackBoundDurationInFrames` for a range over empty track space. The range is absolute on the timeline.
+- **Clip-anchored**: supply `targetItemId` for the whole clip, or include an explicit range that intersects the clip. The stored range is local to that clip and follows it when it moves.
+- **Adjustment-track**: supply `trackId` + `trackBoundFrom` + `trackBoundDurationInFrames` for a range over empty track space. The range is absolute on the timeline.
 
 Use `targetItemId` for whole-clip effects. Use explicit track geometry only when the requested range differs from a clip's full duration.
 

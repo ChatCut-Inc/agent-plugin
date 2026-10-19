@@ -20,7 +20,7 @@ Set the mood and smooth over micro-gaps in speech.
 ### Principles
 
 - Set the music track's `role` to `follower` with `edit_track` (and the talking track's `role` to `anchor`). That single pair turns on auto-ducking — the engine dips the music under speech and lifts it back in the gaps.
-- Let `edit_track` initialize `audioRouting.duckDepthDb` from the current timeline loudness when it can. Pass `audioRouting.duckDepthDb` yourself only when the user explicitly wants the music louder or softer under speech.
+- Let `edit_track` initialize `audioRouting.duckDepthDb` from the current timeline loudness when it can. Set `audioRouting.duckDepthDb` yourself only when the user explicitly wants the music louder or softer under speech.
 - Keep the BGM clip's base `decibelAdjustment` natural by default. Do not pre-duck music with a large negative clip gain, then also set manual `duckDepthDb`; only do both when the user explicitly asks for a lower overall bed and a stronger / weaker speech duck.
 - Do not put short sound effects (SFX) or stingers on follower tracks by default. Place them at their editorial moment and adjust item volume only if they are clearly too loud or too quiet.
 - No prominent lyrics

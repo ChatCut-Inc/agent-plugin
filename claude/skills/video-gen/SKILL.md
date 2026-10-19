@@ -132,7 +132,7 @@ See the chosen model's reference for prompt structure and param combinations (e.
 
 **Submit one generation job at a time.** Unless the user explicitly asked for multiple clips in parallel, do not submit the next clip until the current one completes and the user has reviewed it. Parallel submission hides problems: if the first shot has drift or wrong framing, the user would rather redo it once than have several misaligned shots to discard.
 
-- `submit_video.ratio` controls the generated asset only; it does not change the project timeline canvas. If the user requested a final output aspect ratio (for example "9:16 vertical" or "16:9 landscape"), set the timeline canvas to the same ratio with `manage_timelines` action=update (e.g. ratio:"9:16") before placing the completed asset. If the user asked for no black bars / full-bleed, pass `fit:"cover"` when setting the canvas or updating/adding the visual item.
+- `submit_video.ratio` controls the generated asset only; it does not change the project timeline canvas. If the user requested a final output aspect ratio (for example "9:16 vertical" or "16:9 landscape"), set the timeline canvas to the same ratio with `manage_timelines` action=update (e.g. ratio:"9:16") before placing the completed asset. If the user asked for no black bars / full-bleed, set `fit:"cover"` when setting the canvas or updating/adding the visual item.
 - Do not use this skill for job management — use `track_progress` for an immediate status read and follow its later check-back guidance.
 - After submitting, end your turn (tell the user the job was created) unless a follow-up task is already queued.
 - When the job finishes, surface the result to the user for review before proceeding to the next shot.

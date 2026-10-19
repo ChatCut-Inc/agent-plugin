@@ -1,6 +1,7 @@
 {
   "name": "chatcut",
-  "version": "1.10.16",
+  "displayName": "ChatCut",
+  "version": "1.10.19",
   "description": "ChatCut plugin for editable video editing and creation workflows from Claude Code.",
   "author": {
     "name": "ChatCut",
@@ -8,6 +9,11 @@
     "url": "https://chatcut.io"
   },
   "homepage": "https://chatcut.io",
+  "icon": "./assets/logo-light.png",
+  "documentationUrl": "https://chatcut.io/claude",
+  "supportUrl": "https://chatcut.io/contact",
+  "privacyPolicyUrl": "https://chatcut.io/privacy",
+  "termsOfServiceUrl": "https://chatcut.io/terms",
   "repository": "https://github.com/ChatCut-Inc/agent-plugin.git",
   "license": "GPL-3.0-only",
   "keywords": [
