@@ -1,7 +1,7 @@
 {
   "$schema": "https://catalog.msh.team/misc/kimi.plugin.schema.json",
   "name": "chatcut-kimi-work",
-  "version": "1.10.15",
+  "version": "1.10.16",
   "description": "ChatCut plugin for Kimi Work: let the agent edit speech, create motion graphics and media, and deliver editable video projects in the live in-app editor.",
   "author": "ChatCut",
   "homepage": "https://chatcut.io",
