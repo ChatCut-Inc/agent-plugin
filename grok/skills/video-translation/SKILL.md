@@ -1,7 +1,6 @@
 ---
 name: video-translation
 description: Translate, dub, and localize speech in an existing video while optionally preserving speaker voices, generating translated captions, or synchronizing the speaker's lip movements. Use when the user asks for 视频译制、多语言配音、 把视频里的中文变成英文、让视频里的人说另一种语言、保留原音色、翻译声音、 口型同步、translated video, video dubbing, voice translation, or lip-synced localization, as well as traducción de video, doblaje de video, traducir un video, or sincronización labial. This Skill MUST be loaded before composing treatment choices for an ambiguous video-translation request in any language, including a turn that only asks the user to choose a treatment. Do not use when the user only wants subtitles translated, wants an SRT/VTT file, wants text or a script translated before generating a new avatar video, or wants ordinary TTS with a newly selected voice.
-user-invocable: true
 ---
 
 # Video Translation
@@ -157,8 +156,8 @@ explicitly requested or confirmed.
 ## Constraints and cost
 
 - The whole source video is translated and billed by its full duration. To
-  localize only a section, trim/export that section into its own asset first,
-  then translate the shorter asset.
+  localize only a section, follow [processing-source preparation](#prepare-the-processing-source)
+  to trim/export it into its own asset first, then translate the shorter asset.
 - Optional translated captions: `enableCaption: true` burns subtitles into the
   output video.
 - ChatCut always requests preservation of the source resolution and bitrate.
@@ -185,3 +184,25 @@ explicitly requested or confirmed.
   footage and its speakers when the material is clearly someone else's.
 - Never reveal or discuss the underlying provider; present this as ChatCut's
   AI video translation.
+
+## Prepare the processing source
+
+Whole-asset generation needs an actual asset containing only the requested source
+section. Resolve whether the user's range refers to source time or timeline time;
+map timeline ranges through item offsets and playback rate before preparing media.
+Use a readable host-local original or obtain it through `request_asset_download`
+and follow its returned delivery contract. A user-authenticated URL belongs in
+the signed-in browser, not an unauthenticated cloud shell. Trim the required
+source interval with available shell media tools such as ffmpeg, then follow
+[asset-import](../asset-import/SKILL.md) with `import_media`. If the input must
+include existing timeline edits, prepare a separate working timeline containing
+only that section, follow [export](../export/SKILL.md) with the advertised
+`submit_export` and `track_export` tools, then import the completed output only
+after it is readable by the host. A browser export downloads on the rendering
+computer and may not have a cloud URL; follow the export Skill's delivery rules
+and do not switch to cloud rendering without user intent. Preserve the original
+timeline. Report unavailable download, preparation, or export capabilities rather
+than calling tools from a different ChatCut surface.
+
+Verify the prepared asset's actual content and duration. Its times are relative
+to that asset; placement returns to the intended original timeline range.

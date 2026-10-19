@@ -1,7 +1,18 @@
 When the user has **two or more cameras recording the same moment** — cues like "both angles", "the same interview", "multi angles", "alternate angle", "cut to the other angle", "angle switch", 换角度, 两个机位 — switching to another angle means the picture changes but the **audio and lip-sync must stay matched** to the take.
 
-**Do not hand-compute source offsets with `edit_item` to line angles up.** Manual offsets drift wherever the underlying reference angle was cut, and the drift only shows up later as out-of-sync lips. Use the **`multicam_sync`** tool instead: it runs the editor's audio-based alignment engine and repositions each angle clip so its picture matches the reference angle's audio. Pass the angle clips' `itemIds` (the reference plus the follower angle(s)); optionally name the `referenceItemId`.
+Load [AI Multicam Editor](../../multicam-sync/SKILL.md) before aligning angles.
+Use `multicam_sync` only if it is advertised by the active MCP tool list. The
+hosted connector may not expose it; use the skill's transcript-offset workflow
+in that case. Verify early, middle, and late alignment before placing a draft.
 
-Key constraint: a **single cutaway clip that spans a cut in the reference angle** can't be aligned as one piece — split it at that cut with `split_item` first, then pass both pieces to `multicam_sync` so each maps to the reference segment beneath it.
+Do not guess offsets with `edit_item`: a cut reference can make an apparently
+aligned clip drift later. When `multicam_sync` is available, pass the angle
+clips' `itemIds` and optionally the `referenceItemId` using the current schema.
 
-`multicam_sync` runs in the user's editor (no backend path): if it reports the editor isn't open, ask the user to open the project, then retry. After it applies, read the project back to confirm the alignment.
+For the editor-tool route, a **single cutaway clip that spans a cut in the
+reference angle** cannot be aligned as one piece. Split it with `split_item`
+first, then align each piece to its corresponding reference segment.
+
+When available, `multicam_sync` runs in the editor. If it reports that the editor
+is closed, open the target project before retrying. After either alignment route,
+read the project back and inspect matching frames to confirm synchronization.

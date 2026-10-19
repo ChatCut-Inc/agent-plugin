@@ -38,7 +38,10 @@ Two categories:
 
 Limits: 9 ref images, 3 ref videos, 3 ref audio. Each file ≤200MB (video), <30MB (image), ≤15MB (audio).
 
-All frame/reference slots take a project **asset id** (UUID or short prefix from `browse_assets`), `asset://<id>`, or a same-project asset URL. External URLs are not accepted — download them into the sandbox workspace, then import the local files through `asset-import` + `push_asset`.
+All frame/reference slots take a project **asset id** (UUID or short prefix from
+`browse_assets`), `asset://<id>`, or a same-project asset URL. External URLs are not
+accepted — download them into the host workspace, then follow
+[asset-import](../../asset-import/SKILL.md) using `import_media`.
 
 ## Modes (inferred from params)
 

@@ -1,7 +1,6 @@
 ---
 name: talking-head-guide
 description: Guide for editing speech-led videos where spoken delivery or conversation drives the cut — single-speaker talking-head / 口播, two- or multi-speaker interview / 访谈, video podcast, lecture, tutorial, course, and similar formats. Use for any non-trivial edit of those formats, including speech cleanup (剪口播 / 口播剪辑 / 去口癖 / clean up fillers / smooth speech), pause or repeated-take removal, motion graphics layered onto the footage (口播加 MG / 加动画), B-roll (加 B-roll / add B-roll), music, or captions. For motion graphics specifically, use this together with the active Motion Graphics skill/workflow available in the current ChatCut environment — this skill adds speech-specific guidance (rhythm-aware timing, frame-aware placement, subject/caption protection, placement verification).
-user-invocable: true
 ---
 
 # Speech-Led Video Editing (Talking Head, Interview, Podcast)
