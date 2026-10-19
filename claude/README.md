@@ -35,6 +35,11 @@ media, transcripts, generated assets, and edits can become part of your ChatCut
 project. Generation, translation, and transcription are processed through
 ChatCut's service.
 
+Optional forms load public catalog images and audio previews directly from
+`cdn.jsdelivr.net`, outside the declared MCP connection. These requests expose
+normal network request metadata to the CDN. Project media and transcripts are
+not embedded in those public preview URLs.
+
 Local imports use one of two bundled Node.js helpers:
 
 - **Same-machine editor import:** the local media server reads only the files
