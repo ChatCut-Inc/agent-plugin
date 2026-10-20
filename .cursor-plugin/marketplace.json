@@ -1,0 +1,13 @@
+{
+  "name": "chatcut-inc",
+  "owner": {
+    "name": "ChatCut",
+    "email": "dev@chatcut.io"
+  },
+  "plugins": [
+    {
+      "name": "chatcut",
+      "source": "grok"
+    }
+  ]
+}
