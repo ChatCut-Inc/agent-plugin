@@ -69,7 +69,7 @@ Visual understanding has two distinct surfaces:
 - To inspect raw imported or attached source media, use host-native file capabilities on the source bytes when available (for example extract stills with `ffmpeg` and read the images). Do not create a temporary timeline just to inspect source assets.
 - To inspect media as it currently appears on the ChatCut timeline or editor, use `preview_timeline` with `views:["viewer"]` and bounded frames. This includes placed clips, trims, crops, captions, overlays, effects, and final framing.
 
-Export runs through the connector: load `export`, call `submit_export`, then use `track_export`. Download the finished render locally and deliver the local path, local-file preview link, and render metadata as concise text. Do not create an export preview card.
+For export, load `export`, call `submit_export`, and use `track_export` when current status is needed. Video/audio render locally by default in the connected editor tab: open the intended project/timeline in the Browser pane using the handoff below and keep that tab open until delivery finishes. In the Browser pane every finished export opens a save dialog in the Claude window, so tell the user to click Save when you submit. Deliver the file you find by name in the user's downloads folder, as `export` describes, with its local path, local-file preview link, and render metadata as concise text; do not switch to cloud rendering just to get a download URL. Do not create an export preview card.
 
 ## Data Model
 
@@ -257,7 +257,7 @@ If a ChatCut tool returns a pricing or billing URL, present it as an external br
 
 ChatCut plugin access is based on connector authentication and the user's accessible projects. Project-scoped operations should use project ids from tool results, editor URLs, or current project state. Do not guess hidden ids.
 
-There is no editor-action bridge: the agent cannot ask the editor UI to pick, relink, upload, export, or capture local files for it. Local files, attached files, browser-held files, and public URLs must enter the project through a supported media import path before timeline use:
+There is no editor-action bridge: the agent cannot ask the editor UI to pick, relink, upload, or capture local files for it. Export requests use `submit_export`, which can start the connected editor tab's local renderer. Local files, attached files, browser-held files, and public URLs must enter the project through a supported media import path before timeline use:
 
 - Browser-pane local import (`asset-import` skill: loopback helper + synthetic drop) — the sanctioned Claude Code path for handing local files to the visible editor; behaves like the user dragging from Finder.
 - Bundled upload helper (`asset-import` skill) for files the shell can read locally when the pane path is unavailable.
@@ -272,7 +272,7 @@ For raw source-frame inspection, use the local source file directly with host-na
 
 In ChatCut plugin workflows, local `ffmpeg`/`ffprobe` is for read-only source inspection and non-editorial diagnostics only: probing metadata, checking streams, or extracting still frames from locally readable source files. Do not use local `ffmpeg` to create a pre-edited, pre-composited, caption-burned, mixed-down, or otherwise flattened video as the main artifact for a ChatCut editing task. Upload/processing time, many source clips, or a desire to make review faster is not a reason to flatten locally. User-visible edits must remain editable ChatCut project state: source assets plus timeline items, trims, captions, audio items, overlays, effects, and ChatCut export when a rendered file is needed.
 
-Export and capture flows remain connector-only: do not ask the browser/editor tab to export or capture as a substitute for `submit_export`.
+Capture flows remain connector-only; do not ask the browser/editor tab to capture as a substitute.
 
 ChatCut native internal chat components do not render directly in this host. Convert those moments into ordinary chat or the `widget-forms` Claude Code adapter.
 

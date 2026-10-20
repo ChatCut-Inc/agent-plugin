@@ -1,7 +1,7 @@
 {
   "name": "chatcut",
   "displayName": "ChatCut",
-  "version": "1.10.19",
+  "version": "1.10.20",
   "description": "ChatCut plugin for editable video editing and creation workflows from Claude Code.",
   "author": {
     "name": "ChatCut",
@@ -36,7 +36,8 @@
       "oauth_resource": "https://api.chatcut.io/api/external-mcp/mcp",
       "headers": {
         "x-chatcut-mcp-client": "claude_code",
-        "x-chatcut-mcp-surface": "embedded-preview"
+        "x-chatcut-mcp-surface": "embedded-preview",
+        "x-chatcut-plugin-version": "1.10.20"
       }
     }
   },
