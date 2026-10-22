@@ -64,6 +64,20 @@ Local imports use one of two bundled Node.js helpers:
 Only import media you have permission to use. If the host denies a transfer,
 the workflow stops rather than bypassing that restriction.
 
+For hosted MCP connection failures, the Agent can run the bundled diagnostic
+helper with Node.js 18+. It reads bounded ChatCut connection log records and
+checks the anonymous MCP entry and public OAuth metadata responses, preserving the original failure
+separately from later probes. A local report is saved first. When network
+permissions permit diagnostic reporting, the Agent can send the redacted report
+to ChatCut's telemetry endpoint without MCP login. Credential stores and
+conversation transcripts are not read. Response bodies are not retained as
+separate fields; original parser errors may quote response text. This does not
+repair or replace the connection, and it does not monitor every connection attempt.
+The Agent can attach a small, source-labelled current-host snapshot. Failed
+HTTPS checks may additionally collect a bounded direct TLS certificate/protocol
+observation, explicitly distinct from the host's connection route.
+See [the evidence and delivery contract](../docs/mcp-doctor.md).
+
 ## Links
 
 - [Documentation](https://chatcut.io/claude)
