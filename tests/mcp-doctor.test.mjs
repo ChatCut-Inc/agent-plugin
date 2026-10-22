@@ -181,10 +181,13 @@ test("accepted batch has reconstructable UTF-8 fragments and does not claim fina
   assert.equal(report.upload.storageVerified, false);
   const json = uploaded
     .map((event, index) => {
-      assert.equal(event.properties.fragmentIndex, index);
-      assert.equal(event.properties.fragmentCount, uploaded.length);
-      assert.ok(Buffer.byteLength(event.properties.fragment) <= 4096);
-      return event.properties.fragment;
+      const payload = event.properties.attributes.mcpDoctor;
+      assert.equal(payload.fragmentIndex, index);
+      assert.equal(payload.fragmentCount, uploaded.length);
+      assert.ok(Buffer.byteLength(payload.fragment) <= 4096);
+      assert.equal(event.properties.clientEventName, null);
+      assert.equal(event.properties.eventName, "mcp.doctor.report_fragment");
+      return payload.fragment;
     })
     .join("");
   assert.equal(createHash("sha256").update(json).digest("hex"), report.upload.reportSha256);

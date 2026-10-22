@@ -28,7 +28,12 @@ version the host loaded. `collectorVersion` identifies the diagnostic helper.
 The default report is local only. `--upload` sends one unauthenticated POST to
 `<registered-origin>/telemetry/events` through the existing public telemetry
 ingest. It never adds MCP bearer tokens. The body is an array of
-`mcp.doctor.report_fragment` events, each with these properties:
+`mcp.doctor.report_fragment` events. The existing `eventName` is used for the
+canonical event name and each fragment is nested in
+`properties.attributes.mcpDoctor`. The legacy `clientEventName` alias is null so
+that the endpoint does not introduce an additional flat dataset field. This
+envelope was checked against beta ingestion rather than assuming that an HTTP
+acknowledgement proves schema compatibility. Each fragment has these fields:
 
 | Property | Meaning |
 | --- | --- |
@@ -39,8 +44,9 @@ ingest. It never adds MCP bearer tokens. The body is an array of
 | `reportSha256` | SHA-256 of the exact reassembled UTF-8 JSON |
 | `fragment` | Up to 4096 UTF-8 bytes, split on Unicode code-point boundaries |
 
-The existing backend logs these as `frontend_event`, with
-`clientEventName=mcp.doctor.report_fragment`. Reassemble by diagnostic ID and
+The existing backend logs these with `eventName=mcp.doctor.report_fragment` and
+the message `frontend_event`. Read `attributes.mcpDoctor`, or
+`parse_json(attributesJson).mcpDoctor` when map fields are disabled. Reassemble by diagnostic ID and
 hash, require all distinct indexes from zero through count minus one, concatenate
 in index order, verify the hash, then parse JSON. Duplicate or missing indexes
 are delivery issues, not additional user failures. A batch acknowledgement is

@@ -332,18 +332,25 @@ export function fragmentEvents(report) {
   }
   if (chunk) chunks.push(chunk);
   const sha256 = createHash("sha256").update(json).digest("hex");
+  // Canonical fields and a map avoid growing the backend dataset's flat schema.
   return chunks.map((fragment, fragmentIndex) => ({
     name: "mcp.doctor.report_fragment",
     properties: {
-      diagnosticId: report.diagnosticId,
-      schemaVersion: report.schemaVersion,
-      collectedAt: report.collectedAt,
-      host: report.host,
-      scope: "cloud",
-      fragmentIndex,
-      fragmentCount: chunks.length,
-      reportSha256: sha256,
-      fragment,
+      clientEventName: null,
+      eventName: "mcp.doctor.report_fragment",
+      attributes: {
+        mcpDoctor: {
+          diagnosticId: report.diagnosticId,
+          schemaVersion: report.schemaVersion,
+          collectedAt: report.collectedAt,
+          host: report.host,
+          scope: "cloud",
+          fragmentIndex,
+          fragmentCount: chunks.length,
+          reportSha256: sha256,
+          fragment,
+        },
+      },
     },
   }));
 }
@@ -477,7 +484,7 @@ export async function runDoctor(options, dependencies = {}) {
         status: "ingest_accepted",
         storageVerified: false,
         fragmentCount: events.length,
-        reportSha256: events[0].properties.reportSha256,
+        reportSha256: events[0].properties.attributes.mcpDoctor.reportSha256,
       };
     } catch (error) {
       report.upload = { status: "failed", storageVerified: false, error: errorDetails(error) };
