@@ -65,19 +65,28 @@ values in error text are redacted while the remaining error and cause stay
 intact. No separate metadata response body is retained; original JSON parser
 errors may quote response text and pass through the same credential redactor.
 
-## Validation and pilot gate
+## Release validation and production observation
 
 Run `node --test tests/*.test.mjs`. Focused tests exercise a real malformed
 chunked response, invalid JSON under HTTP 200, original failure preservation
 despite later healthy probes, upload rejection/local persistence, UTF-8 fragment
 reassembly, credential redaction, and scoped host log extraction.
 
-Before release, use a still-failing user's report to establish at least one new
-observed fact that changes the next investigation step. Repeating Mark's already
-known HTTP 200/chunk error alone does not satisfy this gate. Rick's next request
-also needs the separately owned backend auth-logging patch to distinguish a
-missing bearer from a rejected bearer. Neither fixture results nor another
-client's successful request establish recovery of those historical cases.
+Before release, verify the controlled failure cases and use an explicitly
+labelled internal report to check acknowledgement, final-store fragment
+completeness, reassembly and hash. This acceptance work must not depend on a
+reporter replying or reproducing an old issue. Check normal tool access in the
+candidate's supported host before wider distribution.
+
+After release, inspect the new server auth evidence and the reports produced
+when Agents trigger diagnostics. Establish which reports add an observed fact
+that changes the next investigation step, and list remaining evidence gaps.
+Repeating Mark's already known HTTP 200/chunk error alone is not proof of
+diagnostic improvement. Rick's next request also needs the separately owned
+backend auth-logging patch to distinguish a missing bearer from a rejected
+bearer. A direct user follow-up is useful supplementary evidence, not a release
+gate. Neither fixture results nor another client's successful request establish
+recovery of those historical cases.
 
 Track diagnostic completion/gaps and actionable evidence among received reports.
 Do not call these all-user connection failure rates. Browser-only hosts and
