@@ -28,6 +28,8 @@ If the tools are available and authenticated, continue normal work without reins
 
 When an existing connection or OAuth attempt reports an error, or tools remain absent after successful authentication, preserve that evidence and follow [connection diagnostics](references/connection-diagnostics.md) before retrying login or changing anything. An initial sign-in requirement by itself is expected, not a confirmed connection defect. The diagnostic helper collects evidence independently of the broken MCP connection; it does not require ChatCut Desktop.
 
+Also use connection diagnostics when previously available tools disappear or the host reports an unfamiliar MCP/protocol error. Capture the current-host snapshot described in that reference; preserve unknown errors and stages.
+
 1. **Server not registered:** Offer to register the Hosted MCP server directly at user scope. Do not install, reinstall, repair, or enable a plugin to obtain the server:
 
 ```sh

@@ -15,7 +15,7 @@ import {
   fragmentEvents,
   probeMetadata,
   redact,
-  runDoctor,
+  runDoctor as runDoctorImpl,
   serverUrl,
 } from "../codex/skills/chatcut-plugin-basics/scripts/mcp-doctor.mjs";
 
@@ -39,6 +39,23 @@ async function listen(t, server) {
 }
 
 const noLogs = async () => ({ entries: [], gaps: [{ reason: "fixture_no_logs" }] });
+const runDoctor = (options, dependencies) =>
+  runDoctorImpl(options, {
+    inspectTransport: async () => ({ status: "fixture; no_network" }),
+    ...dependencies,
+  });
+const metadataResponse = () =>
+  new Response(
+    JSON.stringify({
+      issuer: "https://api.chatcut.io",
+      authorization_endpoint: "https://api.chatcut.io/auth/mcp/authorize",
+      token_endpoint: "https://api.chatcut.io/auth/mcp/token",
+      response_types_supported: ["code"],
+      code_challenge_methods_supported: ["S256"],
+      resource: "https://api.chatcut.io/api/external-mcp/mcp",
+      authorization_servers: ["https://api.chatcut.io"],
+    }),
+  );
 
 test("real HTTP 200 with malformed chunk framing remains a body failure with its original cause", async (t) => {
   const server = createTcpServer((socket) => {
@@ -102,7 +119,7 @@ test("original failure survives later healthy probes and an unavailable log coll
       collectLogs: async () => {
         throw Object.assign(new Error("read denied"), { code: "EACCES" });
       },
-      fetchImpl: async () => new Response('{"issuer":"fixture","resource":"fixture"}'),
+      fetchImpl: metadataResponse,
     },
   );
   assert.match(report.originalFailure.message, /socket ECONNRESET/);
@@ -138,7 +155,7 @@ test("upload rejection retains the prewritten local report and never replaces th
     {
       collectLogs: noLogs,
       fetchImpl: async (url, init) => {
-        if (init.method === "POST") {
+        if (url.endsWith("/telemetry/events")) {
           posts++;
           assert.equal(url, "https://api.chatcut.dev/telemetry/events");
           const local = JSON.parse(await readFile(output));
@@ -167,8 +184,8 @@ test("accepted batch has reconstructable UTF-8 fragments and does not claim fina
     },
     {
       collectLogs: async () => ({ entries: [{ message: "原始故障🎬".repeat(1600) }], gaps: [] }),
-      fetchImpl: async (_, init) => {
-        if (init.method === "POST") {
+      fetchImpl: async (url, init) => {
+        if (url.endsWith("/telemetry/events")) {
           assert.equal(init.headers.authorization, undefined);
           uploaded = JSON.parse(init.body);
           return new Response('{"ok":true}');
@@ -206,8 +223,8 @@ test("oversized diagnostics are retained locally instead of silently truncated f
     },
     {
       collectLogs: async () => ({ entries: [{ message: "x".repeat(280_000) }], gaps: [] }),
-      fetchImpl: async (_, init) => {
-        if (init.method === "POST") posts++;
+      fetchImpl: async (url) => {
+        if (url.endsWith("/telemetry/events")) posts++;
         return new Response("{}");
       },
     },
@@ -270,14 +287,33 @@ for (const [host, folder, manifest] of [
     await writeFile(original, "CONTROLLED FIXTURE: original metadata connection failed");
     let posts = 0;
     const server = createServer(async (req, res) => {
-      if (req.method === "POST") {
+      if (req.url === "/telemetry/events") {
         const parts = [];
         for await (const part of req) parts.push(part);
         const events = JSON.parse(Buffer.concat(parts).toString());
         assert.equal(events[0].name, "mcp.doctor.report_fragment");
         posts++;
         res.end('{"ok":true}');
-      } else res.end('{"issuer":"fixture","resource":"fixture"}');
+      } else if (req.url === "/api/external-mcp/mcp") {
+        res.writeHead(401, {
+          "www-authenticate":
+            'Bearer resource_metadata="' +
+            origin +
+            '/.well-known/oauth-protected-resource/api/external-mcp/mcp"',
+        });
+        res.end('{"jsonrpc":"2.0","error":{"code":-32000,"message":"Authentication required"}}');
+      } else
+        res.end(
+          JSON.stringify({
+            issuer: origin,
+            resource: origin + "/api/external-mcp/mcp",
+            authorization_servers: [origin],
+            authorization_endpoint: origin + "/auth/mcp/authorize",
+            token_endpoint: origin + "/auth/mcp/token",
+            response_types_supported: ["code"],
+            code_challenge_methods_supported: ["S256"],
+          }),
+        );
     });
     const origin = await listen(t, server);
     const helper = fileURLToPath(new URL(`../${folder}/scripts/mcp-doctor.mjs`, import.meta.url));
@@ -394,7 +430,11 @@ test("endpoint validation never silently retargets an unsupported environment or
 });
 
 test("self-contained host packages ship identical helpers and diagnostic references", async () => {
-  for (const file of ["scripts/mcp-doctor.mjs", "references/connection-diagnostics.md"]) {
+  for (const file of [
+    "scripts/mcp-doctor.mjs",
+    "scripts/mcp-evidence.mjs",
+    "references/connection-diagnostics.md",
+  ]) {
     assert.equal(
       await readFile(
         new URL(`../codex/skills/chatcut-plugin-basics/${file}`, import.meta.url),

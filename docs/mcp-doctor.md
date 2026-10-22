@@ -1,4 +1,4 @@
-# Hosted MCP evidence report v1
+# Hosted MCP evidence report v2
 
 The Codex and Claude Code basics skills route actual connection failures to a
 bundled, dependency-free Node helper. This does not change the MCP URL, transport,
@@ -12,9 +12,19 @@ need a runtime with `node:sqlite`; missing support is an explicit evidence gap.
 
 ## Evidence and delivery contract
 
-`schemaVersion:1` reports contain `diagnosticId`, `collectedAt`, declared host and
+`schemaVersion:2` reports contain `diagnosticId`, `collectedAt`, declared host and
 version source, collector/package/runtime/platform versions, registered cloud server URL,
-`originalFailure`, `hostLogs`, `probes`, `gaps`, and `upload`.
+`originalFailure`, `hostSnapshot` when available, `hostLogs`, `entryProbe`,
+`probes`, optional `transportContext`, `evidenceSummary`, `gaps`, and `upload`.
+
+The Agent supplies a dedicated schema-1 `.mcp-snapshot.json` using the basics
+Skill reference. It identifies configuration vs. current-session sources,
+connection/auth state, visible ChatCut tools and actual per-stage observations.
+Unknown stages and errors are retained. Missing facts remain unknown.
+The helper validates the schema but cannot independently verify Agent-supplied
+facts. It does not run a new authenticated session or extract credentials.
+Missing registered URL permits local-only collection; a disabled hosted server
+sends neither diagnostic requests nor an upload.
 
 The original failure, host log window, and independent probes have separate
 provenance. No original request association or recovery is inferred from a later
@@ -56,16 +66,28 @@ probes do not correlate the original host failure automatically.
 Raw report uploads above 256 KiB are refused and the complete collected local
 report remains available. Each metadata response is bounded to 128 KiB and 3.5
 seconds; exceeding the limit records an incomplete probe rather than success.
-The helper makes three discovery probes serially and at most one upload, without
-retries. Redirects are not followed. Proxy environment presence is recorded only
+The helper makes one anonymous initialize POST, at most five metadata GETs,
+and at most one upload, without retries. A normal 401 challenge is recorded as
+such. Metadata checks validate resource/issuer consistency and the product's
+OAuth-code/PKCE fields rather than only JSON syntax. Targets discovered in
+challenge/issuer metadata stay within the explicitly selected origin.
+Redirects are not followed. Proxy environment presence is recorded only
 as a boolean; no proxy URLs or secrets are collected. Node fetch's network stack
 may differ from the host's, so a healthy probe cannot rule out a host-path issue.
+On an HTTPS request/body failure, at most one additional direct TLS connection
+may record the certificate issuer and TLS protocol. It retains normal
+certificate verification, is limited to 3.5 seconds, and is labelled as a
+different route from the host/fetch proxy path. This is not antivirus attribution.
 
-Only dedicated MCP runtime modules and matching ChatCut records are selected
+Only dedicated MCP/plugin runtime modules and matching ChatCut records are selected
 from Codex's read-only SQLite database, up to 200 candidates / 30 selected rows.
 Native `chatcut_desktop` records are excluded. The text fallback reads up to 128
 KiB from a known host log tail; Claude reads at most three recent debug files.
 Missing logs, bounded windows, scan limits, or denied reads are explicit gaps.
+Timestamped text records outside the requested window are excluded; unknown
+times are explicit. Unfamiliar records do not need a known connection-error
+keyword to survive extraction. Other-service/native records, tool-call echoes,
+and conversation payloads remain excluded.
 Credential files and conversation transcripts are never read. Credential-shaped
 values in error text are redacted while the remaining error and cause stay
 intact. No separate metadata response body is retained; original JSON parser
@@ -97,3 +119,9 @@ recovery of those historical cases.
 Track diagnostic completion/gaps and actionable evidence among received reports.
 Do not call these all-user connection failure rates. Browser-only hosts and
 failures that do not trigger this Skill remain outside coverage.
+
+The previously verified beta envelope remains the fragment delivery contract;
+it does not establish that every new v2 field has been exercised by a real
+failing host. Local controlled checks and post-release case evidence remain
+separate. The current coverage follow-up is local and must be reviewed before
+updating the existing draft PR or any release.
