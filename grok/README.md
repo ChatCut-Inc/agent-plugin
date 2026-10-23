@@ -21,7 +21,12 @@ Edits remain editable in the ChatCut timeline. The plugin does not replace a pro
 
 ## Install and connect
 
-After marketplace approval:
+Start with the [Grok installation and first-project guide](../docs/grok-install.md).
+It includes copyable English and Chinese prompts and separates Grok Bot plugins
+from grok.com custom MCP connectors. A prompt starts the setup conversation;
+sign-in, approvals, and host availability may still require your action.
+
+For the Grok Bot marketplace route, once ChatCut is available to your account:
 
 1. Open **Connect apps** in Grok Bot.
 2. Find **ChatCut** and select **Add**. If it is not listed, it is not yet
@@ -29,6 +34,8 @@ After marketplace approval:
 3. Select **Authorize** or **Authenticate** and complete ChatCut sign-in in the browser.
 4. If the host shows **Waiting for authorization**, select **Reopen** and finish the browser flow.
 5. Confirm ChatCut appears under installed plugins and its tools are connected.
+6. Attach ChatCut with `@` if needed. Check that the ChatCut workflow skills are
+   available separately; a connected MCP server alone does not install skills.
 
 The plugin connects to:
 
@@ -37,8 +44,12 @@ https://api.chatcut.io/api/external-mcp/mcp
 ```
 
 Authentication uses OAuth. No API key or access token is stored in this repository.
-Follow the official [Grok Bot connection guide](https://cursor.com/help/grok-bot/connect-plugins)
+Follow the official [Grok Bot connection guide](https://cursor.com/help/grok-bot/connect-apps)
 for reconnecting an existing installation.
+
+If ChatCut is absent from the catalog, the guide explains the limits of custom
+MCP and repository-based setup. Do not use Codex or Cursor installation commands
+as Grok Bot instructions, or treat downloading this folder as an installed plugin.
 
 ## Example requests
 
