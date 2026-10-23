@@ -2,7 +2,7 @@
 
 Use this branch when a registered hosted ChatCut connection fails, including
 OAuth failing before a browser opens, or authentication completing without usable
-tools. Preserve evidence before reconnecting or restarting. This version gathers
+tools, and failures of already available hosted tools. Preserve evidence before reconnecting or restarting. This version gathers
 evidence; it does not repair configuration, credentials, network settings, or the
 original connection.
 
@@ -104,6 +104,49 @@ Only include ChatCut tool names; keep tool arguments and results out.
 
 ## Run once for the reported failure
 
+### Preserve the failed call before independent checks
+
+When the host exposes the original failed tool result or runtime event, the Agent
+copies only its error and available identifiers into a new dedicated
+`<name>.mcp-failure.json`. Do this before retries, reconnects or later probes.
+Do not read a conversation transcript or collect tool arguments/results to build
+it. Use the host's existing error metadata and supported read-only runtime logs;
+the user does not fill this record. Keep the full original error message, code,
+cause and stack when available, including unfamiliar failures.
+
+```json
+{
+  "schemaVersion": 1,
+  "source": "host_tool_result",
+  "serverName": "chatcut",
+  "occurredAt": null,
+  "conversationId": null,
+  "callId": null,
+  "operation": "list_projects",
+  "requestId": null,
+  "error": { "message": "Exact original error; add original code/cause/stack when available" }
+}
+```
+
+Supported sources are `host_tool_result`, `host_runtime_event`, and
+`captured_stderr`. `occurredAt` is the failed event's actual timestamp with
+timezone, when exposed; never substitute the current time, file modification
+time, snapshot capture or later probe time. Omit unknown optional IDs or leave
+them null. A local `callId` and `conversationId` identify client-side work and
+are useful even if the request never reaches ChatCut; they are not server
+request IDs. Copy a `requestId` only when the original failed call actually
+provides it. All supplied facts remain labelled as Agent-supplied evidence.
+
+Prefer `--failure-record <name.mcp-failure.json>` to `--original-error` when
+this structured source is available; choose one input. The collector centers
+its bounded log window on the supplied failure time and uses its conversation
+ID when available. A missing time remains an explicit gap. For an exec caller,
+use already retained stderr; discarded stderr cannot be recovered by this Skill.
+Do not start another authenticated session to manufacture replacement evidence.
+
+If only the original error text is accessible, use the text-file fallback below.
+Do not call a report with only startup-status notices a captured tool failure.
+
 1. Obtain the existing server's registered URL through the host. Preserve its
    environment. The helper accepts ChatCut production/beta/dev endpoints and
    loopback development servers; it reports unsupported endpoints rather than
@@ -153,6 +196,17 @@ records from three 128 KiB tails. Missing/rotated/denied logs remain explicit
 gaps. The known Windows MXC `LOCALAPPDATA` sandbox redirect falls back to the
 real user's `AppData/Local` without changing permissions. An already supplied alternative App log root can be selected with
 `--codex-app-log-dir`; do not scan browser profiles or session transcripts.
+
+The report names selected/omitted native files and byte ranges that were not read.
+For an existing reported gap, use `--codex-app-log-file <known codex-desktop-*.log>`
+to select at most three known native files. With exactly one selected file,
+`--codex-app-log-offset <nonnegative byte offset>` reads at most 128 KiB from
+that segment; unread ranges remain explicit. Preserve the original failure's
+known time/window. Do not repeatedly upload replacement reports or scan entire
+log history to fill an unknown failure time. App startup notices cover startup;
+they do not cover every later tool-call failure. SQLite/native log extraction
+retains available local conversation/call IDs without promoting them to original
+server request IDs or independently confirmed attempt associations.
 For a separately chosen future reproduction, Codex's explicit `log_dir` setting
 can enable its native plaintext log. Do not change global settings or relaunch
 the user's host automatically. Existing logs cannot be reconstructed retroactively.

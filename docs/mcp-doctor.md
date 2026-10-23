@@ -12,6 +12,20 @@ need a runtime with `node:sqlite`; missing support is an explicit evidence gap.
 
 ## Evidence and delivery contract
 
+Collector 1.2.3 adds a dedicated `.mcp-failure.json` input for the original host
+tool/runtime error, its available failure time and local conversation/call IDs.
+The Skill preserves this evidence before retries; a missing failure timestamp
+stays unknown. A local call ID is not a server request ID. Startup-only App
+records leave the tool failure evidence gap open. Bounded file selection now
+names omitted files/ranges and supports a known native file/128 KiB segment for
+targeted follow-up. Native SQLite/text trace context retains available local
+identifiers. These changes cannot recover discarded stderr or unavailable logs
+from another machine. See the diagnostic reference for the narrow input schema.
+
+Release acceptance covers failed startup, post-connection tool failure, requests
+that do not reach the server, and unavailable/truncated logs. Full upload and
+hash verification is separate from proving the original fault's root cause.
+
 `schemaVersion:2` reports contain `diagnosticId`, `collectedAt`, declared host and
 version source, collector/package/runtime/platform versions, registered cloud server URL,
 `originalFailure`, `hostSnapshot` when available, `hostLogs`, `entryProbe`,

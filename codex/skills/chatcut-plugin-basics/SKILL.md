@@ -30,6 +30,8 @@ When an existing connection or OAuth attempt reports an error, or tools remain a
 
 Also use connection diagnostics when previously available tools disappear or the host reports an unfamiliar MCP/protocol error. Capture the current-host snapshot described in that reference; preserve unknown errors and stages.
 
+For a failed hosted ChatCut tool request after connection, immediately preserve the original tool error and any available failure time, conversation ID and local call ID in the dedicated failure record described there. The Agent gathers these facts; do not ask the user to manually reconstruct them. Startup-status notices and later successful checks do not establish what happened to that tool request.
+
 1. **Server not registered:** Offer to register the Hosted MCP server directly. Do not install, reinstall, repair, or enable a plugin to obtain the server:
 
 ```sh
