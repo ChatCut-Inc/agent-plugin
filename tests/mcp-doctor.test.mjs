@@ -256,7 +256,134 @@ test("credentials in original errors are removed while error codes and useful de
   for (const field of ["authorization", "accessToken", "refresh_token", "clientSecret", "apiKey"]) {
     assert.ok(!redact(JSON.stringify({ [field]: "private-value" })).includes("private-value"));
   }
+  for (const boundary of ["\n", "\\n", "\\r\\n", "\\\\n"]) {
+    const source = `Set-Cookie: sid=cookie-canary; theme=dark${boundary}Caused by: E_ORIGINAL_CAUSE`;
+    const redacted = redact(source);
+    assert.ok(!redacted.includes("cookie-canary"));
+    assert.ok(redacted.includes(boundary + "Caused by: E_ORIGINAL_CAUSE"));
+    assert.equal(redact(redacted), redacted);
+  }
+  const quotedCookie = 'Cookie="sid=cookie-canary"; Caused by: E_ORIGINAL_CAUSE';
+  assert.equal(redact(quotedCookie), 'Cookie="[REDACTED]"; Caused by: E_ORIGINAL_CAUSE');
+  assert.equal(redact(redact(quotedCookie)), redact(quotedCookie));
 });
+
+for (const host of ["codex", "claude"]) {
+  test(`${host} local report and offline fragments redact labelled credential values without losing original diagnostics`, async (t) => {
+    const dir = await temporary(t);
+    const original = join(dir, "original.txt");
+    const canaries = Array.from({ length: 9 }, (_, i) => `ABCDEFGHIJKLMNOPQRSTUVWXYZabcde${i}`);
+    const challenge =
+      'Bearer resource_metadata="https://api.chatcut.io/.well-known/oauth-protected-resource"';
+    await writeFile(
+      original,
+      [
+        `Original E_UNFAMILIAR_MCP: token=${canaries[0]}; access_token="${canaries[1]}"; refreshToken='${canaries[2]}'`,
+        `client_secret="${canaries[3]} with spaces / += :"; session_token=\\"${canaries[4]}\\"`,
+        JSON.stringify({ access_token: canaries[5], message: "preserved provider message" }),
+        JSON.stringify(JSON.stringify({ token: canaries[6], code: "E_NESTED_ORIGINAL" })),
+        `Cookie: sid=${canaries[7]}; second=${canaries[8]}\\r\\nCaused by: OriginalType E_CAUSE_777`,
+        challenge,
+        "Error type=OriginalType code=E_TOKEN_EXPIRED: Bearer token required; token refresh rejected",
+      ].join("\n"),
+    );
+    const { report, path } = await runDoctor(
+      { host, originalError: original, output: join(dir, "report.json") },
+      {
+        collectLogs: noLogs,
+        fetchImpl: async () => {
+          throw new Error("Offline redaction verification must not connect");
+        },
+      },
+    );
+    const saved = await readFile(path, "utf8");
+    const events = fragmentEvents(report);
+    const reconstructed = events
+      .map((event) => event.properties.attributes.mcpDoctor.fragment)
+      .join("");
+    assert.equal(
+      createHash("sha256").update(reconstructed).digest("hex"),
+      events[0].properties.attributes.mcpDoctor.reportSha256,
+    );
+    for (const text of [saved, reconstructed]) {
+      for (const canary of canaries) assert.ok(!text.includes(canary));
+      const parsed = JSON.parse(text);
+      assert.equal(parsed.originalFailure.status, "recorded");
+      for (const fact of [
+        "E_UNFAMILIAR_MCP",
+        "preserved provider message",
+        "E_NESTED_ORIGINAL",
+        "OriginalType E_CAUSE_777",
+        "E_TOKEN_EXPIRED",
+        "Bearer token required",
+        challenge,
+      ])
+        assert.ok(parsed.originalFailure.message.includes(fact));
+    }
+    assert.equal(report.upload.status, "skipped_endpoint_unavailable");
+  });
+
+  test(`${host} text logs retain unknown error words and causes while excluding tool/chat records and other services`, async (t) => {
+    const dir = await temporary(t);
+    const logDir = host === "codex" ? join(dir, "log") : join(dir, "debug");
+    await mkdir(logDir);
+    const timestamp = new Date().toISOString();
+    const prefix =
+      host === "codex" ? `${timestamp} ERROR codex_mcp::rmcp_client: ` : `${timestamp} [ERROR] `;
+    await writeFile(
+      join(logDir, host === "codex" ? "codex-tui.log" : "fixture.txt"),
+      [
+        `${prefix}MCP server "chatcut": Error E_UNKNOWN_777: unsupported transcript field with tool_call value`,
+        "  Caused by: AnotherUnknownType code=E_CAUSE_777; transcript transport; tool_call schema",
+        "  transcript: E_TRANSCRIPT_FIELD_DETAIL",
+        "  tool_call: E_TOOL_FIELD_DETAIL",
+        `${prefix}MCP server "plugin:chatcut:chatcut": tool_call field not recognized E_UNKNOWN_778`,
+        `${prefix}MCP server "chatcut": transcript: E_TRANSCRIPT_FIELD_ERROR`,
+        `${prefix}MCP server "chatcut": tool_call: E_TOOL_FIELD_ERROR`,
+        `${prefix}MCP server "chatcut": Error refers to chatcut_desktop compatibility E_UNKNOWN_779`,
+        `${prefix}MCP server "chatcut": {"code":-32999,"message":"unknown transcript tool_call error"}`,
+        `${prefix}MCP server "chatcut": Tool result: private-tool-result`,
+        `${prefix}MCP server "chatcut": tool_call: {"arguments":"private-tool-arguments"}`,
+        `${prefix}MCP server "chatcut": Sending request: {"method":"tools/call","params":{"arguments":"private-request"}}`,
+        `${prefix}MCP server "chatcut": Received response: {"result":{"content":[{"text":"private-response"}]}}`,
+        `${prefix}MCP server "chatcut": {"type":"user_message","message":"private-scoped-message"}`,
+        `${prefix}MCP server "chatcut": {"method":"tools/call","params":{"arguments":"private-json-arguments"}}`,
+        `${prefix}user prompt: private-user-message MCP server "chatcut"`,
+        `${prefix}transcript: private-conversation MCP server "chatcut"`,
+        `${prefix}MCP server "other-service": private-other-service; MCP server "chatcut"`,
+        `${prefix}MCP server "chatcut_desktop": private-native; https://api.chatcut.io/`,
+        `${timestamp} INFO codex_core::tools: tool result server_name=chatcut private-codex-echo`,
+        `${timestamp} INFO rmcp::client: request{server_name=chatcut method="tools/call"}: private-rpc-span`,
+        `${prefix}MCP server "chatcut": Error E_BEFORE_PRIVATE_LINE`,
+        "  user prompt: private-indented-user",
+        `  MCP server "other-service": private-indented-other`,
+      ].join("\n"),
+    );
+    const result = await collectHostLogs(host, {
+      home: dir,
+      codexHome: dir,
+      codexSqliteHome: dir,
+      localAppData: join(dir, "empty-appdata"),
+      claudeConfigDir: dir,
+    });
+    const messages = result.entries.map((entry) => entry.message).join("\n");
+    for (const marker of [
+      "E_UNKNOWN_777",
+      "E_CAUSE_777",
+      "E_TRANSCRIPT_FIELD_DETAIL",
+      "E_TOOL_FIELD_DETAIL",
+      "E_TRANSCRIPT_FIELD_ERROR",
+      "E_TOOL_FIELD_ERROR",
+      "E_UNKNOWN_778",
+      "E_UNKNOWN_779",
+      "unknown transcript tool_call error",
+      "E_BEFORE_PRIVATE_LINE",
+    ])
+      assert.ok(messages.includes(marker), marker);
+    assert.ok(!messages.includes("private-"));
+    assert.ok(result.entries.every((entry) => entry.originalAttemptMatch === "unconfirmed"));
+  });
+}
 
 test("a credential file cannot be used as the original-error input", async (t) => {
   const dir = await temporary(t);
@@ -411,6 +538,202 @@ test("SQLite extraction is read-only, scoped to runtime modules, and excludes na
   assert.match(result.entries[0].message, /ECONNRESET/);
   assert.equal(result.entries[0].rowId, 1);
   assert.equal(result.entries[0].originalAttemptMatch, "unconfirmed");
+});
+
+test("Codex custom SQLite storage retains fresh WAL records and reads the selected native text log", async (t) => {
+  const { DatabaseSync } = await import("node:sqlite");
+  const dir = await temporary(t);
+  const sqliteHome = join(dir, "sqlite-state");
+  const logDir = join(dir, "native-log");
+  await mkdir(sqliteHome);
+  await mkdir(logDir);
+  const db = new DatabaseSync(join(sqliteHome, "logs_2.sqlite"));
+  db.exec("PRAGMA journal_mode=WAL; PRAGMA wal_autocheckpoint=0");
+  db.exec("CREATE TABLE logs(id INTEGER,ts INTEGER,level TEXT,target TEXT,feedback_log_body TEXT)");
+  db.prepare("INSERT INTO logs VALUES(?,?,?,?,?)").run(
+    1,
+    Math.floor(Date.now() / 1000),
+    "ERROR",
+    "codex_mcp::connection_manager",
+    "start{server_name=chatcut}: fresh WAL metadata failure",
+  );
+  await writeFile(
+    join(logDir, "codex-tui.log"),
+    [
+      `${new Date().toISOString()} WARN codex_mcp::rmcp_client: MCP server startup failed server_name=chatcut error=Original transport cause`,
+      'MCP server "chatcut" Tool result: private project payload',
+    ].join("\n"),
+  );
+  const previous = process.env.CODEX_SQLITE_HOME;
+  try {
+    process.env.CODEX_SQLITE_HOME = sqliteHome;
+    const result = await collectHostLogs("codex", { codexHome: dir, codexLogDir: logDir });
+    assert.ok(
+      result.entries.some(
+        (entry) => entry.source === "codex_runtime_sqlite" && /fresh WAL/.test(entry.message),
+      ),
+    );
+    assert.ok(
+      result.entries.some(
+        (entry) =>
+          entry.source === "codex_tui_log" && /Original transport cause/.test(entry.message),
+      ),
+    );
+    assert.ok(!JSON.stringify(result).includes("private project payload"));
+    const explicit = await collectHostLogs("codex", {
+      codexHome: dir,
+      codexSqliteHome: sqliteHome,
+      codexLogDir: logDir,
+    });
+    assert.ok(explicit.entries.some((entry) => /fresh WAL/.test(entry.message)));
+  } finally {
+    if (previous === undefined) delete process.env.CODEX_SQLITE_HOME;
+    else process.env.CODEX_SQLITE_HOME = previous;
+    db.close();
+  }
+});
+
+test("Windows App fallback keeps native ChatCut startup errors with thread, time and privacy boundaries", async (t) => {
+  const dir = await temporary(t);
+  const localAppData = join(dir, "Local");
+  const now = Date.now();
+  const logDir = join(
+    localAppData,
+    "Codex",
+    "Logs",
+    new Date(now).toISOString().slice(0, 10).replaceAll("-", "/"),
+  );
+  await mkdir(logDir, { recursive: true });
+  const line = (time, error, server = "chatcut", threadId = "this-thread") =>
+    `${time} info [AppServerConnection] mcp_server_startup_status_updated error=${error} failureReason=null hostId=local server=${server} status=failed threadId=${threadId}`;
+  await writeFile(
+    join(logDir, "codex-desktop-fixture.log"),
+    [
+      line(
+        new Date(now).toISOString(),
+        JSON.stringify(
+          'Original unfamiliar E_HOST_777 transcript metadata cause; Bearer secret-test-value; {"access_token":"nested-app-secret","message":"preserved original cause"}',
+        ),
+      ),
+      "  private continuation is not a runtime event",
+      line(new Date(now - 1000).toISOString(), "Auth required", "plugin:chatcut:chatcut", "null"),
+      line(new Date(now - 1000).toISOString(), "private-other-thread", "chatcut", "other-thread"),
+      line(new Date(now - 1000).toISOString(), "private-native", "chatcut_desktop"),
+      line(
+        new Date(now - 1000).toISOString(),
+        '"mentioned server=chatcut inside error"',
+        "other-service",
+      ),
+      line(new Date(now - 60 * 60_000).toISOString(), "old-window-error"),
+      `${new Date(now).toISOString()} info [Renderer] user prompt MCP server "chatcut" private prompt`,
+    ].join("\n"),
+  );
+  await writeFile(
+    join(logDir, "conversation.log"),
+    line(new Date(now).toISOString(), "wrong-source-file"),
+  );
+  const result = await collectHostLogs("codex", {
+    home: dir,
+    codexHome: dir,
+    platform: "win32",
+    localAppData,
+    conversationId: "this-thread",
+    now,
+  });
+  assert.equal(result.entries.length, 2);
+  assert.match(
+    result.entries[0].message + result.entries[1].message,
+    /Original unfamiliar E_HOST_777/,
+  );
+  assert.ok(
+    result.entries.every(
+      (entry) => entry.source === "codex_app_log" && entry.originalAttemptMatch === "unconfirmed",
+    ),
+  );
+  assert.equal(result.appLog.filesRead, 1);
+  assert.equal(result.appLog.locationSource, "windows_default");
+  assert.equal(result.appLog.currentConversationFilterApplied, true);
+  assert.doesNotMatch(
+    JSON.stringify(result),
+    /secret-test-value|nested-app-secret|private continuation|private-other-thread|private-native|mentioned server|old-window-error|private prompt|wrong-source-file/,
+  );
+  assert.match(JSON.stringify(result.entries), /preserved original cause/);
+});
+
+test("MXC AppData redirection falls back to the host user profile without changing other platforms", async (t) => {
+  const dir = await temporary(t);
+  const now = Date.now();
+  const logDir = join(
+    dir,
+    "AppData",
+    "Local",
+    "Codex",
+    "Logs",
+    new Date(now).toISOString().slice(0, 10).replaceAll("-", "/"),
+  );
+  await mkdir(logDir, { recursive: true });
+  await writeFile(
+    join(logDir, "codex-desktop-fixture.log"),
+    `${new Date(now).toISOString()} info [AppServerConnection] mcp_server_startup_status_updated error="native cause" failureReason=null hostId=local server=chatcut status=failed threadId=null`,
+  );
+  const previous = process.env.LOCALAPPDATA;
+  try {
+    process.env.LOCALAPPDATA = join(dir, "Packages", "sandbox.fixture", "AC");
+    const result = await collectHostLogs("codex", {
+      home: dir,
+      codexHome: dir,
+      platform: "win32",
+      now,
+    });
+    assert.equal(result.appLog.filesRead, 1);
+    assert.equal(result.appLog.sandboxLocalAppDataRedirected, true);
+    assert.ok(result.entries.some((entry) => /native cause/.test(entry.message)));
+    const otherPlatform = await collectHostLogs("codex", {
+      home: dir,
+      codexHome: dir,
+      platform: "darwin",
+      now,
+    });
+    assert.equal(otherPlatform.appLog, undefined);
+    assert.ok(!otherPlatform.entries.some((entry) => entry.source === "codex_app_log"));
+  } finally {
+    if (previous === undefined) delete process.env.LOCALAPPDATA;
+    else process.env.LOCALAPPDATA = previous;
+  }
+});
+
+test("App fallback remains bounded and does not promote host notices into the original failed request", async (t) => {
+  const dir = await temporary(t);
+  const now = Date.now();
+  const dateDir = join(dir, new Date(now).toISOString().slice(0, 10).replaceAll("-", "/"));
+  await mkdir(dateDir, { recursive: true });
+  await writeFile(
+    join(dateDir, "codex-desktop-fixture.log"),
+    Array.from(
+      { length: 35 },
+      (_, i) =>
+        `${new Date(now - 35 + i).toISOString()} info [AppServerConnection] mcp_server_startup_status_updated error="original cause ${i}" failureReason=null hostId=local server=chatcut status=failed threadId=null`,
+    ).join("\n"),
+  );
+  const { report } = await runDoctor({
+    host: "codex",
+    codexAppLogDir: dir,
+    codexSqliteHome: join(dir, "empty-sqlite"),
+    codexLogDir: join(dir, "empty-tui"),
+    output: join(dir, "report.json"),
+  });
+  assert.equal(report.collectorVersion, "1.2.2");
+  assert.equal(
+    report.hostLogs.entries.filter((entry) => entry.source === "codex_app_log").length,
+    30,
+  );
+  assert.ok(
+    report.hostLogs.gaps.some(
+      (gap) => gap.source === "codex_app_log" && gap.reason === "log_record_limit",
+    ),
+  );
+  assert.equal(report.originalFailure.status, "unavailable");
+  assert.equal(report.originalFailure.occurredAt, null);
 });
 
 test("endpoint validation never silently retargets an unsupported environment or follows embedded credentials", () => {

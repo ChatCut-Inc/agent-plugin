@@ -13,6 +13,7 @@ import {
   runDoctor,
 } from "../codex/skills/chatcut-plugin-basics/scripts/mcp-doctor.mjs";
 import {
+  evidenceSummary,
   inspectMetadata,
   validateSnapshot,
 } from "../codex/skills/chatcut-plugin-basics/scripts/mcp-evidence.mjs";
@@ -59,6 +60,72 @@ const dependencies = {
   inspectTransport: async () => ({ status: "fixture_no_network" }),
   fetchImpl: async (url) => (url === endpoint.href ? challenge() : metadata(url)),
 };
+
+test("other observations and later probe IDs cannot close the original failure's correlation gap", () => {
+  const report = {
+    originalFailure: { status: "unavailable", occurredAt: null },
+    hostSnapshot: {
+      observations: [
+        {
+          stage: "session_tools",
+          source: "current_session",
+          observedAt: now,
+          outcome: "unknown",
+          requestId: "other-observation",
+        },
+      ],
+    },
+    hostLogs: { entries: [] },
+    probes: [{ requestId: "later-probe-request" }],
+  };
+  assert.ok(evidenceSummary(report).gaps.includes("original_request_id_unavailable"));
+  report.originalFailure.status = "recorded";
+  assert.ok(evidenceSummary(report).gaps.includes("original_request_id_unavailable"));
+  const original = {
+    stage: "initialize",
+    source: "runtime_log",
+    observedAt: null,
+    outcome: "failed",
+    requestId: "original-request",
+    originalAttemptMatch: "confirmed",
+  };
+  report.hostSnapshot.observations.push(original);
+  const confirmed = evidenceSummary(report);
+  assert.ok(!confirmed.gaps.includes("original_request_id_unavailable"));
+  assert.equal(confirmed.originalRequestCorrelation.status, "agent_reported_same_attempt");
+  assert.deepEqual(confirmed.originalRequestCorrelation.observations, [
+    { requestId: "original-request", source: "runtime_log", observationIndex: 1 },
+  ]);
+  assert.match(confirmed.originalRequestCorrelation.provenance, /not_independently_verified/);
+  report.originalFailure.status = "unavailable";
+  assert.ok(evidenceSummary(report).gaps.includes("original_request_id_unavailable"));
+  assert.equal(report.probes[0].requestId, "later-probe-request");
+  assert.equal(report.hostSnapshot.observations[0].requestId, "other-observation");
+});
+
+test("same-attempt request association must be explicit and belong to a failed runtime/session observation", () => {
+  const observation = {
+    stage: "initialize",
+    source: "current_session",
+    observedAt: now,
+    outcome: "failed",
+    requestId: "request",
+    originalAttemptMatch: "confirmed",
+  };
+  const snapshot = { schemaVersion: 1, observedAt: now, observations: [observation] };
+  assert.equal(validateSnapshot(snapshot).observations[0].originalAttemptMatch, "confirmed");
+  for (const changes of [
+    { source: "cli_configuration" },
+    { outcome: "success" },
+    { requestId: "" },
+    { originalAttemptMatch: "maybe" },
+  ]) {
+    assert.throws(
+      () => validateSnapshot({ ...snapshot, observations: [{ ...observation, ...changes }] }),
+      /association|attempt match/,
+    );
+  }
+});
 
 test("issuer-only and wrong-resource documents expose the missing protocol evidence", async () => {
   const auth = await probeMetadata(
