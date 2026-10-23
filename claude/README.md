@@ -33,7 +33,12 @@ The plugin includes workflow skills and one remote MCP server at
 instructions and content needed for the requested operation to ChatCut. Imported
 media, transcripts, generated assets, and edits can become part of your ChatCut
 project. Generation, translation, and transcription are processed through
-ChatCut's service.
+ChatCut's service. Requests to that server carry static headers naming the
+client, editor surface, and plugin version.
+
+Video and audio exports render in your open ChatCut editor tab and download
+through that browser. To deliver the file, the agent looks for it by name in
+your downloads folder; it does not read other files there.
 
 Optional forms load public catalog images and audio previews directly from
 `cdn.jsdelivr.net`, outside the declared MCP connection. These requests expose

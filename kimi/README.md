@@ -9,7 +9,7 @@ Import the packaged directory/ZIP through Kimi Work's supported plugin installat
 - Entry point: `kimi.plugin.json`; all skills are under `skills/`.
 - Compatibility metadata: `.mcp.json`, `.app.json`, root icon and brand assets from the Kimi-provided 0.1.4 package.
 - Hosted endpoint / OAuth resource: `https://api.chatcut.io/api/external-mcp/mcp`.
-- Attribution headers: `x-chatcut-mcp-client: kimi_work`, `x-chatcut-mcp-surface: embedded-preview`.
+- Attribution headers: `x-chatcut-mcp-client: kimi_work`, `x-chatcut-mcp-surface: embedded-preview`, and `x-chatcut-plugin-version` set to the package version.
 - This Kimi-only package intentionally has no `.codex-plugin` or `.cursor-plugin` manifest.
 
 The source package is version **0.1.6**. It follows the independent-directory delivery used by `plugins/grok` (PR #4099), but draws craft from the current repository rather than copying Grok's older MG instructions. Source baseline: `600fa53770`.

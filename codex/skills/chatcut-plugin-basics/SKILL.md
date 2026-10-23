@@ -69,7 +69,7 @@ Visual understanding has two distinct surfaces:
 - To inspect raw imported or attached source media, use Codex-native visual/file capabilities on the source bytes when available. Do not create a temporary timeline just to inspect source assets.
 - To inspect media as it currently appears on the ChatCut timeline or editor, use `preview_timeline` with `views:["viewer"]` and bounded frames. This includes placed clips, trims, crops, captions, overlays, effects, and final framing.
 
-Export is a connector boundary in Codex sessions: load `export`, call `submit_export`, then use `track_export` when needed so Codex returns the finished render `downloadUrl`.
+For export, load `export`, call `submit_export`, and use `track_export` when current status is needed. Video/audio render locally by default in the connected editor tab: open the intended project/timeline through the browser handoff below and keep that tab open until delivery finishes. The delivered file is the one Codex finds by name in the user's downloads folder, as `export` describes; do not switch to cloud rendering just to get a download URL.
 
 ## Data Model
 
@@ -245,7 +245,7 @@ If a ChatCut tool returns a pricing or billing URL, present it as an external br
 
 ChatCut plugin access is based on connector authentication and the user's accessible projects. Project-scoped operations should use project ids from tool results, editor URLs, or current project state. Do not guess hidden ids.
 
-Codex cannot ask the editor UI to pick, relink, upload, export, or capture local files for it; there is no editor-action bridge. Local files, attached files, browser-held files, and public URLs must enter the project through the appropriate media import or asset acquisition path before timeline use:
+Codex cannot ask the editor UI to pick, relink, upload, or capture local files for it. Export requests use `submit_export`, which can start the connected editor tab's local renderer. Local files, attached files, browser-held files, and public URLs must enter the project through the appropriate media import or asset acquisition path before timeline use:
 
 - The `asset-import` skill for files Codex can read locally.
 - `import_media` for client-held bytes.
@@ -257,7 +257,7 @@ For raw source-frame inspection, use the local source file directly with Codex-n
 
 In ChatCut plugin workflows, local `ffmpeg`/`ffprobe` is for read-only source inspection and non-editorial diagnostics only: probing metadata, checking streams, or extracting still frames from locally readable source files. Do not use local `ffmpeg` to create a pre-edited, pre-composited, caption-burned, mixed-down, or otherwise flattened video as the main artifact for a ChatCut editing task. Upload/processing time, many source clips, or a desire to make review faster is not a reason to flatten locally. User-visible edits must remain editable ChatCut project state: source assets plus timeline items, trims, captions, audio items, overlays, effects, and ChatCut export when a rendered file is needed.
 
-Codex cannot ask the browser/editor tab to pick, relink, upload, export, or capture local files as a substitute for connector import/export flows.
+Codex cannot ask the browser/editor tab to pick, relink, upload, or capture local files as a substitute for connector import flows.
 
 ChatCut native internal chat components do not render directly in Codex. Convert those moments into ordinary Codex chat or the available structured follow-up/form capability.
 

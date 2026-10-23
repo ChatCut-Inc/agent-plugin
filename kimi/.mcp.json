@@ -7,7 +7,8 @@
       "oauth_resource": "https://api.chatcut.io/api/external-mcp/mcp",
       "http_headers": {
         "x-chatcut-mcp-client": "kimi_work",
-        "x-chatcut-mcp-surface": "embedded-preview"
+        "x-chatcut-mcp-surface": "embedded-preview",
+        "x-chatcut-plugin-version": "1.10.17"
       },
       "note": "Official ChatCut remote MCP endpoint. OAuth 2.0 with dynamic client registration (DCR) + PKCE; the server derives userId from the token.",
       "authorization": "OAuth 2.0 with dynamic client registration",
