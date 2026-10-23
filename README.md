@@ -36,7 +36,7 @@ https://api.chatcut.io/api/external-mcp/mcp
 
 The host handles authentication when the plugin is installed or first used (`codex mcp login chatcut`, or `claude mcp login plugin:chatcut:chatcut` in Claude Code). Grok Bot and Cursor users complete the authorization flow from the host's Plugins screen. Follow the sign-in flow to connect your ChatCut account.
 
-Install instructions per host: [chatcut.io/chatgpt](https://chatcut.io/chatgpt) for Codex, [chatcut.io/claude](https://chatcut.io/claude) for Claude Code (agent-executable copy in [./docs/claude-code-install.md](./docs/claude-code-install.md)), and [./grok/README.md](./grok/README.md) for Grok Bot and Cursor.
+Install instructions per host: [chatcut.io/chatgpt](https://chatcut.io/chatgpt) for Codex, [chatcut.io/claude](https://chatcut.io/claude) for Claude Code (agent-executable copy in [./docs/claude-code-install.md](./docs/claude-code-install.md)), [./docs/grok-install.md](./docs/grok-install.md) for Grok Bot and grok.com (including their different setup paths), and [./grok/README.md](./grok/README.md) for package details.
 
 ## Example Prompts
 
