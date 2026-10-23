@@ -33,7 +33,11 @@ function source(value) {
 }
 
 function instant(value) {
-  return typeof value === "string" && TIMESTAMP.test(value) && Number.isFinite(Date.parse(value));
+  return (
+    typeof value === "string" &&
+    new RegExp("^" + TIMESTAMP.source + "$").test(value) &&
+    Number.isFinite(Date.parse(value))
+  );
 }
 
 export function validateSnapshot(input, endpoint) {
@@ -46,8 +50,14 @@ export function validateSnapshot(input, endpoint) {
     "session",
     "observations",
   ]);
-  if (input.schemaVersion !== 1 || !instant(input.observedAt))
-    throw new Error("Snapshot requires schemaVersion 1 and observedAt with a timezone");
+  if (input.schemaVersion !== 1)
+    throw new Error(
+      "Snapshot schemaVersion must be 1 (the outer Doctor report uses a separate schemaVersion); generate a template with --create-snapshot",
+    );
+  if (!instant(input.observedAt))
+    throw new Error(
+      "Snapshot observedAt must be its capture time as a complete ISO timestamp with timezone, e.g. 2026-10-23T01:00:00Z; original failure time may remain unknown",
+    );
   for (const key of ["hostVersion", "pluginVersion"])
     if (input[key] !== undefined && (typeof input[key] !== "string" || input[key].length > 256))
       throw new Error("Invalid snapshot version");
@@ -124,20 +134,39 @@ export function validateSnapshot(input, endpoint) {
         "httpStatus",
         "protocolCode",
         "message",
+        "originalAttemptMatch",
       ]);
       source(item.source);
       if (
         !/^[a-z][a-z0-9_./:-]{0,127}$/.test(item.stage) ||
         !["success", "failed", "unknown"].includes(item.outcome) ||
-        !instant(item.observedAt)
+        (item.observedAt !== null && !instant(item.observedAt))
       )
-        throw new Error("Stage observation needs a stage, outcome, and timestamp");
+        throw new Error(
+          "Stage observation needs stage, outcome, and observedAt (ISO timestamp with timezone, or null when the original time is unknown)",
+        );
       for (const field of ["operation", "requestId", "message"])
         if (item[field] !== undefined && typeof item[field] !== "string")
           throw new Error("Observation text fields must be strings");
       for (const field of ["httpStatus", "protocolCode"])
         if (item[field] !== undefined && !Number.isSafeInteger(item[field]))
           throw new Error("Observation status/code must be an integer");
+      if (
+        item.originalAttemptMatch !== undefined &&
+        !["confirmed", "unconfirmed"].includes(item.originalAttemptMatch)
+      )
+        throw new Error(
+          "Original attempt match must be confirmed or unconfirmed; omit when unknown",
+        );
+      if (
+        item.originalAttemptMatch === "confirmed" &&
+        (!item.requestId ||
+          item.outcome !== "failed" ||
+          !["current_session", "runtime_log"].includes(item.source))
+      )
+        throw new Error(
+          "Confirmed original request association requires its failed runtime/session observation and actual request ID",
+        );
     }
   }
   return input;
@@ -171,6 +200,20 @@ export function evidenceSummary(report) {
     gaps.push("current_session_tools_unavailable");
   if (report.originalFailure.status !== "recorded") gaps.push("original_failure_unavailable");
   if (!report.originalFailure.occurredAt) gaps.push("original_failure_time_unavailable");
+  const originalRequests =
+    report.originalFailure.status === "recorded"
+      ? observations.flatMap((item, observationIndex) =>
+          item.requestId &&
+          item.originalAttemptMatch === "confirmed" &&
+          item.outcome === "failed" &&
+          ["current_session", "runtime_log"].includes(item.source)
+            ? [{ requestId: item.requestId, source: item.source, observationIndex }]
+            : [],
+        )
+      : [];
+  if (!originalRequests.length) gaps.push("original_request_id_unavailable");
+  if (!snapshot?.pluginVersion) gaps.push("actual_loaded_plugin_version_unavailable");
+  if (!report.hostLogs.entries.length) gaps.push("matching_host_runtime_logs_unavailable");
   const stages = STAGES.map((stage) => ({
     stage,
     observations: observations.filter((item) => item.stage === stage),
@@ -188,9 +231,15 @@ export function evidenceSummary(report) {
     stages,
     otherObservations: unknown,
     logHints,
+    originalRequestCorrelation: {
+      status: originalRequests.length ? "agent_reported_same_attempt" : "unconfirmed",
+      observations: originalRequests,
+      provenance:
+        "agent_supplied_confirmation; not_independently_verified; never_inferred_from_time_or_other_ids",
+    },
     gaps,
     independentChecks:
-      "entryProbe/probes/transportContext are later requests, never original stage completions",
+      "entryProbe/probes/wireProbes/transportContext are later requests, never original stage completions; server observation is before Node framing, not proof of downstream wire validity",
     recoveryVerified: false,
   };
 }

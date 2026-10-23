@@ -12,6 +12,11 @@ network permissions; do not add a separate manual step when those permit it.
 Honor a refusal or a denied read/network operation. Do not change permission
 settings to make collection work.
 
+Invoke each helper as a standalone `node` command with its quoted path. Do not
+combine it with `cd`, shell variables, pipelines, or other commands; command
+allowlists may permit the helper while rejecting the combined shell operation.
+Use the host's file-writing tool for the dedicated snapshot and error file.
+
 ## Capture the current host, including unfamiliar failures
 
 The Agent creates a dedicated `.mcp-snapshot.json` from facts already available
@@ -20,6 +25,27 @@ configuration, credential file, environment, or conversation. Preserve unfamilia
 errors as well as known OAuth errors; classify uncertain stages as unknown.
 Static CLI configuration describes registration, not tools loaded into the
 current chat. Browser sign-in does not establish MCP authentication.
+
+First generate a new snapshot template with the bundled helper, then add only
+observed groups from the schema below. This sets the snapshot schema and capture
+time mechanically; it does not invent the original failure time or host state:
+
+```text
+node <skill-directory>/scripts/mcp-doctor.mjs --create-snapshot <new.mcp-snapshot.json>
+```
+
+Validate the completed file locally before collecting or uploading:
+
+```text
+node <skill-directory>/scripts/mcp-doctor.mjs --validate-snapshot <new.mcp-snapshot.json> --server-url <registered-url>
+```
+
+Snapshot `schemaVersion` is **1**, independently of the outer report version.
+Keep unavailable groups omitted. Each observation's `observedAt` may be `null`
+when its actual time is unknown. If validation fails, correct only the reported
+schema error using already available facts; do not guess times or relax the
+credential/config file restriction. If facts remain unavailable, collect the
+other evidence and preserve the specific gap.
 
 Snapshot schema 1 accepts this shape; omit unavailable groups, use null for an
 unknown tool count/enabled flag, and label each group's actual source:
@@ -44,15 +70,17 @@ unknown tool count/enabled flag, and label each group's actual source:
     "visibleToolCount": 0,
     "visibleTools": []
   },
-  "observations": [{
-    "stage": "initialize",
-    "operation": "initialize",
-    "source": "runtime_log",
-    "observedAt": "2026-10-22T11:59:00Z",
-    "outcome": "failed",
-    "requestId": "server-request-id-only-if-recorded",
-    "message": "Exact original error, including an unfamiliar error code"
-  }]
+  "observations": [
+    {
+      "stage": "initialize",
+      "operation": "initialize",
+      "source": "runtime_log",
+      "observedAt": "2026-10-22T11:59:00Z",
+      "outcome": "failed",
+      "requestId": "server-request-id-only-if-recorded",
+      "message": "Exact original error, including an unfamiliar error code"
+    }
+  ]
 }
 ```
 
@@ -63,7 +91,14 @@ Sources: `current_session`, `tool_search`, `host_settings`,
 `authenticated`, `needs_authentication`, or `unknown`.
 Observations accept `stage`, `operation`, `source`, `observedAt`, `outcome`
 (`success`/`failed`/`unknown`), optional `requestId`, `httpStatus`,
-`protocolCode`, and `message`. New stage names are preserved. Do not put an
+`protocolCode`, `message`, and `originalAttemptMatch` (`confirmed`/`unconfirmed`).
+Omit the match flag when unknown. Set `confirmed` only when the captured failed
+runtime/session observation explicitly identifies the original failed attempt
+and its actual server request ID; registration, nearby timestamps, successful
+operations, and later probe IDs are not confirmation. An original error must
+also have been recorded for that observation to close the original-request gap.
+This remains Agent-supplied confirmation, not independent helper verification.
+New stage names are preserved. Do not put an
 MCP session credential in `conversationId` or guess a server request ID.
 Only include ChatCut tool names; keep tool arguments and results out.
 
@@ -102,12 +137,61 @@ runs and the report marks the missing SQLite evidence. A denied file read is a
 coverage gap, not proof that the server has no errors.
 
 The helper reads only bounded ChatCut MCP runtime log records or debug log tails.
+Codex SQLite locations follow `CODEX_SQLITE_HOME` when present. If the current
+host already supplies its actual `sqlite_home` or `log_dir`, pass that directory
+with `--codex-sqlite-home` or `--codex-log-dir`; do not read whole config files to
+find it. These options select existing log locations and do not enable logging.
+On Windows, SQLite error 14 can coexist with readable WAL files in a read-only
+sandbox. The report preserves the original error and bounded file-access facts;
+it does not prove a specific security product caused the restriction. Never copy
+the whole log database, ignore its WAL with immutable mode, or relax permissions.
+On Windows, the helper also reads the existing Codex App startup-status notices
+under `%LOCALAPPDATA%/Codex/Logs/YYYY/MM/DD`. This is independent of TUI logging.
+It selects only `AppServerConnection` startup notices for the hosted ChatCut
+server, uses the current conversation ID when available, and keeps at most 30
+records from three 128 KiB tails. Missing/rotated/denied logs remain explicit
+gaps. The known Windows MXC `LOCALAPPDATA` sandbox redirect falls back to the
+real user's `AppData/Local` without changing permissions. An already supplied alternative App log root can be selected with
+`--codex-app-log-dir`; do not scan browser profiles or session transcripts.
+For a separately chosen future reproduction, Codex's explicit `log_dir` setting
+can enable its native plaintext log. Do not change global settings or relaunch
+the user's host automatically. Existing logs cannot be reconstructed retroactively.
 It never reads `auth.json`, OAuth credential stores, session transcripts, or
 other project files. It makes one unauthenticated initialize probe and at most
 five public metadata GETs, all within the selected origin and with a 3.5-second
 timeout each. An anonymous 401 challenge is expected. It validates resource /
 issuer consistency and this product's OAuth-code/PKCE metadata. It never logs in,
 refreshes credentials, or lists tools using extracted credentials.
+
+Codex exec prints diagnostics inline; `--json` stdout alone is not a complete
+MCP error stream. Preserve the original stderr/startup error when it is already
+visible to the current host. The helper cannot recover discarded parent-process
+stderr or reconstruct an old exec failure from App logs.
+
+If the current host already exposes native `mcpServer/startupStatus/updated`
+notifications or `mcpServerStatus/list`, preserve `error`, `failureReason`,
+`runtimeStatus` and `toolsError` from that same thread in the error file and
+snapshot observations (`source: current_session`). Record the native method and
+actual thread ID. Authentication inventory alone is not proof of initialization
+or usable tools. The status query may perform new auth-discovery requests; keep
+those separate from retained runtime errors. Do not start another app-server,
+start/reload a thread, invoke OAuth, or launch a daemon to obtain the original
+state. These interfaces are not guaranteed to be exposed to a third-party Skill.
+`codex doctor --json` is a general installation/config/auth health check, not a
+targeted export of the failed MCP attempt. Do not ingest its entire report.
+`feedback/upload` submits to OpenAI; it is not ChatCut's log export endpoint.
+
+The CLI also makes at most two sequential anonymous metadata GETs to compare
+the relevant path-scoped and root endpoints at the HTTP/1.1 framing level.
+`wireProbes` records selected response headers, request ID, first framing byte,
+chunk validity, bounded byte counts/hashes and peer/TLS evidence from that same
+connection. It retains no metadata body, cookies or credentials. Each probe
+stops at 128 KiB / 3.5 seconds. These are direct connections, explicitly outside
+the host/fetch proxy route; normal certificate verification remains enabled.
+Complete fixed-length/chunked messages finish at their verified boundary without
+waiting for peer close. Invalid HTTP status lines and unsupported informational
+responses never count as complete final responses. `completionReason` and
+`peerEndObserved` distinguish message completion from connection termination.
 
 When an HTTPS request/body fails, one additional direct TLS connection may
 record the peer certificate issuer and protocol, with the same timeout and
@@ -138,6 +222,10 @@ the cause. A disabled connection sends neither probes nor an upload.
 - A `diagnosticId` identifies the diagnostic report and its new probes. It is
   not the original failed request's ID. Server response request IDs are useful
   only when actually present and matched; time/path matching is weaker evidence.
+- Match a wire response's `x-request-id` with the server's metadata response
+  record. The application record observes bytes before Node's HTTP framing;
+  a successful finish does not prove valid framing after Node/ALB/local HTTPS
+  inspection, nor receipt by Codex. Different requests may have different paths.
 
 The local JSON is written before any upload. `ingest_accepted` means that the
 endpoint acknowledged the batch; `storageVerified:false` remains until support
