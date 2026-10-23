@@ -24,8 +24,23 @@ function redactFieldValue(_match, prefix, value) {
   return prefix + (quote ? quote + "[REDACTED]" + quote : "[REDACTED]");
 }
 
-export function redact(text) {
-  return String(text)
+export function redact(text, jsonDepth = 0) {
+  let value = String(text);
+  // A host may quote/stringify an entire JSON response inside its error. Decode
+  // only JSON string tokens containing this credential label, redact their full
+  // value, then restore the quoting. A partial escaped-field regex can leak the
+  // suffix after an escaped quote/backslash. Input collection is size bounded.
+  if (jsonDepth < 16) value = value.replace(/"(?:\\.|[^"\\\r\n])*"/g, (token) => {
+    try {
+      const decoded = JSON.parse(token);
+      if (/mcp[-_]session[-_]id/i.test(decoded)) {
+        const sanitized = redact(decoded, jsonDepth + 1);
+        if (sanitized !== decoded) return JSON.stringify(sanitized);
+      }
+    } catch { /* Non-JSON diagnostic text is retained for the normal rules. */ }
+    return token;
+  });
+  return value
     .replace(/\b(Mcp-Session-Id[ \t]*:[ \t]*)\S+/gi, "$1[REDACTED]")
     .replace(
       /(["']mcp[-_]session[-_]id["']\s*[:=]\s*)("(?:\\.|[^"\\\r\n])*"|'(?:\\.|[^'\\\r\n])*')/gi,
@@ -402,6 +417,9 @@ function runtimeContext(body) {
 
 function hostedTextRecord(line) {
   if (/^\s/.test(line)) return false;
+  // Inspect explicit echo prefixes before stripping trace context: a payload
+  // itself can contain "}:" and must not become a diagnostic via lastIndex.
+  if (/(?:^|\}:\s*)(?:tool (?:call|result)\s*:|(?:function_call(?:_output)?|tool_call(?:_output)?)\s*:?\s*[{[])/i.test(line)) return false;
   let body = line.replace(
     /^\d{4}-\d{2}-\d{2}T\S+\s+(?:(?:\[(?:TRACE|DEBUG|INFO|WARN|ERROR)\]|TRACE|DEBUG|INFO|WARN|ERROR)\s+)?/i,
     "",

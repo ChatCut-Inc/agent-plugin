@@ -157,7 +157,8 @@ test("MCP session credentials are redacted while local IDs remain private report
     assert.ok(!redact(`Mcp-Session-Id: ${opaque}\nError E_KEEP`).includes(opaque));
   for (let code = 0x21; code <= 0x7e; code++) {
     const opaque = `opaque${String.fromCharCode(code)}SECRET_SUFFIX`;
-    for (const text of [`Mcp-Session-Id: ${opaque}\nError E_KEEP`, JSON.stringify({ "Mcp-Session-Id": opaque, code: "E_KEEP" })]) {
+    const document = JSON.stringify({ "Mcp-Session-Id": opaque, code: "E_KEEP" });
+    for (const text of [`Mcp-Session-Id: ${opaque}\nError E_KEEP`, document, `Response: ${JSON.stringify(document)}`, `Response: ${JSON.stringify(JSON.stringify(document))}`]) {
       assert.ok(!redact(text).includes("SECRET_SUFFIX"));
       assert.ok(redact(text).includes("E_KEEP"));
     }
@@ -193,6 +194,8 @@ test("SQLite and text runtime records exclude content echoes from permitted MCP 
   const messages = [
     'start{server_name="chatcut"}: tool call: {"method":"tools/call","params":{"arguments":{"prompt":"PRIVATE_PROMPT_SENTINEL"}}}',
     'start{server_name="chatcut"}: tool result: {"result":{"content":[{"text":"PRIVATE_RESULT_SENTINEL"}]}}',
+    'start{server_name="chatcut"}: tool call: {"params":{"arguments":{"prompt":"}: PRIVATE_PROMPT_SENTINEL"}}}',
+    'start{server_name="chatcut"}: tool result: {"result":{"content":[{"text":"}: PRIVATE_RESULT_SENTINEL"}]}}',
     'start{server_name="chatcut"}: Unfamiliar error E_KEEP_UNKNOWN cause ECONNRESET',
   ];
   const add = db.prepare("INSERT INTO logs VALUES(?,?,?,?,?)");
