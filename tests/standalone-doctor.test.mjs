@@ -79,7 +79,7 @@ test("startup, post-connection tool failure, missing registration and truncated 
     ["host_registration", "lookup_registered_server", "cli_configuration", "not_registered"],
   ]) {
     const snapshot = join(dir, `${stage}.mcp-snapshot.json`);
-    await writeFile(snapshot, JSON.stringify({ schemaVersion: 1, observedAt: new Date().toISOString(), observations: [{ stage, operation, source, observedAt: null, outcome: "failed", message: "Exact native error E_UNKNOWN" }] }));
+    await writeFile(snapshot, JSON.stringify({ schemaVersion: 1, observedAt: new Date().toISOString(), observations: [{ stage, operation, source, observedAt: null, outcome: "failed", ...(stage === "host_registration" && { lookupResult: "not_found" }), message: stage === "host_registration" ? "Completed scoped lookup explicitly reports no entry" : "Exact native error E_UNKNOWN" }] }));
     const failure = join(dir, `${stage}.mcp-failure.json`);
     await writeFile(failure, JSON.stringify({ schemaVersion: 1, source: "host_tool_result", serverName: "chatcut", occurredAt: null, operation, callId: "original-local-id", error: { message: "busy after 300s", code: "E_UNKNOWN", cause: { code: "E_NATIVE" } } }));
     const { report } = await runDoctor({ host: "claude", hostSnapshot: snapshot, failureRecord: failure, output: join(dir, `${stage}.mcp-report.json`) }, {

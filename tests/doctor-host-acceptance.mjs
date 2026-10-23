@@ -2,6 +2,7 @@
 // node tests/doctor-host-acceptance.mjs --codex <exe> --claude <exe> --evidence <new-dir>
 // --codex-plugin verifies the local plugin marketplace/cache; --tool-failure
 // initializes MCP successfully, then fails a real native read-only tools/call.
+// --registration-only limits the run to scoped registration diagnosis/repair.
 // The local deterministic model fixture tests host skill expansion/tool execution,
 // not a real model's independent diagnostic reasoning or OAuth recovery.
 import assert from "node:assert/strict";
@@ -13,14 +14,17 @@ import { join, resolve } from "node:path";
 import { createInterface } from "node:readline";
 import { fileURLToPath } from "node:url";
 import { parseArgs, promisify } from "node:util";
+import { diagnose } from "../codex/skills/chatcut-mcp-doctor/scripts/diagnosis.mjs";
+import { validateSnapshot } from "../codex/skills/chatcut-mcp-doctor/scripts/mcp-evidence.mjs";
 
-const { values } = parseArgs({ options: { codex: { type: "string" }, claude: { type: "string" }, evidence: { type: "string" }, "codex-plugin": { type: "boolean", default: false }, "tool-failure": { type: "boolean", default: false } } });
+const { values } = parseArgs({ options: { codex: { type: "string" }, claude: { type: "string" }, evidence: { type: "string" }, "codex-plugin": { type: "boolean", default: false }, "tool-failure": { type: "boolean", default: false }, "registration-only": { type: "boolean", default: false } } });
 if (!values.evidence || (!values.codex && !values.claude)) throw new Error("Explicit host executable and new evidence directory required");
 const root = resolve(values.evidence);
 await mkdir(root); // Never overwrite evidence from a previous run.
 const repo = fileURLToPath(new URL("../", import.meta.url));
 const run = promisify(execFile);
 const records = [];
+const registrationRecords = [];
 const requests = [];
 const hostCommands = new Map();
 const nativeEvidence = new Map();
@@ -156,18 +160,53 @@ async function cli(exe, args, context, label, expected = 0, onEvent) {
   return result;
 }
 async function registration(host, exe, context) {
-  await cli(exe, ["mcp", "get", "chatcut"], context, "registration-missing", 1);
+  async function verifyLookup(label, result, lookupResult, expectedFinding) {
+    const path = join(context.dir, `${label}.mcp-snapshot.json`);
+    const output = join(context.dir, `${label}.mcp-report.json`);
+    const snapshot = validateSnapshot({ schemaVersion: 1, observedAt: new Date().toISOString(), observations: [{
+      stage: "host_registration", operation: "lookup_registered_server", source: "cli_configuration",
+      outcome: result.code === 0 ? "success" : "failed", lookupResult, observedAt: null,
+      message: result.stderr || result.stdout,
+    }] }, null);
+    await writeFile(path, JSON.stringify(snapshot, null, 2));
+    await cli(process.execPath, [join(context.skill, "scripts/doctor.mjs"), "--host", host, "--host-snapshot", path, "--offline", "--output", output], context, `${label}-doctor`);
+    const report = JSON.parse(await readFile(output));
+    const findings = diagnose(report).findings;
+    assert.equal(findings.some((item) => item.kind === "not_registered"), lookupResult === "not_found");
+    if (expectedFinding) assert.ok(findings.some((item) => item.kind === expectedFinding));
+    return { lookupResult, findings, report: output };
+  }
+  let unreadable;
+  if (host === "codex") {
+    // An actual parser failure in this task's isolated home, without changing ACLs.
+    await writeFile(join(context.dir, "home/config.toml"), "invalid = [");
+    const failed = await cli(exe, ["mcp", "get", "chatcut"], context, "registration-parse-failed", 1);
+    unreadable = await verifyLookup("registration-parse-failed", failed, "unavailable", "registration_lookup_unavailable");
+    await writeFile(join(context.dir, "home/config.toml"), "");
+  }
+  const missing = await cli(exe, ["mcp", "get", "chatcut"], context, "registration-missing", 1);
+  // Exact native no-entry replies verified for these installed CLI versions.
+  // A generic exit 1 or text containing 'not found' is insufficient.
+  assert.equal(missing.stdout.trim(), "");
+  assert.equal(missing.stderr.trim(), host === "codex"
+    ? "Error: No MCP server named 'chatcut' found."
+    : 'No MCP server named "chatcut". Run `claude mcp add` to add one.');
+  const absent = await verifyLookup("registration-missing", missing, "not_found", "not_registered");
   const args = host === "codex" ? ["mcp", "add", "chatcut", "--url", `${origin}/api/external-mcp/mcp`] : ["mcp", "add", "--transport", "http", "--scope", "local", "chatcut", `${origin}/api/external-mcp/mcp`];
   await cli(exe, args, context, "registration-added");
-  await cli(exe, ["mcp", "get", "chatcut"], context, "registration-recheck");
+  const recheck = await cli(exe, ["mcp", "get", "chatcut"], context, "registration-recheck");
+  assert.ok(recheck.stdout.includes(`${origin}/api/external-mcp/mcp`));
+  const present = await verifyLookup("registration-recheck", recheck, "found");
   await cli(exe, host === "codex" ? ["mcp", "remove", "chatcut"] : ["mcp", "remove", "--scope", "local", "chatcut"], context, "registration-rollback");
   await cli(exe, ["mcp", "get", "chatcut"], context, "registration-rollback-recheck", 1);
+  registrationRecords.push({ host, absent, present, ...(unreadable && { unreadable }), rollbackVerified: true });
 }
 try {
   if (values.codex) {
     const context = await setup("codex");
     await cli(values.codex, ["--version"], context, "version");
     await registration("codex", values.codex, context);
+    if (!values["registration-only"]) {
     await writeFile(join(context.dir, "home/config.toml"), `model="doctor-fixture"\nmodel_provider="fixture"\napproval_policy="never"\nsandbox_mode="danger-full-access"\n[model_providers.fixture]\nname="local acceptance fixture"\nbase_url="${origin}/codex"\nwire_api="responses"\nrequires_openai_auth=false\n[mcp_servers.chatcut]\nurl="${origin}/api/external-mcp/mcp"\nstartup_timeout_sec=2\n`);
     if (values["codex-plugin"]) {
       await mkdir(join(context.dir, "marketplace/.agents/plugins"), { recursive: true });
@@ -230,11 +269,13 @@ try {
       await writeFile(join(context.dir, "appserver-events.json"), JSON.stringify(events, null, 2));
       await writeFile(join(context.dir, "appserver-stderr.txt"), stderr);
     }
+    }
   }
   if (values.claude) {
     const context = await setup("claude");
     await cli(values.claude, ["--version"], context, "version");
     await registration("claude", values.claude, context);
+    if (!values["registration-only"]) {
     await mkdir(join(context.dir, "plugin/.claude-plugin"), { recursive: true });
     await writeFile(join(context.dir, "plugin/.claude-plugin/plugin.json"), JSON.stringify({ name: "chatcut", version: "0.0.0-local", skills: "./skills/", mcpServers: { chatcut: { type: "http", url: `${origin}/api/external-mcp/mcp` } } }));
     let statusSaved;
@@ -251,10 +292,11 @@ try {
     assert.ok(init.mcp_servers.some((item) => item.name === "chatcut" && (values["tool-failure"] ? item.status === "connected" : item.status !== "connected")), "actual host connection state must match scenario");
     assert.equal(JSON.parse(await readFile(join(context.dir, "native.mcp-report.json"))).upload.status, "skipped_offline");
     records.push({ host: "claude", discovered: true, invoked: true, reportWrittenByNativeTool: true, scenario: values["tool-failure"] ? "post_connection_tool_failure" : "startup_failure", provider: "deterministic loopback fixture; not model quality evaluation" });
+    }
   }
 } finally {
   server.closeAllConnections(); server.close();
   await writeFile(join(root, "provider-requests.json"), JSON.stringify(requests, null, 2));
-  await writeFile(join(root, "acceptance.json"), JSON.stringify({ records, mcpCalls, fixtureErrors, diagnosticNetworkPolicy: "offline", providerAndMcpTargets: "loopback", wholeHostNetworkEgressInstrumented: false, globalSettingsChanged: false }, null, 2));
+  await writeFile(join(root, "acceptance.json"), JSON.stringify({ records, registrationRecords, mcpCalls, fixtureErrors, diagnosticNetworkPolicy: "offline", providerAndMcpTargets: "loopback", wholeHostNetworkEgressInstrumented: false, globalSettingsChanged: false }, null, 2));
 }
 console.log(JSON.stringify({ evidence: root, records, mcpCalls }));

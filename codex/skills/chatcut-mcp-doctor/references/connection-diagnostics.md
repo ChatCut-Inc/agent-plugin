@@ -92,6 +92,14 @@ Sources: `current_session`, `tool_search`, `host_settings`,
 Observations accept `stage`, `operation`, `source`, `observedAt`, `outcome`
 (`success`/`failed`/`unknown`), optional `requestId`, `httpStatus`,
 `protocolCode`, `message`, and `originalAttemptMatch` (`confirmed`/`unconfirmed`).
+Only `host_registration` / `lookup_registered_server` observations from
+`cli_configuration` or `host_settings` may additionally carry `lookupResult`:
+`not_found`, `found`, or `unavailable`. `not_found` requires an explicit absence
+response from a completed named lookup or a successful complete scoped inventory;
+do not derive it from an exit code, permission/parse error, missing CLI, or empty
+tool list. Preserve the actual response in `message`. Failed/inconclusive lookups
+without this fact retain unknown registration state and do not recommend adding
+an entry. This is still agent-supplied evidence, not independent verification.
 Omit the match flag when unknown. Set `confirmed` only when the captured failed
 runtime/session observation explicitly identifies the original failed attempt
 and its actual server request ID; registration, nearby timestamps, successful

@@ -13,6 +13,16 @@ be enabled/installed through its existing plugin UI; do not add a duplicate
 manual server to bypass a failed plugin installation. An absent tool list alone
 does not establish missing registration.
 
+A failed lookup is not necessarily an absent registration. Record the exact
+host response and its source/scope. Only an explicit no-entry response from a
+completed host lookup (or a successful complete scoped inventory) permits
+`lookupResult: not_found` in the registration observation. Permission errors,
+configuration parse failures, unavailable CLI/status APIs and generic nonzero
+exit codes leave registration existence unknown: use `unavailable` or omit
+the field, retain the error and check the same scope read-only. Do not add or
+replace an entry as a response to an unreadable state. A `found` response can
+coexist with a later connection/health failure and must not trigger registration.
+
 Confirm the intended endpoint/environment from the user's setup or trusted
 package metadata. Production is `https://api.chatcut.io/api/external-mcp/mcp`;
 preserve beta/dev when selected. Check local CLI help for the installed version.

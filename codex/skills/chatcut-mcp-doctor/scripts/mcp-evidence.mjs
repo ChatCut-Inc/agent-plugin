@@ -135,8 +135,15 @@ export function validateSnapshot(input, endpoint) {
         "protocolCode",
         "message",
         "originalAttemptMatch",
+        "lookupResult",
       ]);
       source(item.source);
+      if (item.lookupResult !== undefined &&
+          (item.stage !== "host_registration" || item.operation !== "lookup_registered_server" ||
+           !["cli_configuration", "host_settings"].includes(item.source) ||
+           !["not_found", "found", "unavailable"].includes(item.lookupResult) ||
+           (item.lookupResult === "not_found" && item.outcome === "unknown")))
+        throw new Error("lookupResult is a host registration lookup result: not_found only for an explicit absence response; found or unavailable otherwise");
       if (
         !/^[a-z][a-z0-9_./:-]{0,127}$/.test(item.stage) ||
         !["success", "failed", "unknown"].includes(item.outcome) ||
