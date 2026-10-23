@@ -722,7 +722,7 @@ test("App fallback remains bounded and does not promote host notices into the or
     codexLogDir: join(dir, "empty-tui"),
     output: join(dir, "report.json"),
   });
-  assert.equal(report.collectorVersion, "1.2.2");
+  assert.equal(report.collectorVersion, "1.2.3");
   assert.equal(
     report.hostLogs.entries.filter((entry) => entry.source === "codex_app_log").length,
     30,

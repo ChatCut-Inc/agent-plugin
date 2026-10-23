@@ -211,9 +211,20 @@ export function evidenceSummary(report) {
             : [],
         )
       : [];
+  if (report.originalFailure.status === "recorded" && report.originalFailure.requestId)
+    originalRequests.push({
+      requestId: report.originalFailure.requestId,
+      source: report.originalFailure.source,
+    });
   if (!originalRequests.length) gaps.push("original_request_id_unavailable");
   if (!snapshot?.pluginVersion) gaps.push("actual_loaded_plugin_version_unavailable");
   if (!report.hostLogs.entries.length) gaps.push("matching_host_runtime_logs_unavailable");
+  const appNotices = report.hostLogs.entries.filter((entry) => entry.source === "codex_app_log");
+  const failedAppNotices = appNotices.filter(
+    (entry) => [...entry.message.matchAll(/(?:^|\s)status=([^\s]+)/g)].at(-1)?.[1] === "failed",
+  );
+  if (appNotices.length === report.hostLogs.entries.length && !failedAppNotices.length)
+    gaps.push("matching_host_failure_logs_unavailable");
   const stages = STAGES.map((stage) => ({
     stage,
     observations: observations.filter((item) => item.stage === stage),
@@ -226,6 +237,8 @@ export function evidenceSummary(report) {
     entryIndex: index,
     stage: stageHint(entry.message),
     interpretation: "text_hint_only; attempt_match_unconfirmed",
+    ...(entry.conversationId && { conversationId: entry.conversationId }),
+    ...(entry.callId && { callId: entry.callId }),
   }));
   return {
     stages,
@@ -236,6 +249,24 @@ export function evidenceSummary(report) {
       observations: originalRequests,
       provenance:
         "agent_supplied_confirmation; not_independently_verified; never_inferred_from_time_or_other_ids",
+    },
+    originalLocalCall: report.originalFailure.callId
+      ? {
+          callId: report.originalFailure.callId,
+          conversationId: report.originalFailure.conversationId ?? null,
+          operation: report.originalFailure.operation ?? null,
+          provenance:
+            "original_failure_record; agent_supplied_not_independently_verified; local_call_id_is_not_server_request_id",
+        }
+      : null,
+    hostLogCoverage: {
+      records: report.hostLogs.entries.length,
+      appStartupRecords: appNotices.length,
+      failedAppStartupRecords: failedAppNotices.length,
+      originalToolFailureRecord:
+        report.originalFailure.source === "agent_supplied_host_tool_result",
+      qualification:
+        "startup notices are not tool-request failure evidence; log presence alone does not prove original failure capture",
     },
     gaps,
     independentChecks:

@@ -8,6 +8,7 @@ import { connect as connectTls } from "node:tls";
 import { isIP } from "node:net";
 import { evidenceSummary, inspectMetadata, logTime, validateSnapshot } from "./mcp-evidence.mjs";
 import { probeMetadataWire } from "./mcp-wire.mjs";
+import { failureFromRecord } from "./mcp-failure.mjs";
 
 const READ_LIMIT = 128 * 1024;
 const UPLOAD_LIMIT = 256 * 1024;
@@ -252,7 +253,7 @@ export async function probeEntry(endpoint, diagnosticId, fetchImpl = fetch) {
         params: {
           protocolVersion: "2025-11-25",
           capabilities: {},
-          clientInfo: { name: "chatcut-mcp-doctor", version: "1.2.2" },
+          clientInfo: { name: "chatcut-mcp-doctor", version: "1.2.3" },
         },
       }),
     });
@@ -374,6 +375,21 @@ function logMessage(body) {
   return (marker < 0 ? body : body.slice(marker + 2)).trim();
 }
 
+function runtimeContext(body) {
+  const boundary = body.lastIndexOf("}:");
+  if (boundary < 0) return {};
+  const context = body.slice(0, boundary);
+  const value = (field) =>
+    [
+      ...context.matchAll(
+        new RegExp(`(?:^|[\\s{])${field}="?([A-Za-z0-9_.-]{1,256})(?:"|[\\s}:]|$)`, "g"),
+      ),
+    ].at(-1)?.[1];
+  const conversationId = value("thread_id") ?? value("thread\\.id") ?? value("conversation\\.id");
+  const callId = value("call_id");
+  return { ...(conversationId && { conversationId }), ...(callId && { callId }) };
+}
+
 function hostedTextRecord(line) {
   if (/^\s/.test(line)) return false;
   let body = line.replace(
@@ -448,13 +464,34 @@ async function textLog(path, source, gaps, window, select = hostedTextRecord) {
   const handle = await open(path, "r");
   try {
     const info = await handle.stat();
-    const start = Math.max(0, info.size - READ_LIMIT);
-    const buffer = Buffer.alloc(Math.min(info.size, READ_LIMIT));
+    const start = window.readOffset ?? Math.max(0, info.size - READ_LIMIT);
+    if (!Number.isSafeInteger(start) || start < 0 || start > info.size)
+      throw new Error("Log segment offset must point inside the selected existing file");
+    const buffer = Buffer.alloc(Math.min(info.size - start, READ_LIMIT));
     const { bytesRead } = await handle.read(buffer, 0, buffer.length, start);
     const lines = buffer.subarray(0, bytesRead).toString("utf8").split(/\r?\n/);
     if (start) {
-      lines.shift();
-      gaps.push({ source, reason: "only_log_tail_read", bytesBeforeWindow: start });
+      const previous = Buffer.alloc(1);
+      await handle.read(previous, 0, 1, start - 1);
+      if (previous[0] !== 10) lines.shift();
+      gaps.push({
+        source,
+        reason: "only_log_tail_read",
+        sourceFile: basename(path),
+        bytesBeforeWindow: start,
+        omittedBytes: start,
+      });
+    }
+    if (start + bytesRead < info.size) {
+      if (!buffer.subarray(0, bytesRead).toString("utf8").endsWith("\n")) lines.pop();
+      gaps.push({
+        source,
+        reason: "only_log_segment_read",
+        sourceFile: basename(path),
+        offset: start,
+        bytesRead,
+        remainingBytes: info.size - start - bytesRead,
+      });
     }
     const entries = [];
     for (let i = 0; i < lines.length; i++) {
@@ -483,6 +520,7 @@ async function textLog(path, source, gaps, window, select = hostedTextRecord) {
         occurredAt,
         timeStatus: occurredAt ? "within_requested_window" : "unknown; not_confirmed_within_window",
         message: redact(block.join("\n")),
+        ...runtimeContext(block[0]),
         originalAttemptMatch: "unconfirmed",
       });
     }
@@ -497,7 +535,14 @@ async function textLog(path, source, gaps, window, select = hostedTextRecord) {
   }
 }
 
-async function codexAppLogs(root, gaps, window, conversationId) {
+async function codexAppLogs(root, gaps, window, conversationId, selectedFiles = [], readOffset) {
+  if (
+    readOffset !== undefined &&
+    (selectedFiles.length !== 1 || !Number.isSafeInteger(readOffset) || readOffset < 0)
+  )
+    throw new Error(
+      "A segment offset requires exactly one selected native App log file and a nonnegative integer",
+    );
   const files = [];
   const dates = new Set();
   for (const time of [window.since * 1000, window.until * 1000]) {
@@ -530,13 +575,25 @@ async function codexAppLogs(root, gaps, window, conversationId) {
     if (scanned > 200 || Date.now() > deadline) break;
   }
   files.sort((a, b) => b.modified - a.modified);
+  if (selectedFiles.length) {
+    if (selectedFiles.length > 3)
+      throw new Error("Select at most three existing Codex App log files");
+    files.length = 0;
+    for (const path of [...new Set(selectedFiles)]) {
+      if (!/^codex-desktop-.*\.log$/.test(basename(path)))
+        throw new Error("Select only existing native codex-desktop-*.log files");
+      const info = await stat(path);
+      if (!info.isFile()) throw new Error("Codex App log selection must be a file");
+      files.push({ path, modified: info.mtimeMs });
+    }
+  }
   const entries = [];
   let filesRead = 0;
   for (const file of files.slice(0, 3)) {
     try {
       // App logs mix unrelated UI activity with runtime notices, so accept only this native event.
       entries.push(
-        ...(await textLog(file.path, "codex_app_log", gaps, window, (line) => {
+        ...(await textLog(file.path, "codex_app_log", gaps, { ...window, readOffset }, (line) => {
           if (
             !/^\d{4}-\d{2}-\d{2}T\S+\s+\w+\s+\[AppServerConnection\] mcp_server_startup_status_updated\s/.test(
               line,
@@ -555,7 +612,12 @@ async function codexAppLogs(root, gaps, window, conversationId) {
     }
   }
   if (files.length > 3)
-    gaps.push({ source: "codex_app_log", reason: "log_file_limit", omitted: files.length - 3 });
+    gaps.push({
+      source: "codex_app_log",
+      reason: "log_file_limit",
+      omitted: files.length - 3,
+      omittedFiles: files.slice(3, 13).map((file) => basename(file.path)),
+    });
   if (entries.length > 30)
     gaps.push({
       source: "codex_app_log",
@@ -572,6 +634,12 @@ async function codexAppLogs(root, gaps, window, conversationId) {
       filesRead,
       maximumTailBytesPerFile: READ_LIMIT,
       currentConversationFilterApplied: Boolean(conversationId),
+      ...(conversationId && { conversationId }),
+      selectedFileMode: selectedFiles.length > 0,
+      ...(readOffset !== undefined && { selectedByteOffset: readOffset }),
+      filesSelected: files.slice(0, 3).map((file) => basename(file.path)),
+      observationScope:
+        "hosted_mcp_startup_notices_only; tool_request_failures_need_original_failure_record_or_matching_runtime_logs",
     },
   };
 }
@@ -631,14 +699,26 @@ export async function collectHostLogs(host, options = {}) {
       const { DatabaseSync } = await import("node:sqlite");
       db = new DatabaseSync(databasePath, { readOnly: true, timeout: 1000 });
       db.exec("PRAGMA query_only=ON");
+      const hasThreadId = db
+        .prepare("PRAGMA table_info(logs)")
+        .all()
+        .some((column) => column.name === "thread_id");
       const rows = db
         .prepare(
-          "SELECT id,ts,level,target,feedback_log_body FROM logs WHERE ts>=? AND ts<=? AND (target LIKE 'codex_mcp%' OR target LIKE 'rmcp%' OR target LIKE 'codex_plugins%' OR target LIKE 'codex_core::plugins%') AND feedback_log_body LIKE '%chatcut%' ORDER BY ts DESC LIMIT 200",
+          `SELECT id,ts,level,target,feedback_log_body${hasThreadId ? ",thread_id" : ""} FROM logs WHERE ts>=? AND ts<=? AND (target LIKE 'codex_mcp%' OR target LIKE 'rmcp%' OR target LIKE 'codex_plugins%' OR target LIKE 'codex_core::plugins%') AND feedback_log_body LIKE '%chatcut%' ORDER BY ts DESC LIMIT 200`,
         )
         .all(since, until);
       for (const row of rows) {
         const message = logMessage(row.feedback_log_body ?? "");
         const original = row.feedback_log_body ?? "";
+        const context = runtimeContext(original);
+        if (row.thread_id) context.conversationId = row.thread_id;
+        if (
+          options.conversationId &&
+          context.conversationId &&
+          context.conversationId !== options.conversationId
+        )
+          continue;
         if (!CHATCUT_MESSAGE.test(original) || /server_name="?chatcut_desktop/.test(original))
           continue;
         if (
@@ -653,6 +733,7 @@ export async function collectHostLogs(host, options = {}) {
           target: row.target,
           level: row.level,
           message: redact(message),
+          ...context,
           originalAttemptMatch: "unconfirmed",
         });
         if (entries.length === 30) break;
@@ -701,7 +782,14 @@ export async function collectHostLogs(host, options = {}) {
           )
         : null);
     if (appLogRoot) {
-      const result = await codexAppLogs(appLogRoot, gaps, { since, until }, options.conversationId);
+      const result = await codexAppLogs(
+        appLogRoot,
+        gaps,
+        { since, until },
+        options.conversationId,
+        options.codexAppLogFiles,
+        options.codexAppLogOffset,
+      );
       entries.push(...result.entries);
       appLog = {
         ...result.scan,
@@ -800,6 +888,8 @@ export function fragmentEvents(report) {
 export async function runDoctor(options, dependencies = {}) {
   if (!["codex", "claude"].includes(options.host))
     throw new Error("--host must be codex or claude");
+  if (options.originalError && options.failureRecord)
+    throw new Error("Choose one original failure input: --failure-record or --original-error");
   const endpoint = options.serverUrl ? serverUrl(options.serverUrl) : null;
   if (
     options.occurredAt &&
@@ -812,7 +902,7 @@ export async function runDoctor(options, dependencies = {}) {
   const diagnosticId = randomUUID();
   const report = {
     schemaVersion: 2,
-    collectorVersion: "1.2.2",
+    collectorVersion: "1.2.3",
     diagnosticId,
     collectedAt: new Date().toISOString(),
     scope: "cloud",
@@ -841,6 +931,9 @@ export async function runDoctor(options, dependencies = {}) {
     originalFailure: {
       evidenceKind: "original_failure",
       occurredAt: options.occurredAt ?? null,
+      timeSource: options.occurredAt
+        ? "command_line; agent_supplied_not_independently_verified"
+        : "unavailable",
       source: "agent_supplied_error_file",
       status: "unavailable",
     },
@@ -917,18 +1010,63 @@ export async function runDoctor(options, dependencies = {}) {
         error: errorDetails(error),
       });
     }
-  } else
+  } else if (!options.failureRecord)
     report.gaps.push({
       source: "original_failure",
       reason: "not_provided; do_not_invent_original_error",
     });
+  if (options.failureRecord) {
+    try {
+      if (!basename(String(options.failureRecord)).endsWith(".mcp-failure.json"))
+        throw new Error(
+          "Use a dedicated .mcp-failure.json file, never a config or session transcript",
+        );
+      if ((await stat(options.failureRecord)).size > 64 * 1024)
+        throw new Error("Failure record exceeds 64 KiB; complete source retained without reading");
+      report.originalFailure = clean(
+        failureFromRecord(JSON.parse(await readFile(options.failureRecord, "utf8"))),
+      );
+      if (!report.originalFailure.occurredAt && options.occurredAt) {
+        report.originalFailure.occurredAt = options.occurredAt;
+        report.originalFailure.timeSource =
+          "command_line; agent_supplied_not_independently_verified";
+      }
+      if (
+        options.occurredAt &&
+        report.originalFailure.occurredAt &&
+        Date.parse(options.occurredAt) !== Date.parse(report.originalFailure.occurredAt)
+      ) {
+        report.originalFailure.timeConflict = {
+          failureRecord: report.originalFailure.occurredAt,
+          commandLine: options.occurredAt,
+        };
+        report.originalFailure.occurredAt = null;
+        report.originalFailure.timeSource = "conflicting_supplied_times";
+        report.gaps.push({
+          source: "original_failure",
+          reason: "conflicting_supplied_failure_times",
+        });
+      }
+    } catch (error) {
+      report.gaps.push({
+        source: "original_failure",
+        reason: "failure_record_unavailable",
+        error: errorDetails(error),
+      });
+    }
+  }
   try {
     report.hostLogs = await (dependencies.collectLogs ?? collectHostLogs)(options.host, {
-      occurredAt: options.occurredAt,
+      occurredAt: report.originalFailure.occurredAt,
       codexSqliteHome: options.codexSqliteHome,
       codexLogDir: options.codexLogDir,
       codexAppLogDir: options.codexAppLogDir,
-      conversationId: report.hostSnapshot?.session?.conversationId ?? process.env.CODEX_THREAD_ID,
+      codexAppLogFiles: options.codexAppLogFiles,
+      codexAppLogOffset: options.codexAppLogOffset,
+      conversationId:
+        report.originalFailure.conversationId ??
+        report.hostSnapshot?.session?.conversationId ??
+        process.env.CODEX_THREAD_ID,
     });
   } catch (error) {
     report.hostLogs = {
@@ -1098,10 +1236,13 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
         "host-version": { type: "string" },
         "host-snapshot": { type: "string" },
         "original-error": { type: "string" },
+        "failure-record": { type: "string" },
         "occurred-at": { type: "string" },
         "codex-sqlite-home": { type: "string" },
         "codex-log-dir": { type: "string" },
         "codex-app-log-dir": { type: "string" },
+        "codex-app-log-file": { type: "string", multiple: true },
+        "codex-app-log-offset": { type: "string" },
         output: { type: "string" },
         upload: { type: "boolean", default: false },
         "wire-evidence": { type: "boolean", default: true },
@@ -1143,7 +1284,7 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
       console.log(JSON.stringify({ snapshotValid: true, networkRequests: 0 }));
     } else if (values.help) {
       console.log(
-        "node mcp-doctor.mjs --create-snapshot <new.mcp-snapshot.json> | --validate-snapshot <file> | --host codex|claude --server-url <registered URL> [--host-snapshot <dedicated .mcp-snapshot.json>] [--host-version <version>] [--original-error <error-only text file>] [--occurred-at <ISO timestamp>] [--codex-sqlite-home <known host SQLite directory>] [--codex-log-dir <known host log directory>] [--codex-app-log-dir <known host App log directory>] [--wire-evidence] [--output <new JSON path>] [--upload]",
+        "node mcp-doctor.mjs --create-snapshot <new.mcp-snapshot.json> | --validate-snapshot <file> | --host codex|claude --server-url <registered URL> [--host-snapshot <dedicated .mcp-snapshot.json>] [--host-version <version>] [--failure-record <dedicated .mcp-failure.json> | --original-error <error-only text file>] [--occurred-at <ISO timestamp>] [--codex-sqlite-home <known host SQLite directory>] [--codex-log-dir <known host log directory>] [--codex-app-log-dir <known host App log directory>] [--codex-app-log-file <known native log; at most three>] [--wire-evidence] [--output <new JSON path>] [--upload]",
       );
     } else {
       const { path, report } = await runDoctor({
@@ -1152,10 +1293,16 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
         hostVersion: values["host-version"],
         hostSnapshot: values["host-snapshot"],
         originalError: values["original-error"],
+        failureRecord: values["failure-record"],
         occurredAt: values["occurred-at"],
         codexSqliteHome: values["codex-sqlite-home"],
         codexLogDir: values["codex-log-dir"],
         codexAppLogDir: values["codex-app-log-dir"],
+        codexAppLogFiles: values["codex-app-log-file"],
+        codexAppLogOffset:
+          values["codex-app-log-offset"] === undefined
+            ? undefined
+            : Number(values["codex-app-log-offset"]),
         output: values.output,
         upload: values.upload,
         wireEvidence: values["wire-evidence"],
