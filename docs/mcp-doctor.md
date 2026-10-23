@@ -1,5 +1,40 @@
 # Hosted MCP evidence report v2
 
+## Independent Doctor Skill (local candidate)
+
+`codex/skills/chatcut-mcp-doctor` and `claude/skills/chatcut-mcp-doctor` now
+package the collector independently of MCP, with diagnosis and feedback sidecars.
+Use Codex's skill picker / `$chatcut:chatcut-mcp-doctor` (standalone copies use
+`$chatcut-mcp-doctor`), or Claude Code's `/chatcut:chatcut-mcp-doctor`. Neither
+overrides the host's `/doctor`. Its description also enables agent selection for
+natural-language connection-failure requests. See its [entrypoint](../codex/skills/chatcut-mcp-doctor/SKILL.md)
+and [fallback guide](../codex/skills/chatcut-mcp-doctor/references/discovery.md).
+This source candidate has not been published; an older installed package may
+not expose it.
+
+The basics scripts are compatibility forwarders; each host package contains
+one collector implementation under Doctor. The new `scripts/doctor.mjs`
+entrypoint keeps schema-2 collection unchanged and writes `.diagnosis.json`,
+`.summary.md`, `.issue-draft.md` beside the local report. `--offline` forbids
+all diagnostic HTTP requests even with a registered URL and `--upload`.
+`--report <existing.mcp-report.json>` rebuilds sidecars without probes;
+`--upload-report <existing.mcp-report.json>` sends the same report/ID and retains
+a separate receipt. An acknowledged report is not automatically resent. Derived
+sidecars can be regenerated; keep actual agent repair notes separately.
+Supplementary upload receipts bind the immutable report bytes' SHA-256 and its
+diagnostic ID; a foreign receipt cannot establish delivery. Disabled snapshots
+remain disabled through later submission even if snapshot validation failed.
+Credential redaction includes opaque MCP session headers, and permitted native
+SQLite modules still filter tool-call/content echoes before retaining records.
+
+Findings are evidence pointers to observed host boundaries and later checks,
+not root-cause assertions. The helper performs no host repair. The repair guide
+limits configuration changes to a genuinely absent manual registration in the
+selected host/scope, with rollback and lookup verification. Sign-in remains a
+host-guided action, and tool recovery requires an actual safe host call.
+The issue draft is private review material; a public issue destination is still
+undecided, and ingest acknowledgement does not create a ticket.
+
 The Codex and Claude Code basics skills route actual connection failures to a
 bundled, dependency-free Node helper. This does not change the MCP URL, transport,
 authentication, plugin installation, or Desktop integration. It is triggered by
