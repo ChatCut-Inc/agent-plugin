@@ -427,7 +427,7 @@ function hostedTextRecord(line, nativeLevel) {
   const module = body.match(/^([A-Za-z_]\w*(?:::\w+)+):\s*/);
   if (module) {
     if (
-      !/^(?:codex_(?:mcp|rmcp_client|plugins|core(?:::|_)plugins)(?:::|$)|rmcp::)/.test(module[1])
+      !/^(?:codex_(?:mcp|rmcp_client|plugins|core(?:::|_)plugins)(?:::|$)|rmcp::|codex_core::mcp_tool_call$)/.test(module[1])
     )
       return false;
     body = body.slice(module[0].length);
@@ -445,12 +445,17 @@ function hostedTextRecord(line, nativeLevel) {
   const server =
     context.match(/\bserver_name=["']?([\w:.-]+)/)?.[1] ?? scope?.[1] ?? scope?.[2] ?? scope?.[3];
   if (server && !["chatcut", "plugin:chatcut:chatcut"].includes(server)) return false;
-  if (!CHATCUT_MESSAGE.test(body)) return false;
+  const header = line.match(/^\d{4}-\d{2}-\d{2}T\S+\s+(?:\[(WARN|ERROR)\]|(WARN|ERROR))\s+/i);
+  const level = String(nativeLevel ?? header?.[1] ?? header?.[2]).toUpperCase();
+  const nativeToolError = module?.[1] === "codex_core::mcp_tool_call" &&
+    ["ERROR", "WARN"].includes(level) &&
+    /^MCP tool call error:\s*["']?tool call error: tool call failed for `(?:chatcut|plugin:chatcut:chatcut)\/[A-Za-z0-9_.:-]+`/.test(body);
+  if (module?.[1] === "codex_core::mcp_tool_call" && !nativeToolError) return false;
+  if (!CHATCUT_MESSAGE.test(body) && !nativeToolError) return false;
   if (/\bmethod=["']?tools\/call(?:["'\s}]|$)/.test(context)) {
-    const header = line.match(/^\d{4}-\d{2}-\d{2}T\S+\s+(?:\[(WARN|ERROR)\]|(WARN|ERROR))\s+/i);
     // A trusted native ERROR/WARN can describe a failed tools/call without
     // echoing its content. SQLite supplies its separate native level column.
-    if (!module || !["ERROR", "WARN"].includes(String(nativeLevel ?? header?.[1] ?? header?.[2]).toUpperCase())) return false;
+    if (!module || !["ERROR", "WARN"].includes(level)) return false;
     // Inspect the unstripped body: a payload can itself contain "}:".
     const contentCheck = body.replace(/\\+(?=["'])/g, "");
     if (/["'](?:params|arguments)["']\s*:\s*[{[]|["'](?:prompt|transcript)["']\s*:\s*["'{[]|["']result["']\s*:\s*\{[\s\S]*?["']content["']\s*:\s*\[|["']role["']\s*:\s*["'](?:user|assistant|system|developer)["']|["']type["']\s*:\s*["'](?:function_call(?:_output)?|tool_call(?:_output)?|tool_result|user(?:_message)?|assistant(?:_message)?)["']/i.test(contentCheck)) return false;
@@ -748,7 +753,7 @@ export async function collectHostLogs(host, options = {}) {
         ? " AND (thread_id IS NULL OR thread_id='' OR thread_id=?)" : "";
       const rows = db
         .prepare(
-          `SELECT id,ts,level,target,feedback_log_body${hasThreadId ? ",thread_id" : ""} FROM logs WHERE ts>=? AND ts<=?${threadFilter} AND (target LIKE 'codex_mcp%' OR target LIKE 'codex_rmcp_client%' OR target LIKE 'rmcp%' OR target LIKE 'codex_plugins%' OR target LIKE 'codex_core::plugins%') AND feedback_log_body LIKE '%chatcut%' ORDER BY ts DESC LIMIT 200`,
+          `SELECT id,ts,level,target,feedback_log_body${hasThreadId ? ",thread_id" : ""} FROM logs WHERE ts>=? AND ts<=?${threadFilter} AND (target LIKE 'codex_mcp%' OR target LIKE 'codex_rmcp_client%' OR target LIKE 'rmcp%' OR target LIKE 'codex_plugins%' OR target LIKE 'codex_core::plugins%' OR target='codex_core::mcp_tool_call') AND feedback_log_body LIKE '%chatcut%' ORDER BY ts DESC LIMIT 200`,
         )
         .all(since, until, ...(threadFilter ? [options.conversationId] : []));
       for (const row of rows) {

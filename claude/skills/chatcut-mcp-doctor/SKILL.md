@@ -7,6 +7,8 @@ description: Diagnose hosted ChatCut MCP connection, startup, authentication or 
 
 This Skill runs with local file/shell tools and Node 18+, independently of ChatCut MCP. Do not wait for ChatCut tools, a project, login, or the basics Skill to load. Tell the user that you are collecting connection diagnostics and whether the report will be sent. Honor local-only requests and existing execution/network permissions.
 
+If the host rejects a local command, preserve that exact rejection and the operation it blocked. One denied compound read does not establish that every file tool or the standalone Node helper is prohibited, or that the workspace is read-only. Use only capabilities already permitted by the current host; do not change permissions, switch shells to bypass a rejection, or call collection complete when no report was written.
+
 ## Start here
 
 - In Codex, select **ChatCut MCP Doctor** from the skill picker. The Git plugin entry is `$chatcut:chatcut-mcp-doctor`; the existing store identity uses `$chatcut-desktop:chatcut-mcp-doctor`; a standalone project/personal copy is `$chatcut-mcp-doctor`. Use the exact installed catalog entry. Natural language: “Diagnose my ChatCut MCP connection with ChatCut MCP Doctor.”
