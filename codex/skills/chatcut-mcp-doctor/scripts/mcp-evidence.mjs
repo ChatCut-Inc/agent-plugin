@@ -251,6 +251,13 @@ export function evidenceSummary(report) {
     stages,
     otherObservations: unknown,
     logHints,
+    collectionContext: report.collectionContext ?? null,
+    nativeFailedCalls: (report.hostLogs.nativeFailedCalls ?? []).map((item, index) => ({
+      evidence: `hostLogs.nativeFailedCalls[${index}]`, source: item.source,
+      nativeItemId: item.nativeItemId, idKind: item.idKind, conversationId: item.conversationId,
+      operation: item.operation, startedAtMs: item.startedAtMs, completedAtMs: item.completedAtMs,
+      originalAttemptMatch: "unconfirmed",
+    })),
     originalRequestCorrelation: {
       status: originalRequests.length ? "agent_reported_same_attempt" : "unconfirmed",
       observations: originalRequests,

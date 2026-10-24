@@ -230,6 +230,40 @@ MCP error stream. Preserve the original stderr/startup error when it is already
 visible to the current host. The helper cannot recover discarded parent-process
 stderr or reconstruct an old exec failure from App logs.
 
+When the caller actually retained this invocation's native stderr, explicitly
+select its known dedicated `.codex-stderr.log` with `--codex-stderr-file`.
+The same native ChatCut selector reads at most128 KiB and30 records; omitted
+bytes and inaccessible files remain gaps. `source: codex_stderr_log` records
+`loggedAt` as native log-emission time and keeps original attempt association
+unconfirmed. It does not assign original `occurredAt`, lifecycle time or IDs.
+No capture file is created, discovered or populated by this option. Unknown or
+discarded stderr remains unavailable; another host/session is not a substitute.
+
+For a known thread, the helper can also query the existing Codex
+`thread_history_1.sqlite` failed-MCP index in the same supplied SQLite root.
+It selects only native IDs, start/completion columns and `error` projections for
+that thread, ChatCut server, `mcpToolCall` type, failed status and the bounded
+time window. It returns at most ten items and at most128 KiB per error; limits,
+missing/unsupported schemas and denied reads remain gaps. It never returns
+whole `item_json`, user/assistant messages, tool arguments or successful results,
+and never reads a rollout transcript. `created_at_ms` is not substituted for a
+lifecycle or failure time.
+
+`collectionContext` identifies the current collecting thread from the host's
+`CODEX_THREAD_ID`; it is not silently copied into `originalFailure`.
+`hostLogs.nativeFailedCalls` preserves native `nativeItemId` with its explicit
+kind and `startedAtMs`/`completedAtMs`. These fields are native MCP item identity
+and lifecycle evidence, not Responses `call_id`, MCP RPC ID, server request ID,
+log-emission time or an automatically known original `occurredAt`. Native facts
+can be useful even when the original fields remain unknown. Only compare a
+known same thread, matching operation and exact error; duplicates or missing
+provenance remain candidates. A failed index read does not erase other evidence.
+The gap identifies the failed operation (locate/open/schema/query) and retains
+the native error. Windows error14 can occur at SELECT even when ordinary file
+reads and SQLite open succeed. No database copy, immutable mode or permission
+change is attempted. A report that exceeds the existing upload budget remains
+fully saved locally; errors are not shortened merely to make upload fit.
+
 If the current host already exposes native `mcpServer/startupStatus/updated`
 notifications or `mcpServerStatus/list`, preserve `error`, `failureReason`,
 `runtimeStatus` and `toolsError` from that same thread in the error file and
