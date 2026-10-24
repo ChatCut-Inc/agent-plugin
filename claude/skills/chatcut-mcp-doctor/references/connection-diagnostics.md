@@ -114,6 +114,15 @@ Only include ChatCut tool names; keep tool arguments and results out.
 
 ### Preserve the failed call before independent checks
 
+Database reads are supplementary. When the current tool error is visible, save
+its dedicated failure record before attempting runtime sources, then run the
+offline helper even if SQLite fails. `hostLogCoverage` explicitly distinguishes
+the retained error, database errors and other-source coverage. Existing App logs
+remain an independent bounded source. An already visible tool error needs no
+prior stderr setup; an unexposed startup error still needs an accessible source.
+Never copy a live database, use immutable/nolock mode, discard WAL or widen
+permissions to make collection pass. If no original error is exposed, say so.
+
 When the host exposes the original failed tool result or runtime event, the Agent
 copies only its error and available identifiers into a new dedicated
 `<name>.mcp-failure.json`. Do this before retries, reconnects or later probes.

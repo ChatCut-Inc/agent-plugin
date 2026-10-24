@@ -83,8 +83,12 @@ test("native query errors retain their failing operation and local evidence is n
     'mcpToolCall' AS item_type,${now - 1000} AS started_at_ms,${now - 900} AS completed_at_ms,
     abs(-9223372036854775808) AS item_json`);
   db.close();
+  const runtime = new DatabaseSync(join(dir, "logs_2.sqlite"));
+  runtime.exec("CREATE TABLE logs(id INTEGER,ts INTEGER,level TEXT,target TEXT)");
+  runtime.close();
   const broken = await collectHostLogs("codex", options(dir));
   assert.ok(broken.gaps.some(g => g.source === "codex_native_failed_mcp_items" && g.operation === "select_failed_mcp_items" && g.error?.message));
+  assert.ok(broken.gaps.some(g => g.source === "codex_runtime_sqlite" && g.operation === "prepare_runtime_logs_query" && g.error?.message.includes("feedback_log_body")));
   const largeDir = await fixture(t), large = database(largeDir);
   const insert = large.prepare("INSERT INTO thread_items VALUES(?,?,?,?,?,?,?,?)");
   for (let i = 0; i < 3; i++) insert.run(current, "turn", `native-${i}`, "mcpToolCall", now, now - 1000, now - i,

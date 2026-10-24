@@ -247,6 +247,12 @@ export function evidenceSummary(report) {
     ...(entry.conversationId && { conversationId: entry.conversationId }),
     ...(entry.callId && { callId: entry.callId }),
   }));
+  const databaseReadFailures = (report.hostLogs.gaps ?? []).filter(gap =>
+    ["codex_runtime_sqlite", "codex_native_failed_mcp_items"].includes(gap.source) &&
+    ["unavailable", "close_failed"].includes(gap.reason)).map(gap => ({
+      source: gap.source, operation: gap.operation ?? null,
+      code: gap.error?.code ?? null, errcode: gap.error?.errcode ?? null,
+    }));
   return {
     stages,
     otherObservations: unknown,
@@ -274,6 +280,13 @@ export function evidenceSummary(report) {
         }
       : null,
     hostLogCoverage: {
+      originalErrorRetained: report.originalFailure.status === "recorded",
+      originalErrorRetainedWithoutDatabase: report.originalFailure.status === "recorded" && databaseReadFailures.length > 0,
+      databaseReadFailures,
+      runtimeCollectionFailed: (report.hostLogs.gaps ?? []).some(gap => gap.source === "host_logs" && gap.reason === "collector_failed"),
+      nativeFailedMcpItems: report.hostLogs.nativeFailedCalls?.length ?? 0,
+      retainedStderrRecords: report.hostLogs.entries.filter(entry => entry.source === "codex_stderr_log").length,
+      priorStderrCaptureRequired: false,
       records: report.hostLogs.entries.length,
       appStartupRecords: appNotices.length,
       failedAppStartupRecords: failedAppNotices.length,

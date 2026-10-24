@@ -809,22 +809,29 @@ export async function collectHostLogs(host, options = {}) {
     const logRoot = options.codexLogDir ?? join(root, "log");
     const databasePath = join(sqliteRoot, "logs_2.sqlite");
     let db;
+    let operation = "locate_database";
     try {
       await stat(databasePath);
+      operation = "load_sqlite_module";
       const { DatabaseSync } = await import("node:sqlite");
+      operation = "open_database";
       db = new DatabaseSync(databasePath, { readOnly: true, timeout: 1000 });
+      operation = "set_query_only";
       db.exec("PRAGMA query_only=ON");
+      operation = "inspect_schema";
       const hasThreadId = db
         .prepare("PRAGMA table_info(logs)")
         .all()
         .some((column) => column.name === "thread_id");
       const threadFilter = hasThreadId && options.conversationId
         ? " AND (thread_id IS NULL OR thread_id='' OR thread_id=?)" : "";
-      const rows = db
-        .prepare(
+      operation = "prepare_runtime_logs_query";
+      const query = db.prepare(
           `SELECT id,ts,level,target,feedback_log_body${hasThreadId ? ",thread_id" : ""} FROM logs WHERE ts>=? AND ts<=?${threadFilter} AND (target LIKE 'codex_mcp%' OR target LIKE 'codex_rmcp_client%' OR target LIKE 'rmcp%' OR target LIKE 'codex_plugins%' OR target LIKE 'codex_core::plugins%' OR target='codex_core::mcp_tool_call') AND feedback_log_body LIKE '%chatcut%' ORDER BY ts DESC LIMIT 200`,
-        )
-        .all(since, until, ...(threadFilter ? [options.conversationId] : []));
+        );
+      operation = "select_runtime_logs";
+      const rows = query.all(since, until, ...(threadFilter ? [options.conversationId] : []));
+      operation = "filter_runtime_logs";
       for (const row of rows) {
         const message = logMessage(row.feedback_log_body ?? "");
         const original = row.feedback_log_body ?? "";
@@ -862,6 +869,7 @@ export async function collectHostLogs(host, options = {}) {
       gaps.push({
         source: "codex_runtime_sqlite",
         reason: "unavailable",
+        operation,
         error: errorDetails(error),
         locationSource: options.codexSqliteHome
           ? "explicit_host_location"
@@ -873,7 +881,8 @@ export async function collectHostLogs(host, options = {}) {
           : {}),
       });
     } finally {
-      db?.close();
+      try { db?.close(); }
+      catch (error) { gaps.push({ source: "codex_runtime_sqlite", reason: "close_failed", operation: "close_database", error: errorDetails(error) }); }
     }
     nativeFailedCalls = await nativeFailedMcpItems(sqliteRoot, options.conversationId, { since, until }, gaps);
     try {
