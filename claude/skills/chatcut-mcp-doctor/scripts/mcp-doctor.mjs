@@ -744,11 +744,13 @@ export async function collectHostLogs(host, options = {}) {
         .prepare("PRAGMA table_info(logs)")
         .all()
         .some((column) => column.name === "thread_id");
+      const threadFilter = hasThreadId && options.conversationId
+        ? " AND (thread_id IS NULL OR thread_id='' OR thread_id=?)" : "";
       const rows = db
         .prepare(
-          `SELECT id,ts,level,target,feedback_log_body${hasThreadId ? ",thread_id" : ""} FROM logs WHERE ts>=? AND ts<=? AND (target LIKE 'codex_mcp%' OR target LIKE 'codex_rmcp_client%' OR target LIKE 'rmcp%' OR target LIKE 'codex_plugins%' OR target LIKE 'codex_core::plugins%') AND feedback_log_body LIKE '%chatcut%' ORDER BY ts DESC LIMIT 200`,
+          `SELECT id,ts,level,target,feedback_log_body${hasThreadId ? ",thread_id" : ""} FROM logs WHERE ts>=? AND ts<=?${threadFilter} AND (target LIKE 'codex_mcp%' OR target LIKE 'codex_rmcp_client%' OR target LIKE 'rmcp%' OR target LIKE 'codex_plugins%' OR target LIKE 'codex_core::plugins%') AND feedback_log_body LIKE '%chatcut%' ORDER BY ts DESC LIMIT 200`,
         )
-        .all(since, until);
+        .all(since, until, ...(threadFilter ? [options.conversationId] : []));
       for (const row of rows) {
         const message = logMessage(row.feedback_log_body ?? "");
         const original = row.feedback_log_body ?? "";

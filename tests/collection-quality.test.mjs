@@ -83,3 +83,27 @@ test("Codex TUI excludes explicit other conversations but retains unknown associ
   const unscoped = await collectHostLogs("codex", { ...options(f), conversationId: undefined });
   assert.ok(unscoped.entries.some(e => e.conversationId === "other-thread" && e.originalAttemptMatch === "unconfirmed"));
 });
+
+test("SQLite scopes before LIMIT when thread_id exists and preserves unknown or legacy thread evidence", async (t) => {
+  for (const hasThread of [true, false]) {
+    const f = await fixture(t), db = new DatabaseSync(join(f.dir, "logs_2.sqlite"));
+    db.exec(`CREATE TABLE logs(id INTEGER,ts INTEGER,level TEXT,target TEXT,feedback_log_body TEXT${hasThread ? ",thread_id TEXT" : ""})`);
+    const insert = db.prepare(`INSERT INTO logs VALUES(?,?,?,?,?${hasThread ? ",?" : ""})`);
+    let id = 0;
+    const add = (age, thread, body) => insert.run(++id, Math.floor(f.now / 1000) - age, "ERROR", "codex_mcp::rmcp_client", body, ...(hasThread ? [thread] : []));
+    add(500, "current-thread", 'request{server_name=chatcut thread_id=current-thread call_id=current-call}: E_CURRENT_BEFORE_LIMIT');
+    add(499, null, 'MCP server "chatcut": E_NULL_THREAD');
+    add(498, "", 'MCP server "chatcut": E_EMPTY_THREAD');
+    // Legacy schemas still use explicit trace IDs after the bounded query.
+    // Only schemas with a native column can scope before LIMIT.
+    const foreignCount = hasThread ? 200 : 1;
+    for (let i = 0; i < foreignCount; i++)
+      add(200 - i, "other-thread", 'request{server_name=chatcut thread_id=other-thread}: PRIVATE_FOREIGN');
+    db.close();
+    const logs = await collectHostLogs("codex", options(f));
+    assert.ok(logs.entries.some(e => e.message.includes("E_CURRENT_BEFORE_LIMIT")));
+    assert.ok(!JSON.stringify(logs).includes("PRIVATE_FOREIGN"));
+    for (const marker of ["E_NULL_THREAD", "E_EMPTY_THREAD"])
+      assert.ok(logs.entries.some(e => e.message.includes(marker) && !e.conversationId && e.originalAttemptMatch === "unconfirmed"));
+  }
+});
