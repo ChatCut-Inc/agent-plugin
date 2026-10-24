@@ -415,7 +415,7 @@ function runtimeContext(body) {
   return { ...(conversationId && { conversationId }), ...(callId && { callId }) };
 }
 
-function hostedTextRecord(line) {
+function hostedTextRecord(line, nativeLevel) {
   if (/^\s/.test(line)) return false;
   // Inspect explicit echo prefixes before stripping trace context: a payload
   // itself can contain "}:" and must not become a diagnostic via lastIndex.
@@ -446,7 +446,16 @@ function hostedTextRecord(line) {
     context.match(/\bserver_name=["']?([\w:.-]+)/)?.[1] ?? scope?.[1] ?? scope?.[2] ?? scope?.[3];
   if (server && !["chatcut", "plugin:chatcut:chatcut"].includes(server)) return false;
   if (!CHATCUT_MESSAGE.test(body)) return false;
-  if (/\bmethod=["']?tools\/call(?:["'\s}]|$)/.test(context)) return false;
+  if (/\bmethod=["']?tools\/call(?:["'\s}]|$)/.test(context)) {
+    const header = line.match(/^\d{4}-\d{2}-\d{2}T\S+\s+(?:\[(WARN|ERROR)\]|(WARN|ERROR))\s+/i);
+    // A trusted native ERROR/WARN can describe a failed tools/call without
+    // echoing its content. SQLite supplies its separate native level column.
+    if (!module || !["ERROR", "WARN"].includes(String(nativeLevel ?? header?.[1] ?? header?.[2]).toUpperCase())) return false;
+    // Inspect the unstripped body: a payload can itself contain "}:".
+    const contentCheck = body.replace(/\\+(?=["'])/g, "");
+    if (/["'](?:params|arguments)["']\s*:\s*[{[]|["'](?:prompt|transcript)["']\s*:\s*["'{[]|["']result["']\s*:\s*\{[\s\S]*?["']content["']\s*:\s*\[|["']role["']\s*:\s*["'](?:user|assistant|system|developer)["']|["']type["']\s*:\s*["'](?:function_call(?:_output)?|tool_call(?:_output)?|tool_result|user(?:_message)?|assistant(?:_message)?)["']/i.test(contentCheck)) return false;
+    if (/(?:^|\}:\s*)(?:prompt|transcript)\s*:/i.test(body)) return false;
+  }
   const message = scope ? body.slice(scope[0].length) : logMessage(body);
   // Runtime error contents can name tools; only explicit echo records are excluded.
   if (TEXT_ECHO.test(message)) return false;
@@ -535,7 +544,11 @@ async function textLog(path, source, gaps, window, select = hostedTextRecord) {
         !TEXT_ECHO.test(lines[i + 1].trimStart())
       )
         block.push(lines[++i]);
+      if (block.length > 1 && !select(block.join("\n"))) continue;
       const occurredAt = logTime(block[0]);
+      const context = runtimeContext(block[0]);
+      if (window.conversationId && context.conversationId && context.conversationId !== window.conversationId)
+        continue;
       if (
         occurredAt &&
         (Date.parse(occurredAt) < window.since * 1000 ||
@@ -548,7 +561,7 @@ async function textLog(path, source, gaps, window, select = hostedTextRecord) {
         occurredAt,
         timeStatus: occurredAt ? "within_requested_window" : "unknown; not_confirmed_within_window",
         message: redact(block.join("\n")),
-        ...runtimeContext(block[0]),
+        ...context,
         originalAttemptMatch: "unconfirmed",
       });
     }
@@ -733,7 +746,7 @@ export async function collectHostLogs(host, options = {}) {
         .some((column) => column.name === "thread_id");
       const rows = db
         .prepare(
-          `SELECT id,ts,level,target,feedback_log_body${hasThreadId ? ",thread_id" : ""} FROM logs WHERE ts>=? AND ts<=? AND (target LIKE 'codex_mcp%' OR target LIKE 'rmcp%' OR target LIKE 'codex_plugins%' OR target LIKE 'codex_core::plugins%') AND feedback_log_body LIKE '%chatcut%' ORDER BY ts DESC LIMIT 200`,
+          `SELECT id,ts,level,target,feedback_log_body${hasThreadId ? ",thread_id" : ""} FROM logs WHERE ts>=? AND ts<=? AND (target LIKE 'codex_mcp%' OR target LIKE 'codex_rmcp_client%' OR target LIKE 'rmcp%' OR target LIKE 'codex_plugins%' OR target LIKE 'codex_core::plugins%') AND feedback_log_body LIKE '%chatcut%' ORDER BY ts DESC LIMIT 200`,
         )
         .all(since, until);
       for (const row of rows) {
@@ -747,7 +760,7 @@ export async function collectHostLogs(host, options = {}) {
           context.conversationId !== options.conversationId
         )
           continue;
-        if (!hostedTextRecord(`${row.target}: ${original}`) ||
+        if (!hostedTextRecord(`${row.target}: ${original}`, row.level) ||
             !hostedTextRecord(`MCP server "chatcut" ${message}`))
           continue;
         if (
@@ -791,6 +804,7 @@ export async function collectHostLogs(host, options = {}) {
         ...(await textLog(join(logRoot, "codex-tui.log"), "codex_tui_log", gaps, {
           since,
           until,
+          conversationId: options.conversationId,
         })),
       );
     } catch (error) {
