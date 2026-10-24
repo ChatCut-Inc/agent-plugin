@@ -40,7 +40,7 @@ test("standalone copied skill runs offline without a parent plugin or a live MCP
   await cli(join(dir, "doctor/scripts/doctor.mjs"), ["--host", "codex", "--server-url", `${origin}/api/external-mcp/mcp`, "--offline", "--upload", "--output", output], dir);
   const report = JSON.parse(await readFile(output));
   assert.equal(requests, 0);
-  assert.equal(report.collectorVersion, "1.2.3");
+  assert.equal(report.collectorVersion, "1.3.0");
   assert.equal(report.upload.status, "skipped_offline");
   assert.equal(report.probes.length, 0);
   assert.ok(report.gaps.some((gap) => gap.source === "plugin_version"));

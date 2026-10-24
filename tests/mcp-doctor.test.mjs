@@ -413,15 +413,21 @@ for (const [host, folder, manifest] of [
     const output = join(dir, "report.json");
     await writeFile(original, "CONTROLLED FIXTURE: original metadata connection failed");
     let posts = 0;
+    let initializeClientVersion;
+    let uploadedCollectorVersion;
     const server = createServer(async (req, res) => {
       if (req.url === "/telemetry/events") {
         const parts = [];
         for await (const part of req) parts.push(part);
         const events = JSON.parse(Buffer.concat(parts).toString());
         assert.equal(events[0].name, "mcp.doctor.report_fragment");
+        uploadedCollectorVersion = JSON.parse(events.map((event) => event.properties.attributes.mcpDoctor.fragment).join("")).collectorVersion;
         posts++;
         res.end('{"ok":true}');
       } else if (req.url === "/api/external-mcp/mcp") {
+        const parts = [];
+        for await (const part of req) parts.push(part);
+        initializeClientVersion = JSON.parse(Buffer.concat(parts).toString()).params.clientInfo.version;
         res.writeHead(401, {
           "www-authenticate":
             'Bearer resource_metadata="' +
@@ -470,6 +476,9 @@ for (const [host, folder, manifest] of [
     assert.equal(receipt.upload.status, "ingest_accepted");
     assert.equal(receipt.upload.storageVerified, false);
     const report = JSON.parse(await readFile(output));
+    assert.equal(report.collectorVersion, "1.3.0");
+    assert.equal(initializeClientVersion, report.collectorVersion);
+    assert.equal(uploadedCollectorVersion, report.collectorVersion);
     assert.equal(report.host, host);
     assert.equal(report.hostVersion, "fixture-1.0");
     assert.equal(
@@ -722,7 +731,7 @@ test("App fallback remains bounded and does not promote host notices into the or
     codexLogDir: join(dir, "empty-tui"),
     output: join(dir, "report.json"),
   });
-  assert.equal(report.collectorVersion, "1.2.3");
+  assert.equal(report.collectorVersion, "1.3.0");
   assert.equal(
     report.hostLogs.entries.filter((entry) => entry.source === "codex_app_log").length,
     30,

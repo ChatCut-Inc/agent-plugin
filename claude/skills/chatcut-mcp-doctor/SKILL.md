@@ -9,7 +9,7 @@ This Skill runs with local file/shell tools and Node 18+, independently of ChatC
 
 ## Start here
 
-- In Codex, select **ChatCut MCP Doctor** from the skill picker. The ChatCut plugin entry is `$chatcut:chatcut-mcp-doctor`; a standalone project/personal copy is `$chatcut-mcp-doctor`. Use the exact installed catalog entry. Natural language: “Diagnose my ChatCut MCP connection with ChatCut MCP Doctor.”
+- In Codex, select **ChatCut MCP Doctor** from the skill picker. The Git plugin entry is `$chatcut:chatcut-mcp-doctor`; the existing store identity uses `$chatcut-desktop:chatcut-mcp-doctor`; a standalone project/personal copy is `$chatcut-mcp-doctor`. Use the exact installed catalog entry. Natural language: “Diagnose my ChatCut MCP connection with ChatCut MCP Doctor.”
 - In Claude Code with the ChatCut plugin, invoke `/chatcut:chatcut-mcp-doctor`. A separately installed project/personal copy uses `/chatcut-mcp-doctor`.
 - `/doctor` and `codex doctor` belong to the host; this Skill does not replace them. If the entry is absent or the plugin is old, read [discovery and fallback](references/discovery.md). A browser-only host without local execution cannot run this collector; retain the error and explain that boundary.
 

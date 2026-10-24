@@ -6,7 +6,8 @@ does not prove a command is available in the current chat.
 
 | Host/package | Entry | Verification |
 | --- | --- | --- |
-| Codex ChatCut plugin | Skill picker; `$chatcut:chatcut-mcp-doctor` | Confirm the named Skill and path in the running host catalog; invoke it and obtain a local report |
+| Codex ChatCut Git plugin | Skill picker; `$chatcut:chatcut-mcp-doctor` | Confirm the named Skill and path in the running host catalog; invoke it and obtain a local report |
+| Codex existing `chatcut-desktop` store identity | Skill picker; `$chatcut-desktop:chatcut-mcp-doctor` | Confirm the installed version and actual catalog entry; store approval/update is separate from Git availability |
 | Codex standalone project/personal copy | `$chatcut-mcp-doctor` | Confirm it in the catalog, then invoke it |
 | Claude Code ChatCut plugin | `/chatcut:chatcut-mcp-doctor` | Confirm the command in `/` or `/skills`, then invoke it |
 | Claude personal/project Skill copy | `/chatcut-mcp-doctor` | Confirm the same catalog before use |
@@ -36,5 +37,6 @@ For users without a local copy, the official plugin sources/install guidance are
 [agent-plugin](https://github.com/ChatCut-Inc/agent-plugin),
 [Codex setup](https://chatcut.io/chatgpt), and
 [Claude Code setup](https://chatcut.io/claude). Verify a released package actually
-contains this Skill before recommending it; a local candidate is not a released
-feature. Do not download and execute an unreviewed remote shell script.
+contains this Skill before recommending it (Codex 1.10.22 / Claude plugin 1.10.24
+or later). Git source availability does not prove store approval or a host update.
+Do not download and execute an unreviewed remote shell script.

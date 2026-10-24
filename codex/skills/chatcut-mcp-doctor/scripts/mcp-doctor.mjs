@@ -278,7 +278,7 @@ export async function probeEntry(endpoint, diagnosticId, fetchImpl = fetch) {
         params: {
           protocolVersion: "2025-11-25",
           capabilities: {},
-          clientInfo: { name: "chatcut-mcp-doctor", version: "1.2.3" },
+          clientInfo: { name: "chatcut-mcp-doctor", version: "1.3.0" },
         },
       }),
     });
@@ -959,7 +959,7 @@ export async function runDoctor(options, dependencies = {}) {
   const diagnosticId = randomUUID();
   const report = {
     schemaVersion: 2,
-    collectorVersion: "1.2.3",
+    collectorVersion: "1.3.0",
     diagnosticId,
     collectedAt: new Date().toISOString(),
     scope: "cloud",

@@ -66,7 +66,7 @@ actual server's authentication action in the interactive host. Recent CLI versio
 also support `claude mcp login <actual-server-name>`; verify local help before
 offering that command on an older version. A browser/account sign-in alone is insufficient.
 
-This candidate does not validate a real OAuth login by automating it. Respect
+The collector does not perform OAuth login. Use the host's guided action and respect
 the user's login/permission boundaries; never inspect or clear credential
 stores, copy tokens, or change OAuth settings. If a login attempt fails, preserve
 the actual new error separately from the original failure. After authorized

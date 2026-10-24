@@ -59,10 +59,13 @@ https://github.com/ChatCut-Inc/agent-plugin.git
 ## Support
 
 For hosted MCP startup, sign-in or tool failures, use **ChatCut MCP Doctor** in
-Codex's skill picker (or `$chatcut:chatcut-mcp-doctor` for the plugin), or
+Codex's skill picker (`$chatcut:chatcut-mcp-doctor` for the Git plugin,
+`$chatcut-desktop:chatcut-mcp-doctor` for the existing store identity), or
 `/chatcut:chatcut-mcp-doctor` in Claude Code. It runs locally even when ChatCut
 MCP cannot connect and prepares a report, explanation and private feedback draft.
-This is a source candidate; check that the installed package includes the Skill.
+Doctor is included from Codex 1.10.22 / Claude Code plugin 1.10.24; check the
+installed version and skill catalog when using an older package. Local diagnosis
+does not require ChatCut authentication.
 See [Doctor discovery/fallback](codex/skills/chatcut-mcp-doctor/references/discovery.md).
 The host's own `/doctor` command is separate.
 

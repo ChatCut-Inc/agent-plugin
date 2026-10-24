@@ -1,16 +1,19 @@
 # Hosted MCP evidence report v2
 
-## Independent Doctor Skill (local candidate)
+## Independent Doctor Skill
 
 `codex/skills/chatcut-mcp-doctor` and `claude/skills/chatcut-mcp-doctor` now
 package the collector independently of MCP, with diagnosis and feedback sidecars.
 Use Codex's skill picker / `$chatcut:chatcut-mcp-doctor` (standalone copies use
-`$chatcut-mcp-doctor`), or Claude Code's `/chatcut:chatcut-mcp-doctor`. Neither
+`$chatcut-mcp-doctor`; the existing store identity uses
+`$chatcut-desktop:chatcut-mcp-doctor`), or Claude Code's
+`/chatcut:chatcut-mcp-doctor`. Neither
 overrides the host's `/doctor`. Its description also enables agent selection for
 natural-language connection-failure requests. See its [entrypoint](../codex/skills/chatcut-mcp-doctor/SKILL.md)
 and [fallback guide](../codex/skills/chatcut-mcp-doctor/references/discovery.md).
-This source candidate has not been published; an older installed package may
-not expose it.
+The Skill is included from Codex 1.10.22 / Claude plugin 1.10.24, with collector
+1.3.0. Check the installed version and catalog; Git availability, store approval
+and actual host adoption are separate checks.
 
 The basics scripts are compatibility forwarders; each host package contains
 one collector implementation under Doctor. The new `scripts/doctor.mjs`
@@ -46,6 +49,13 @@ parity. Node 18+ runs probes and text-log extraction. Optional Codex SQLite read
 need a runtime with `node:sqlite`; missing support is an explicit evidence gap.
 
 ## Evidence and delivery contract
+
+Collector 1.3.0 packages the independent Doctor workflow, offline mode and
+immutable-report feedback reuse. It adds explicit registration lookup results,
+surfaces later wire failures and unassociated native errors, and strengthens
+session-credential/content-echo filtering. These behavior changes have a new
+collector identity; reports from the released 1.2.3 remain distinguishable.
+The outer report schema 2, snapshot schema 1 and fragment envelope are retained.
 
 Collector 1.2.3 adds a dedicated `.mcp-failure.json` input for the original host
 tool/runtime error, its available failure time and local conversation/call IDs.
@@ -270,5 +280,6 @@ failures that do not trigger this Skill remain outside coverage.
 The previously verified beta envelope remains the fragment delivery contract;
 it does not establish that every new v2 field has been exercised by a real
 failing host. Local controlled checks and post-release case evidence remain
-separate. The current coverage follow-up is local and must be reviewed before
-updating the existing draft PR or any release.
+separate. Source/fixture validation, production storage verification, store review
+and installed-host adoption have separate evidence; a prepared ZIP or merged PR
+alone does not establish the latter checks.
