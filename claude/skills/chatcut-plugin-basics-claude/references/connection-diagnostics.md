@@ -106,6 +106,15 @@ Only include ChatCut tool names; keep tool arguments and results out.
 
 ### Preserve the failed call before independent checks
 
+Database reads are supplementary. Save the currently visible error first, then
+continue local collection with `--offline` even when SQLite is unavailable.
+This option sends no probes or upload, including when `--upload` is also given.
+`evidenceSummary.hostLogCoverage` distinguishes the retained original error,
+database failures and remaining sources. Existing App logs remain independent.
+An already visible tool error needs no prior stderr setup; an unexposed startup
+error still needs an accessible source. Never copy a live database, parse its
+WAL separately, ignore locks or widen permissions to make collection pass.
+
 When the host exposes the original failed tool result or runtime event, the Agent
 copies only its error and available identifiers into a new dedicated
 `<name>.mcp-failure.json`. Do this before retries, reconnects or later probes.
@@ -147,6 +156,24 @@ Do not start another authenticated session to manufacture replacement evidence.
 If only the original error text is accessible, use the text-file fallback below.
 Do not call a report with only startup-status notices a captured tool failure.
 
+Save actual error fields rather than reconstructing a raw tool-result envelope.
+The collector records a valid Codex `CODEX_THREAD_ID` in `collectionContext` as
+the current collecting thread. It does not fill the original failure's thread
+automatically. When the failure just happened in this same chat, that known
+thread may be supplied in its failure record with the source explained. Never
+use the diagnostic command's `CODEX_TOOL_CALL_ID` as the failed MCP call's ID.
+
+With a known original/session thread, `hostLogs.nativeFailedCalls` selects at
+most ten failed hosted ChatCut MCP items in the bounded window from the native
+`thread_history_1.sqlite` index. Only IDs, lifecycle times and error fields are
+projected; whole history items, conversations, arguments and successful results
+are not collected. An error above 128 KiB is explicitly omitted; the complete
+local report is never trimmed to fit the 256 KiB upload limit. `nativeItemId`
+is a native MCP item identity, distinct from Responses call IDs, RPC IDs and
+server request IDs. `startedAtMs`/`completedAtMs` are lifecycle times, not the
+original `occurredAt`. Matches remain unconfirmed; compare known thread, tool
+and exact error without promoting nearby times to proof of association.
+
 1. Obtain the existing server's registered URL through the host. Preserve its
    environment. The helper accepts ChatCut production/beta/dev endpoints and
    loopback development servers; it reports unsupported endpoints rather than
@@ -184,10 +211,18 @@ Codex SQLite locations follow `CODEX_SQLITE_HOME` when present. If the current
 host already supplies its actual `sqlite_home` or `log_dir`, pass that directory
 with `--codex-sqlite-home` or `--codex-log-dir`; do not read whole config files to
 find it. These options select existing log locations and do not enable logging.
+If the caller already retained a dedicated native stderr stream, pass its
+existing `.codex-stderr.log` with `--codex-stderr-file`. The helper reads only
+its bounded ChatCut log tail, marks emission time as `loggedAt`, and does not
+fill original failure time or association. This source is optional; it does
+not capture a stream or recover discarded stderr.
 On Windows, SQLite error 14 can coexist with readable WAL files in a read-only
 sandbox. The report preserves the original error and bounded file-access facts;
 it does not prove a specific security product caused the restriction. Never copy
 the whole log database, ignore its WAL with immutable mode, or relax permissions.
+Both SQLite readers preserve the failing operation and error, then continue
+other sources; a close failure does not replace the primary error. Missing
+native IDs and lifecycle times remain missing when the database is unreadable.
 On Windows, the helper also reads the existing Codex App startup-status notices
 under `%LOCALAPPDATA%/Codex/Logs/YYYY/MM/DD`. This is independent of TUI logging.
 It selects only `AppServerConnection` startup notices for the hosted ChatCut
