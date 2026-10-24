@@ -29,12 +29,22 @@ export function diagnose(report) {
       continue;
     }
     if (item.outcome !== "failed") continue;
-    if (["initialize", "plugin_loading", "tools_list"].includes(item.stage))
+    if (["initialize", "plugin_loading", "tools_list", "tool_discovery"].includes(item.stage))
       add("startup_or_discovery_failed", evidence, "Preserve the exact native error. Check the selected host's current status; follow only the matching repair guide.");
-    else if (["authorization", "token_exchange", "token_refresh"].includes(item.stage))
-      add("authentication_attempt_failed", evidence, "Use the host's authentication UI only if authorized; retain the actual auth failure. Do not clear credentials.");
-    else if (item.stage === "tools_call")
+    else if (["authorization", "token_exchange", "token_refresh", "oauth"].includes(item.stage))
+      add("authentication_attempt_failed", evidence, "Use the host's authentication UI only if authorized; retain the actual auth failure and its event time. Do not clear credentials or infer a network/registration cause.", "attention", {
+        source: item.source, stage: item.stage, operation: item.operation ?? null,
+        observedAt: item.observedAt ?? null,
+        messageExcerpt: redact(item.message ?? "").slice(0, 2000),
+      });
+    else if (["tools_call", "tool_call"].includes(item.stage))
       add("tool_call_failed", evidence, "Keep operation and original call IDs. Recheck only a safe read operation; never replay a write or generation just to test recovery.");
+    else if (item.stage === "browser_render")
+      add("tool_execution_failed", evidence, "The host reports a tool rendering/execution failure. Preserve its native error and current tool availability; this observation does not demonstrate an MCP disconnect or justify changing registration/authentication.", "attention", {
+        source: item.source, stage: item.stage, operation: item.operation ?? null,
+        connectionStatus: session?.connectionStatus ?? "unknown",
+        messageExcerpt: redact(item.message ?? "").slice(0, 2000),
+      });
     else
       add("observed_stage_failed", evidence, "Retain the unfamiliar stage and error; root cause needs more evidence.");
   }
@@ -77,6 +87,20 @@ export function diagnose(report) {
   });
   (report.hostLogs?.entries ?? []).forEach((entry, index) => {
     const message = entry.message ?? "";
+    // One observed native startup response, not a generic keyword/root-cause
+    // classifier. A warning alone or another module/message is insufficient.
+    if (entry.source === "codex_runtime_sqlite" && entry.target === "codex_mcp::rmcp_client" &&
+        ["WARN", "ERROR"].includes(entry.level) &&
+        message === 'MCP server startup failed server_name="chatcut" error=OAuth refresh credentials for server chatcut are missing an authorization server issuer; authorization required: OAuth authorization required') {
+      add("host_reauthorization_required_unassociated", [`hostLogs.entries[${index}]`],
+        "This native Codex startup record explicitly required OAuth authorization at its recorded time. Check the same host/server's current authentication status first; offer its normal sign-in action only if authorization is still required and the user wants to reconnect. Do not clear or edit credentials, add a duplicate registration, or infer association with the original failed call.", "attention", {
+          source: entry.source, level: entry.level, target: entry.target,
+          state: "authorization_required", occurredAt: entry.occurredAt ?? null,
+          originalAttemptMatch: "unconfirmed",
+          messageExcerpt: redact(message).slice(0, 2000),
+        });
+      return;
+    }
     let status;
     if (entry.source === "codex_app_log") {
       // The native App event's state, rather than words inside its error text.
@@ -92,6 +116,7 @@ export function diagnose(report) {
     add("host_runtime_error_unassociated", [`hostLogs.entries[${index}]`],
       "A bounded native host error was collected, but its association with the original failed attempt is unconfirmed. Inspect the local record and available time/call context; preserve missing or truncated coverage and do not infer a root cause or recovery.", "attention", {
         source: entry.source, ...(status ? { status } : { level: "ERROR" }),
+        occurredAt: entry.occurredAt ?? null,
         originalAttemptMatch: "unconfirmed",
         messageExcerpt: redact(message).slice(0, 2000),
       });
