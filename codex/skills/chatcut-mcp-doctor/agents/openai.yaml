@@ -1,0 +1,3 @@
+interface:
+  display_name: "ChatCut MCP Doctor"
+  short_description: "Diagnose ChatCut MCP failures and prepare feedback locally"
