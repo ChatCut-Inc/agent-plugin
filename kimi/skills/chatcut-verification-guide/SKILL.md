@@ -5,6 +5,10 @@ description: Use after ChatCut edits, imports, captions, generation, or exports 
 
 # ChatCut Verification Guide
 
+For a video/reference breakdown or detailed frame analysis, use the bundled
+[visual-analysis skill](../visual-analysis/SKILL.md), then continue the checks
+below when verifying an edit.
+
 Verify through ChatCut project state first and the in-app browser second.
 
 ## Checks
