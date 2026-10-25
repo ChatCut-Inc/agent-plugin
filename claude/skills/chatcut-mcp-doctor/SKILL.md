@@ -38,7 +38,7 @@ Read [repair and recheck](references/repair-and-recheck.md) before any change. R
 
 ## Recheck and deliver
 
-After an authorized change, run one native safe `list_projects` in the same host/scope. If a new session must explicitly load project config, disclose that choice. Do not replay mutation/generation calls or simulate a native read with fetch. Save its exposed result separately as `read.mcp-recheck.txt`, then record it without changing the original report:
+After an authorized change, run one native safe `list_projects` in the same host/scope. If a new session must explicitly load project config, disclose that choice. Do not replay mutation/generation calls or simulate a native read with fetch. Save the actually exposed projects[] JSON (or structuredContent.projects[]) separately as `read.mcp-recheck.txt`. A CLI mcp get/configuration response is never a tool recheck, and cannot be formatted into one. If the native project result is not exposed, retain that gap instead of claiming success. Then then record it without changing the original report:
 
 ```text
 node "<this-skill>/scripts/record-recheck.mjs" --active-case --result "read.mcp-recheck.txt" --operation list_projects --outcome <success|failed> --scope "<actual same-host scope and new-session boundary>"

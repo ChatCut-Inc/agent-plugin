@@ -20,6 +20,13 @@ export async function recordRecheck(options) {
   if (!info.isFile() || info.size > 64 * 1024) throw new Error("Recheck result must be a regular file of at most 64 KiB");
   const result = redact(await readFile(options.result, "utf8"));
   if (!result.trim()) throw new Error("Recheck result is empty");
+  if (options.outcome === "success") {
+    let data;
+    try { data = JSON.parse(result); } catch { /* CLI configuration text is not a tool result. */ }
+    if (!data || data.isError === true || data.error ||
+        !Array.isArray(data.projects ?? data.structuredContent?.projects))
+      throw new Error("Successful list_projects recording needs the actually exposed projects[] JSON (or structuredContent.projects[]). Native mcp get/configuration text is not a tool result. Preserve it separately and wait for the actual safe native read; do not manufacture JSON or replay a failed tool.");
+  }
   const observation = { schemaVersion: 1, diagnosticId: report.diagnosticId, sourceReportSha256,
     recordedAt: new Date().toISOString(), observedAt: null,
     source: "agent_supplied_native_tool_result; not_independently_verified", host: report.host,

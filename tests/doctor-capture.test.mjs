@@ -100,7 +100,7 @@ test("native pre-render capture includes the reserved saved plain error without 
 test("safe recheck record binds an immutable original report and never overwrites a prior observation", async t => {
   const cwd = await temp(t), receipt = await capture({ host: "claude", cwd }, deps);
   const original = await readFile(receipt.report), result = join(cwd, "read.mcp-recheck.txt");
-  await writeFile(result, "Controlled unauthenticated service returned []");
+  await writeFile(result, '{"projects":[],"controlled":"owned unauthenticated fixture"}');
   const options = { report: receipt.report, result, operation: "list_projects", outcome: "success", scope: "Same project and isolated profile; explicit new session loaded project .mcp.json" };
   const recheck = await recordRecheck(options);
   assert.equal(recheck.sourceReportSha256, receipt.sourceReportSha256);
@@ -117,8 +117,19 @@ test("follow-up entry baseline cannot replace the active incident report for rec
   const baseline = await capture({ host: "claude", cwd }, deps);
   assert.notEqual(baseline.diagnosticId, first.diagnosticId);
   assert.equal(baseline.activeReport.diagnosticId, first.diagnosticId);
-  await writeFile(result, "actual safe native read returned []");
+  await writeFile(result, '{"projects":[]}');
   const recheck = await recordRecheck({ activeCase: true, cwd, result, operation: "list_projects", outcome: "success", scope: "same project; explicit new session" });
   assert.equal(recheck.diagnosticId, first.diagnosticId);
   assert.equal(recheck.sourceReportSha256, first.sourceReportSha256);
+});
+
+test("registration/status text and configuration JSON cannot be recorded as a successful native project read", async t => {
+  const cwd = await temp(t), receipt = await capture({ host: "claude", cwd }, deps), result = join(cwd, "read.mcp-recheck.txt");
+  const options = { report: receipt.report, result, operation: "list_projects", outcome: "success", scope: "same project" };
+  for (const text of ['chatcut:\n  Scope: Project config\n  Status: Pending approval\n  URL: http://127.0.0.1/', '{"name":"chatcut","transport":{"url":"http://127.0.0.1/"}}', '{"isError":true,"projects":[]}']) {
+    await writeFile(result, text);
+    await assert.rejects(recordRecheck(options), /Native mcp get\/configuration text is not a tool result/);
+  }
+  await writeFile(result, '{"structuredContent":{"projects":[]}}');
+  assert.equal((await recordRecheck(options)).outcome, "success");
 });
