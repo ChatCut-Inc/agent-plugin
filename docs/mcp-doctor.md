@@ -11,9 +11,11 @@ Use Codex's skill picker / `$chatcut:chatcut-mcp-doctor` (standalone copies use
 overrides the host's `/doctor`. Its description also enables agent selection for
 natural-language connection-failure requests. See its [entrypoint](../codex/skills/chatcut-mcp-doctor/SKILL.md)
 and [fallback guide](../codex/skills/chatcut-mcp-doctor/references/discovery.md).
-The Skill is included from Codex 1.10.22 / Claude plugin 1.10.24, with collector
-1.3.0. Check the installed version and catalog; Git availability, store approval
-and actual host adoption are separate checks.
+This is an unpublished Doctor candidate with collector 1.3.0. The candidate
+manifest versions do not establish a released minimum version; final versions
+remain subject to review. The separate collection-only packages contain no
+Doctor entry. Check actual installed contents and catalog; Git availability,
+store approval and host adoption are separate checks.
 
 The basics scripts are compatibility forwarders; each host package contains
 one collector implementation under Doctor. The new `scripts/doctor.mjs`

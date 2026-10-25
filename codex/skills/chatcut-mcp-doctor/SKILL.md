@@ -19,6 +19,8 @@ If the host rejects a local command, preserve that exact rejection and the opera
 
 Preserve the already visible original error before retries, reconnects or changes. Read [connection diagnostics](references/connection-diagnostics.md) for the dedicated failure/snapshot schema, bounded logs and collector options. Unknown times, IDs and stages stay unknown. Do not read credentials, auth.json, full configuration files or conversation transcripts.
 
+Invalid optional time/ID hints must not discard an otherwise valid original error. The helper omits those values and records `metadataGaps`; explain the precise gap instead of guessing replacements. Keep the dedicated input file for review.
+
 If a Windows log database is unavailable, save the just-visible failed tool's error first in a dedicated failure record, including unfamiliar messages/cause and only the stage/time/IDs actually exposed. Continue offline collection: database access is not a prerequisite for preserving that error, and a database failure does not invalidate it. Keep existing bounded App evidence separate. Do not require the user to configure stderr or export/copy a database first, or try permission/WAL/locking workarounds. Check `evidenceSummary.hostLogCoverage` for retained original error, database read failures and remaining sources. A startup error hidden from the Agent with no accessible App log or retained stream remains a coverage gap.
 
 Save the actual error message and exposed error fields, rather than reconstructing a supposedly raw tool-result envelope. A JSON-RPC error does not establish a `result.isError` flag. The helper records `collectionContext` from the current Codex `CODEX_THREAD_ID`; this is the collecting thread, not automatic proof of the original failed thread. When the failure just happened in this same chat, its known thread ID may be copied into the Agent-supplied failure record with that source explained. Never use `CODEX_TOOL_CALL_ID` from the diagnostic command as the failed MCP call's ID.
@@ -48,6 +50,10 @@ Verify the affected boundary in the **same host and scope** after a change. Regi
 ## Feedback without starting over
 
 Return the observed finding, justified next action, diagnostic ID, report/summary locations and remaining gap in the user's language. An unresolved case should include the ready-to-review issue draft. The local JSON retains full credential-redacted evidence; the draft excludes log dumps and local IDs, but still needs review for personal/project data before sharing.
+
+Read the generated files and finish a usable explanation in the user's language. For Chinese requests, write a separate Chinese note with the actual symptom, exact error excerpt, evidence/source, action actually taken, safe same-host recheck result and delivery result. Fill core facts from observations; do not leave template placeholders for the user. If a later safe call succeeded, say exactly which operation and host/scope succeeded, while keeping the collector's original report immutable and its historical recovery flag separate. Do not claim an unperformed repair, complete recovery, final storage or an opened ticket.
+
+A protocol-discovery attempt that was rejected and then successfully negotiated by the same native flow can be normal. Preserve that sequence separately; do not present an intermediate negotiation rejection as the user's terminal failure when actual downstream success is established. Unrelated later success does not erase a recorded original tool failure.
 
 ```text
 node "<this-skill>/scripts/doctor.mjs" --report <existing.mcp-report.json>

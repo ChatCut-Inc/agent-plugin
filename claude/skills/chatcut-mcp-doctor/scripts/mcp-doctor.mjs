@@ -1207,6 +1207,8 @@ export async function runDoctor(options, dependencies = {}) {
       report.originalFailure = clean(
         failureFromRecord(JSON.parse(await readFile(options.failureRecord, "utf8"))),
       );
+      for (const gap of report.originalFailure.metadataGaps ?? [])
+        report.gaps.push({ source: "original_failure", ...gap });
       if (!report.originalFailure.occurredAt && options.occurredAt) {
         report.originalFailure.occurredAt = options.occurredAt;
         report.originalFailure.timeSource =

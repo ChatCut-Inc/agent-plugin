@@ -207,6 +207,8 @@ export function evidenceSummary(report) {
     gaps.push("current_session_tools_unavailable");
   if (report.originalFailure.status !== "recorded") gaps.push("original_failure_unavailable");
   if (!report.originalFailure.occurredAt) gaps.push("original_failure_time_unavailable");
+  for (const gap of report.originalFailure.metadataGaps ?? [])
+    gaps.push(`original_failure_${gap.field}_rejected`);
   const originalRequests =
     report.originalFailure.status === "recorded"
       ? observations.flatMap((item, observationIndex) =>
