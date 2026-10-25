@@ -63,7 +63,8 @@ export function diagnose(report) {
     add("host_connection_failed_stage_unconfirmed", ["hostSnapshot.session"], "The host reports a failed connection. Preserve its native startup/runtime error if exposed; the exact stage and cause are not yet established.");
   if (session?.authStatus === "authenticated" && session?.visibleToolCount === 0)
     add("authenticated_tools_absent", ["hostSnapshot.session"], "Authentication inventory does not prove initialization or tools/list success. Preserve the host's discovery status and error before reconnecting.");
-  if (original?.status === "recorded" && !failed.length) {
+  // A separate registration lookup gap must not hide the retained tool error.
+  if (original?.status === "recorded" && !failed.some(item => ["tools_call", "tool_call"].includes(item.stage))) {
     if (["initialize", "tools/list"].includes(original.operation))
       add("startup_or_discovery_failed", ["originalFailure.operation", "originalFailure"], "The original record identifies the failed startup/discovery operation. Preserve its native error; later healthy probes do not establish host recovery.");
     else if (original.source === "agent_supplied_host_tool_result" && original.operation)

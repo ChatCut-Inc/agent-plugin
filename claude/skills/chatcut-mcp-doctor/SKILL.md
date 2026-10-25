@@ -1,94 +1,57 @@
 ---
 name: chatcut-mcp-doctor
-description: Diagnose hosted ChatCut MCP connection, startup, authentication or tool-call failures from a working Codex or Claude Code agent, even when ChatCut tools cannot connect. Produce evidence-based findings, repair guidance, rechecks and local feedback materials. Use for ChatCut Doctor or MCP连接错误; not for Desktop ACP or unrelated video editing.
+description: Diagnose hosted ChatCut MCP connection, startup, authentication or tool-call failures locally, save a machine report and usable feedback, and guide scoped repair/recheck. Use for ChatCut Doctor or MCP连接错误; not Desktop ACP or unrelated video editing.
+allowed-tools: Bash(node "${CLAUDE_SKILL_DIR}/scripts/capture.mjs" --host claude)
 ---
 
 # ChatCut MCP Doctor
 
-This Skill runs with local file/shell tools and Node 18+, independently of ChatCut MCP. Do not wait for ChatCut tools, a project, login, or the basics Skill to load. Tell the user that you are collecting connection diagnostics and whether the report will be sent. Honor local-only requests and existing execution/network permissions.
+Run locally with Node 18+ even when ChatCut MCP is unavailable. Preserve the already visible original error before any retry or change. Never read credentials, auth files or conversation histories.
 
-If the host rejects a local command, preserve that exact rejection and the operation it blocked. One denied compound read does not establish that every file tool or the standalone Node helper is prohibited, or that the workspace is read-only. Use only capabilities already permitted by the current host; do not change permissions, switch shells to bypass a rejection, or call collection complete when no report was written.
+## Capture first
 
-## Start here
+A diagnosis is complete only after this invocation's program-generated schema-2 report is saved and its diagnostic ID/path verified. A prose note or an old report is not a substitute.
 
-- In Codex, select **ChatCut MCP Doctor** from the skill picker. The Git plugin entry is `$chatcut:chatcut-mcp-doctor`; the existing store identity uses `$chatcut-desktop:chatcut-mcp-doctor`; a standalone project/personal copy is `$chatcut-mcp-doctor`. Use the exact installed catalog entry. Natural language: “Diagnose my ChatCut MCP connection with ChatCut MCP Doctor.”
-- In Claude Code with the ChatCut plugin, invoke `/chatcut:chatcut-mcp-doctor`. A separately installed project/personal copy uses `/chatcut-mcp-doctor`.
-- `/doctor` and `codex doctor` belong to the host; this Skill does not replace them. If the entry is absent or the plugin is old, read [discovery and fallback](references/discovery.md). A browser-only host without local execution cannot run this collector; retain the error and explain that boundary.
+The native host runs this bounded local capture before rendering the Skill. It saves a fresh offline report before any model answer:
 
-## Preserve, collect, explain
+!`node "${CLAUDE_SKILL_DIR}/scripts/capture.mjs" --host claude`
 
-Preserve the already visible original error before retries, reconnects or changes. Read [connection diagnostics](references/connection-diagnostics.md) for the dedicated failure/snapshot schema, bounded logs and collector options. Unknown times, IDs and stages stay unknown. Do not read credentials, auth.json, full configuration files or conversation transcripts.
+If host policy disables the injected command, run that exact local command with already permitted tools. If denied, retain the denial and report collection incomplete; do not bypass host policy.
 
-Invalid optional time/ID hints must not discard an otherwise valid original error. The helper omits those values and records `metadataGaps`; explain the precise gap instead of guessing replacements. Keep the dedicated input file for review.
+The capture receipt names the actual saved report, snapshot, diagnosis, Chinese note and SHA-256. Read these outputs, then explain the observed boundary and remaining gaps in the user's language. Default capture is offline: no native CLI, connection probes, login, repair or upload. Claude's current project .mcp.json is projected in memory to allowlisted registration fields; other scopes and active-session health remain unknown. Missing project configuration does not prove missing host registration.
 
-For a visible failed tool call, the minimal record is below. Create a file named
-`original.mcp-failure.json` (the `.mcp-failure.json` suffix is required). Replace
-only the message and the actually known tool name; keep unavailable time null.
-Read the reference before adding fields. The failure record uses schema **1**,
-not report schema 2; `mcp_tool_call` and `errorMessage` are not accepted fields.
-
-```json
-{"schemaVersion":1,"source":"host_tool_result","serverName":"chatcut","occurredAt":null,"operation":"list_projects","error":{"message":"Exact exposed original error"}}
-```
-
-Do not lose a known tool name by switching to text-only input after a formatting
-mistake. Correct the dedicated record using the already saved original result,
-without calling the failed tool again. Keep earlier incomplete reports separate;
-reuse the final correct report for feedback and one authorized transfer.
-
-**CLI registration query → snapshot; failed MCP tool → failure record.** A
-`codex/claude mcp get` response belongs in snapshot observations, not in a
-failure record with `source: cli_configuration`. Generate a fresh snapshot with
-`--create-snapshot current.mcp-snapshot.json`, retain its generated capture time,
-then add only the observed registration fact. Explicit native absence permits:
-
-```json
-{"stage":"host_registration","operation":"lookup_registered_server","source":"cli_configuration","observedAt":null,"outcome":"failed","lookupResult":"not_found","message":"Exact native no-entry response"}
-```
-
-Collect it with `--host-snapshot current.mcp-snapshot.json --server-url <known-selected-url> --offline --output current.mcp-report.json`. Omit `--failure-record` when no original MCP tool/runtime error is exposed. This keeps the CLI message and `not_registered` finding without inventing an original MCP failure/time. The earlier schema-1 example is for an actual failed MCP tool call only. Keep a known selected URL even offline so a later authorized transfer can reuse the report; never substitute a production URL afterwards.
-
-If a Windows log database is unavailable, save the just-visible failed tool's error first in a dedicated failure record, including unfamiliar messages/cause and only the stage/time/IDs actually exposed. Continue offline collection: database access is not a prerequisite for preserving that error, and a database failure does not invalidate it. Keep existing bounded App evidence separate. Do not require the user to configure stderr or export/copy a database first, or try permission/WAL/locking workarounds. Check `evidenceSummary.hostLogCoverage` for retained original error, database read failures and remaining sources. A startup error hidden from the Agent with no accessible App log or retained stream remains a coverage gap.
-
-Save the actual error message and exposed error fields, rather than reconstructing a supposedly raw tool-result envelope. A JSON-RPC error does not establish a `result.isError` flag. The helper records `collectionContext` from the current Codex `CODEX_THREAD_ID`; this is the collecting thread, not automatic proof of the original failed thread. When the failure just happened in this same chat, its known thread ID may be copied into the Agent-supplied failure record with that source explained. Never use `CODEX_TOOL_CALL_ID` from the diagnostic command as the failed MCP call's ID.
-
-With a known original/session thread and supported local Codex metadata, `hostLogs.nativeFailedCalls` contains at most ten failed ChatCut MCP items projected from that thread's bounded native index. This reads only native IDs, lifecycle times and error fields; do not manually read whole history items, conversations, arguments or successful results. Keep `nativeItemId` and its kind separate from Responses call IDs and server IDs. Keep native `startedAtMs`/`completedAtMs`, log time and original `occurredAt` separate. The collector never backfills original fields or confirms association automatically; compare known thread, operation and exact error, preserving duplicate/unknown matches as candidates.
-
-If this invocation's native stderr has already been retained by its caller in a known dedicated `.codex-stderr.log`, use `--codex-stderr-file` to read a bounded ChatCut diagnostic tail. The helper retains native `loggedAt` separately, never as original `occurredAt` or a call ID. This is conditional on a real retained error stream; do not manufacture a log, scan for unknown paths or start another host to replace missing evidence.
-
-Resolve paths from **this Skill's directory**, then invoke standalone quoted Node commands. The agent creates the files; the user should not have to fill JSON. Capture observed host registration/session facts; static CLI configuration cannot establish current tools or authentication. For a registration lookup, record `stage: host_registration`, `operation: lookup_registered_server`, `source: cli_configuration` (or `host_settings`), its actual `outcome`, exact response/error and actual observation time or null. Add `lookupResult: not_found` **only** when a completed host query explicitly reports no named entry in the selected scope, or a successful complete scoped inventory establishes absence. A nonzero exit, EACCES, parse error, missing CLI, or empty tool list cannot establish absence; omit `lookupResult` or use `unavailable` and preserve that error. `found` records an explicitly present entry. These remain agent-supplied facts; the helper does not independently verify a missing registration. A failed original tools/call may use `stage: tools_call` with its actual source.
-
-Only `scripts/doctor.mjs` generates the canonical report, its diagnostic UUID and collection time. Never handwrite a replacement report or invent these values. The agent writes only the dedicated original-error/snapshot inputs and separate explanatory/repair notes. A directory's timestamp is not the failure or repair time; keep unexposed original times null. A successful read of a controlled unauthenticated service proves that read only, not account authentication, permission checks or the contents of a real user's projects.
+If the current invocation already has a visible MCP tool error, save only its exact exposed error text as `original.mcp-error.txt`, then run:
 
 ```text
-node "<this-skill>/scripts/doctor.mjs" --host codex --server-url <actual-registered-url> --host-snapshot <new.mcp-snapshot.json> --failure-record <new.mcp-failure.json> --output <new.mcp-report.json>
+node "<this-skill>/scripts/capture.mjs" --host <codex|claude> --original-error "original.mcp-error.txt" --operation <actually-known-tool> --server-url <actually-selected-url>
 ```
 
-Use `--host claude` for Claude Code. Omit unavailable optional inputs. If there is no registered URL, omit it; do not silently choose production. `--offline` keeps the registered URL as evidence but sends **no requests**, including upload. Otherwise the collector makes bounded anonymous entry/metadata checks and optional wire checks; an initial anonymous 401 is expected. Use `--upload` for the redacted report when transfer is authorized, after briefly explaining it. An intentionally disabled server is preserved without requests.
+Omit unknown operation/URL. This program formats the dedicated failure record; never handwrite report JSON, schema versions, UUIDs or timestamps. A retained structured `.mcp-failure.json` can instead use `--failure-record` to preserve its code/cause/known IDs. Reuse saved originals; do not recreate a failure. Unknown original time/IDs stay unknown. The snapshot capture time and collecting thread are not original-event evidence.
 
-The command writes the existing schema-2 report plus `.diagnosis.json`, `.summary.md` and `.issue-draft.md` sidecars. Read the findings and actual gaps before answering; do not merely echo a category. Findings identify observed boundaries, not root causes. Distinguish original failure, host evidence and later probes. Missing/truncated/denied logs remain gaps. A healthy later probe does not establish recovery. Proxy presence, busy/300-second timeouts and generic transport errors do not justify blaming security software, clearing locks/credentials, restarting or changing timeouts/environments.
+## Diagnose and repair
 
-Wire failures/incomplete captures are later **direct-route** checks even if fetch metadata succeeds. Bounded native ERROR records and App `status=failed` notices are visible as unassociated host evidence; they do not fill a missing original error/time/request ID. Ordinary App starting/ready notices do not demonstrate failure. Local summaries show credential-redacted error excerpts; issue drafts keep structured states and evidence pointers without copying native log excerpts.
+Keep configuration, original failure, current session and later checks distinct. Do not infer account/permission/service health from prior success, static config or an empty controlled project list. Findings are observed boundaries, not root causes.
 
-## Repair and recheck
+For current native registration evidence, `capture.mjs --host <host> --native-lookup [--cli <actual-executable>]` runs one bounded native `mcp get` and formats its snapshot/report. Use it only when the user permits a connection check: Claude's command can health-check approved servers. It is **not offline**. It projects allowed fields without retaining headers/full CLI output. Timeout, denied/unavailable CLI and unrecognized output remain unavailable; only the exact completed no-entry response supports not_registered. Select `--server-name plugin:chatcut:chatcut` only when that is the actual selected server; never recreate a plugin server as a manual entry.
 
-For an observed missing registration or a normal sign-in requirement, read [repair and recheck](references/repair-and-recheck.md). Apply only the minimal change within the user's authorization and actual host/scope. Keep the prior state and rollback. Other findings need evidence-led investigation; this version has no automatic credential/network repair.
+Read [repair and recheck](references/repair-and-recheck.md) before any change. Repair only a demonstrated missing manual registration in the authorized scope; retain prior state, actual command and rollback. No automatic credential/network repair. Local execution denial is evidence, not authorization to change permissions.
 
-Verify the affected boundary in the **same host and scope** after a change. Registration lookup success proves registration only. Auth success requires the host's authenticated state. Tool recovery requires a safe read-only call such as `list_projects` actually succeeding. If the original operation mutates state, costs credits, or cannot be safely repeated, do not replay it; say that its recovery remains unverified. Record the actual action, time/source and verification result in the summary and draft; never label an unperformed repair as tried. Keep the report's original failure immutable and its collector `recoveryVerified:false`; agent recheck results are separate evidence.
+## Recheck and deliver
 
-## Feedback without starting over
-
-Return the observed finding, justified next action, diagnostic ID, report/summary locations and remaining gap in the user's language. An unresolved case should include the ready-to-review issue draft. The local JSON retains full credential-redacted evidence; the draft excludes log dumps and local IDs, but still needs review for personal/project data before sharing.
-
-Read the generated files and finish a usable explanation in the user's language. For Chinese requests, write a separate Chinese note with the actual symptom, exact error excerpt, evidence/source, action actually taken, safe same-host recheck result and delivery result. Fill core facts from observations; do not leave template placeholders for the user. If a later safe call succeeded, say exactly which operation and host/scope succeeded, while keeping the collector's original report immutable and its historical recovery flag separate. Do not claim an unperformed repair, complete recovery, final storage or an opened ticket.
-
-A protocol-discovery attempt that was rejected and then successfully negotiated by the same native flow can be normal. Preserve that sequence separately; do not present an intermediate negotiation rejection as the user's terminal failure when actual downstream success is established. Unrelated later success does not erase a recorded original tool failure.
+After an authorized change, run one native safe `list_projects` in the same host/scope. If a new session must explicitly load project config, disclose that choice. Do not replay mutation/generation calls or simulate a native read with fetch. Save its exposed result separately as `read.mcp-recheck.txt`, then record it without changing the original report:
 
 ```text
-node "<this-skill>/scripts/doctor.mjs" --report <existing.mcp-report.json>
-node "<this-skill>/scripts/doctor.mjs" --upload-report <existing.mcp-report.json>
+node "<this-skill>/scripts/record-recheck.mjs" --report "<saved.mcp-report.json>" --result "read.mcp-recheck.txt" --operation list_projects --outcome <success|failed> --scope "<actual same-host scope and new-session boundary>"
 ```
 
-`--report` rebuilds sidecars offline without recollecting. It overwrites derived sidecars, so save any agent-written repair notes separately first. Use `--upload-report` only for an authorized first transfer or a single requested retry after failure; it reuses the original diagnostic ID without new probes, keeps the original report unchanged, and writes a separate upload receipt. Do not repeatedly recollect or resend an acknowledged report. `ingest_accepted` is not verified final storage or an opened support ticket.
+The recording is explicitly Agent supplied and does not independently prove account authentication or original recovery. Finish a usable Chinese explanation for Chinese requests: actual symptom/error, evidence, action, recheck result, diagnostic ID/files and delivery status. Generated Chinese notes have the current facts; add actual repair details in a separate note. Do not ask the user to fill JSON or leave core placeholders.
 
-Use [ChatCut contact](https://chatcut.io/contact) for private support. The draft names no public issue repository because that destination is undecided. Do not open an issue, publish evidence, or message anyone without authorization. Root-cause rules and prevalence based on natural incidents remain future work; controlled tests are not user incidents.
+Report transfer requires authorization. `node "<this-skill>/scripts/doctor.mjs" --upload-report "<saved.mcp-report.json>"` sends the unchanged report once and saves a SHA-bound receipt. Do not recollect to resend, change its endpoint or repeat acknowledged delivery. Ingest acceptance is not final storage or a ticket. No publishing or messaging without authorization.
+
+## Entry and advanced evidence
+
+Claude plugin public entry: **/chatcut:chatcut-mcp-doctor**. Codex Git plugin: **$chatcut:chatcut-mcp-doctor**; store identity: **$chatcut-desktop:chatcut-mcp-doctor**. Use the exact installed catalog entry. Bare /doctor belongs to the host.
+
+- [Discovery and fallback](references/discovery.md): entry missing/old plugin or no local execution.
+- [Connection diagnostics](references/connection-diagnostics.md): dedicated evidence inputs, bounded native logs and original IDs.
+- [Advanced collection](references/advanced-collection.md): optional existing collector modes, precise log/database coverage and feedback reuse. Load only when needed.

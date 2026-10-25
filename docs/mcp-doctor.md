@@ -17,6 +17,20 @@ remain subject to review. The separate collection-only packages contain no
 Doctor entry. Check actual installed contents and catalog; Git availability,
 store approval and host adoption are separate checks.
 
+The short `scripts/capture.mjs` entry saves a fresh canonical report, snapshot,
+SHA-bound local receipt and Chinese note in a new `.chatcut-doctor/capture-*`
+directory. Claude invokes it through native Skill dynamic context before the
+model answers, subject to host policy. Default capture sends no requests and
+does not run native CLI: Claude's `mcp get` may health-check approved servers.
+Only allowlisted current project registration fields are projected in memory;
+missing project config does not establish absence in other host scopes.
+An explicit `--native-lookup` allows one bounded native query and projects its
+result without retaining full configuration/headers. Only the exact no-entry
+response supports `not_registered`; denied/timed-out/unrecognized lookups remain
+unknown. Saved `.mcp-error.txt` inputs can be formatted without Agent-authored
+schemas. `record-recheck.mjs` binds a separately supplied native safe-read result
+to the immutable report hash; it does not independently verify the Agent's claim.
+
 The basics scripts are compatibility forwarders; each host package contains
 one collector implementation under Doctor. The new `scripts/doctor.mjs`
 entrypoint keeps schema-2 collection unchanged and writes `.diagnosis.json`,

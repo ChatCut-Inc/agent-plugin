@@ -21,7 +21,7 @@ function dedicatedReportPath(path) {
     /^mcp-report(?:-\d+)?\.json$/i.test(basename(path));
 }
 
-async function readReport(path) {
+export async function readReport(path) {
   // Do not accept config/auth/session files even as a mistakenly supplied input.
   if (!dedicatedReportPath(path))
     throw new Error("Use the dedicated .mcp-report.json or default chatcut-mcp-doctor-<id>.json report, never config/auth/session files");

@@ -226,7 +226,8 @@ test("SQLite and text runtime records exclude content echoes from permitted MCP 
 test("both packages ship identical standalone executable resources and references", async () => {
   async function compare(relative = "") {
     for (const entry of await readdir(join(skill, relative), { withFileTypes: true })) {
-      if (entry.name === "agents") continue;
+      // Claude uses native dynamic capture syntax; executable resources stay identical.
+      if (["agents", "SKILL.md"].includes(entry.name)) continue;
       const path = join(relative, entry.name);
       if (entry.isDirectory()) await compare(path);
       else assert.deepEqual(await readFile(join(skill, path)), await readFile(new URL(`../claude/skills/chatcut-mcp-doctor/${path.replaceAll("\\", "/")}`, import.meta.url)));
