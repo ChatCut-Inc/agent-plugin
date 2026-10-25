@@ -11,6 +11,17 @@ const execute = promisify(execFile);
 const save = (path, data) => writeFile(path, JSON.stringify(data, null, 2) + "\n", { flag: "wx", mode: 0o600 });
 const now = () => new Date().toISOString();
 
+async function savedOriginal(cwd) {
+  // Two reserved error-only inputs, never a report, config, glob or transcript.
+  for (const [key, name] of [["failureRecord", "original.mcp-failure.json"], ["originalError", "original.mcp-error.txt"]]) {
+    try {
+      const path = join(cwd, name), info = await lstat(path);
+      if (info.isFile() && info.size <= 64 * 1024) return { [key]: path };
+    } catch (error) { if (error.code !== "ENOENT") return {}; }
+  }
+  return {};
+}
+
 async function dedicatedText(path) {
   if (!/\.mcp-error\.txt$/i.test(basename(path))) throw new Error("Use a dedicated .mcp-error.txt containing only the exposed original error");
   const info = await lstat(path);
@@ -73,6 +84,7 @@ export async function capture(options, dependencies = {}) {
   // Validate explicit endpoint before any optional native connection check.
   const selected = options.serverUrl ? serverUrl(options.serverUrl).href : null;
   const cwd = resolve(options.cwd ?? process.cwd());
+  const originalInput = options.originalError || options.failureRecord ? options : await savedOriginal(cwd);
   const base = join(cwd, ".chatcut-doctor");
   await mkdir(base, { recursive: true, mode: 0o700 });
   const dir = await mkdtemp(join(base, "capture-"));
@@ -92,11 +104,11 @@ export async function capture(options, dependencies = {}) {
   if (selected && lookup.url && selected !== lookup.url) snapshot.observations[0].message += " The explicitly selected endpoint differs; it was preserved without replacing the configured endpoint. No connection or authentication inference is made.";
   const snapshotPath = join(dir, "current.mcp-snapshot.json");
   await save(snapshotPath, snapshot);
-  let failureRecord = options.failureRecord;
-  if (options.originalError) {
+  let failureRecord = originalInput.failureRecord;
+  if (originalInput.originalError) {
     failureRecord = join(dir, "original.mcp-failure.json");
     await save(failureRecord, { schemaVersion: 1, source: "host_tool_result", serverName: name,
-      occurredAt: null, ...(options.operation && { operation: options.operation }), error: { message: await dedicatedText(options.originalError) } });
+      occurredAt: null, ...(options.operation && { operation: options.operation }), error: { message: await dedicatedText(originalInput.originalError) } });
   }
   const { path, report } = await runDoctor({ host: options.host, serverUrl: endpoint,
     hostSnapshot: snapshotPath, failureRecord, offline: true, output: join(dir, "diagnostic.mcp-report.json") }, dependencies);
@@ -110,7 +122,7 @@ export async function capture(options, dependencies = {}) {
     sourceReportSha256: createHash("sha256").update(bytes).digest("hex"), savedReportVerified: true,
     nativeLookupRequested: Boolean(options.nativeLookup), diagnosticHttpRequests: 0,
     nativeLookupMayConnect: Boolean(options.nativeLookup), lookupResult: lookup.lookupResult,
-    originalInput: options.originalError ? resolve(options.originalError) : options.failureRecord ? resolve(options.failureRecord) : null };
+    originalInput: originalInput.originalError ? resolve(originalInput.originalError) : originalInput.failureRecord ? resolve(originalInput.failureRecord) : null };
   await save(join(dir, "capture-receipt.json"), receipt);
   return receipt;
 }

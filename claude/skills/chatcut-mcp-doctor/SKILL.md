@@ -20,7 +20,7 @@ If host policy disables the injected command, run that exact local command with 
 
 The capture receipt names the actual saved report, snapshot, diagnosis, Chinese note and SHA-256. Read these outputs, then explain the observed boundary and remaining gaps in the user's language. Default capture is offline: no native CLI, connection probes, login, repair or upload. Claude's current project .mcp.json is projected in memory to allowlisted registration fields; other scopes and active-session health remain unknown. Missing project configuration does not prove missing host registration.
 
-If the current invocation already has a visible MCP tool error, save only its exact exposed error text as `original.mcp-error.txt`, then run:
+Before the model answers, capture automatically includes an existing project-root `original.mcp-failure.json` (preferred, preserving known metadata) or `original.mcp-error.txt`. These are reserved error-only inputs; it never scans old reports or conversations. If the error has not yet been saved, save only its exact exposed error text as `original.mcp-error.txt`, then run:
 
 ```text
 node "<this-skill>/scripts/capture.mjs" --host <codex|claude> --original-error "original.mcp-error.txt" --operation <actually-known-tool> --server-url <actually-selected-url>

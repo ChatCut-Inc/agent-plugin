@@ -72,6 +72,31 @@ test("saved visible errors are formatted by the program with known operation and
   assert.ok(receipt.findings.some(x => x.kind === "tool_call_failed"));
 });
 
+test("native pre-render capture automatically includes an existing reserved original error record", async t => {
+  const cwd = await temp(t), path = join(cwd, "original.mcp-failure.json");
+  const original = JSON.stringify({ schemaVersion: 1, source: "host_tool_result", serverName: "plugin:chatcut:chatcut",
+    occurredAt: null, operation: "list_projects", error: { message: "E_SAVED_VISIBLE", cause: { code: "EXPOSED_CAUSE" } } });
+  await writeFile(path, original);
+  const receipt = await capture({ host: "claude", cwd }, deps);
+  const report = JSON.parse(await readFile(receipt.report));
+  assert.equal(receipt.originalInput, path);
+  assert.equal(report.originalFailure.message, "E_SAVED_VISIBLE");
+  assert.equal(report.originalFailure.operation, "list_projects");
+  assert.equal(report.originalFailure.error.cause.code, "EXPOSED_CAUSE");
+  assert.equal(report.originalFailure.occurredAt, null);
+  assert.equal(await readFile(path, "utf8"), original);
+});
+
+test("native pre-render capture includes the reserved saved plain error without guessing an operation", async t => {
+  const cwd = await temp(t), path = join(cwd, "original.mcp-error.txt");
+  await writeFile(path, "E_SAVED_TEXT");
+  const receipt = await capture({ host: "claude", cwd }, deps);
+  const report = JSON.parse(await readFile(receipt.report));
+  assert.equal(report.originalFailure.message, "E_SAVED_TEXT");
+  assert.equal(report.originalFailure.operation, undefined);
+  assert.equal(receipt.originalInput, path);
+});
+
 test("safe recheck record binds an immutable original report and never overwrites a prior observation", async t => {
   const cwd = await temp(t), receipt = await capture({ host: "claude", cwd }, deps);
   const original = await readFile(receipt.report), result = join(cwd, "read.mcp-recheck.txt");
