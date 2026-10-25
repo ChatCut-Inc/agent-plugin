@@ -21,6 +21,21 @@ Preserve the already visible original error before retries, reconnects or change
 
 Invalid optional time/ID hints must not discard an otherwise valid original error. The helper omits those values and records `metadataGaps`; explain the precise gap instead of guessing replacements. Keep the dedicated input file for review.
 
+For a visible failed tool call, the minimal record is below. Create a file named
+`original.mcp-failure.json` (the `.mcp-failure.json` suffix is required). Replace
+only the message and the actually known tool name; keep unavailable time null.
+Read the reference before adding fields. The failure record uses schema **1**,
+not report schema 2; `mcp_tool_call` and `errorMessage` are not accepted fields.
+
+```json
+{"schemaVersion":1,"source":"host_tool_result","serverName":"chatcut","occurredAt":null,"operation":"list_projects","error":{"message":"Exact exposed original error"}}
+```
+
+Do not lose a known tool name by switching to text-only input after a formatting
+mistake. Correct the dedicated record using the already saved original result,
+without calling the failed tool again. Keep earlier incomplete reports separate;
+reuse the final correct report for feedback and one authorized transfer.
+
 If a Windows log database is unavailable, save the just-visible failed tool's error first in a dedicated failure record, including unfamiliar messages/cause and only the stage/time/IDs actually exposed. Continue offline collection: database access is not a prerequisite for preserving that error, and a database failure does not invalidate it. Keep existing bounded App evidence separate. Do not require the user to configure stderr or export/copy a database first, or try permission/WAL/locking workarounds. Check `evidenceSummary.hostLogCoverage` for retained original error, database read failures and remaining sources. A startup error hidden from the Agent with no accessible App log or retained stream remains a coverage gap.
 
 Save the actual error message and exposed error fields, rather than reconstructing a supposedly raw tool-result envelope. A JSON-RPC error does not establish a `result.isError` flag. The helper records `collectionContext` from the current Codex `CODEX_THREAD_ID`; this is the collecting thread, not automatic proof of the original failed thread. When the failure just happened in this same chat, its known thread ID may be copied into the Agent-supplied failure record with that source explained. Never use `CODEX_TOOL_CALL_ID` from the diagnostic command as the failed MCP call's ID.

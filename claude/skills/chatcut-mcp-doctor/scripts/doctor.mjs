@@ -16,9 +16,14 @@ export async function writePacket(path, report) {
   return { diagnosticId: report.diagnosticId, report: path, ...files, findings: diagnosis.findings, upload: report.upload, recoveryVerified: false };
 }
 
+function dedicatedReportPath(path) {
+  return /(?:\.mcp-report|chatcut-mcp-doctor-[a-f0-9-]+)\.json$/i.test(basename(path)) ||
+    /^mcp-report(?:-\d+)?\.json$/i.test(basename(path));
+}
+
 async function readReport(path) {
   // Do not accept config/auth/session files even as a mistakenly supplied input.
-  if (!/(?:\.mcp-report|chatcut-mcp-doctor-[a-f0-9-]+)\.json$/i.test(basename(path)))
+  if (!dedicatedReportPath(path))
     throw new Error("Use the dedicated .mcp-report.json or default chatcut-mcp-doctor-<id>.json report, never config/auth/session files");
   if ((await stat(path)).size > 2 * 1024 * 1024) throw new Error("Report exceeds 2 MiB; retained locally without reading");
   const bytes = await readFile(path);
@@ -60,6 +65,9 @@ export async function main(args = process.argv.slice(2)) {
     }
     result = { path, report };
   } else {
+    const outputIndex = args.indexOf("--output");
+    if (outputIndex >= 0 && !dedicatedReportPath(args[outputIndex + 1] ?? ""))
+      throw new Error("Use --output <name.mcp-report.json> or mcp-report.json so the saved report can be reused with --report and --upload-report");
     if (args.includes("--help")) {
       console.log("ChatCut MCP Doctor: collector options below also produce a diagnosis, summary and private issue draft. --offline sends no requests. --report <existing .mcp-report.json> rebuilds feedback offline. --upload-report <existing .mcp-report.json> sends that report once without new probes; use only for an authorized retry. No automatic repair or ticket submission.");
     }

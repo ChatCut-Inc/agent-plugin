@@ -14,6 +14,20 @@ import { diagnose, renderPacket } from "../codex/skills/chatcut-mcp-doctor/scrip
 const exec = promisify(execFile);
 const skill = fileURLToPath(new URL("../codex/skills/chatcut-mcp-doctor/", import.meta.url));
 const noLogs = async () => ({ entries: [], gaps: [{ source: "fixture", reason: "logs_unavailable" }] });
+
+test("Doctor reuses its dedicated short report names and rejects unusable output names before collection", async t => {
+  const dir = await temp(t), helper = join(skill, "scripts/doctor.mjs");
+  for (const name of ["mcp-report.json", "mcp-report-2.json"]) {
+    const output = join(dir, name);
+    await cli(helper, ["--host", "codex", "--offline", "--output", output], dir);
+    const before = await readFile(output, "utf8"), id = JSON.parse(before).diagnosticId;
+    await cli(helper, ["--report", output], dir);
+    assert.equal(await readFile(output, "utf8"), before);
+    assert.equal(JSON.parse(await readFile(output + ".diagnosis.json", "utf8")).diagnosticId, id);
+  }
+  await assert.rejects(cli(helper, ["--host", "codex", "--offline", "--output", join(dir, "config.json")], dir), /saved report can be reused/);
+  assert.ok(!(await readdir(dir)).includes("config.json"));
+});
 async function temp(t) {
   const dir = await mkdtemp(join(tmpdir(), "chatcut-standalone-doctor-"));
   t.after(() => rm(dir, { recursive: true, force: true }));
