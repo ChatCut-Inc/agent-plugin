@@ -1,6 +1,6 @@
 ---
 name: visual-analysis
-description: Verify composed ChatCut edits, compare source frames, locate visual changes, and build labeled contact sheets using the hosted plugin's actual frame delivery.
+description: Analyze videos and references scene by scene, verify composed ChatCut edits, compare source frames, locate visual changes, and build labeled comparisons using the hosted plugin's actual frame delivery.
 ---
 
 # Visual Analysis
@@ -8,6 +8,16 @@ description: Verify composed ChatCut edits, compare source frames, locate visual
 Use fresh pixels to decide visual questions: whether an edit appears, when an
 animation changes, how a crop or overlay composes, or which source shot fits.
 The Codex/Claude host filesystem and ChatCut's backend workspace are separate.
+
+## Whole-video or granular scene analysis
+
+For a video/reference breakdown, read
+[Scene-by-scene analysis](references/scene-breakdown.md). It adds chronological
+visual observations, each scene's words from the existing ChatCut transcript,
+shot/screen-state detail and optional scene JSON.
+Choose this path from the user's question; a focused edit check keeps the
+inspection workflow below. No new provider, queue or user mode parameter is
+required. Use the current host's source/timeline delivery and clock contracts.
 
 ## Keep coordinates and subjects explicit
 
