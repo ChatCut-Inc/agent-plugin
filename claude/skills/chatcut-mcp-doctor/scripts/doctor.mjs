@@ -65,8 +65,9 @@ export async function main(args = process.argv.slice(2)) {
     }
     result = { path, report };
   } else {
-    const outputIndex = args.indexOf("--output");
-    if (outputIndex >= 0 && !dedicatedReportPath(args[outputIndex + 1] ?? ""))
+    const outputs = args.flatMap((arg, index) => arg === "--output"
+      ? [args[index + 1] ?? ""] : arg.startsWith("--output=") ? [arg.slice(9)] : []);
+    if (outputs.some(path => !dedicatedReportPath(path)))
       throw new Error("Use --output <name.mcp-report.json> or mcp-report.json so the saved report can be reused with --report and --upload-report");
     if (args.includes("--help")) {
       console.log("ChatCut MCP Doctor: collector options below also produce a diagnosis, summary and private issue draft. --offline sends no requests. --report <existing .mcp-report.json> rebuilds feedback offline. --upload-report <existing .mcp-report.json> sends that report once without new probes; use only for an authorized retry. No automatic repair or ticket submission.");

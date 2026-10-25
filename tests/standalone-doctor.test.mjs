@@ -26,6 +26,7 @@ test("Doctor reuses its dedicated short report names and rejects unusable output
     assert.equal(JSON.parse(await readFile(output + ".diagnosis.json", "utf8")).diagnosticId, id);
   }
   await assert.rejects(cli(helper, ["--host", "codex", "--offline", "--output", join(dir, "config.json")], dir), /saved report can be reused/);
+  await assert.rejects(cli(helper, ["--host", "codex", "--offline", `--output=${join(dir, "config.json")}`], dir), /saved report can be reused/);
   assert.ok(!(await readdir(dir)).includes("config.json"));
 });
 async function temp(t) {
