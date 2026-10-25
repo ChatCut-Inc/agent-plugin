@@ -36,6 +36,18 @@ mistake. Correct the dedicated record using the already saved original result,
 without calling the failed tool again. Keep earlier incomplete reports separate;
 reuse the final correct report for feedback and one authorized transfer.
 
+**CLI registration query → snapshot; failed MCP tool → failure record.** A
+`codex/claude mcp get` response belongs in snapshot observations, not in a
+failure record with `source: cli_configuration`. Generate a fresh snapshot with
+`--create-snapshot current.mcp-snapshot.json`, retain its generated capture time,
+then add only the observed registration fact. Explicit native absence permits:
+
+```json
+{"stage":"host_registration","operation":"lookup_registered_server","source":"cli_configuration","observedAt":null,"outcome":"failed","lookupResult":"not_found","message":"Exact native no-entry response"}
+```
+
+Collect it with `--host-snapshot current.mcp-snapshot.json --server-url <known-selected-url> --offline --output current.mcp-report.json`. Omit `--failure-record` when no original MCP tool/runtime error is exposed. This keeps the CLI message and `not_registered` finding without inventing an original MCP failure/time. The earlier schema-1 example is for an actual failed MCP tool call only. Keep a known selected URL even offline so a later authorized transfer can reuse the report; never substitute a production URL afterwards.
+
 If a Windows log database is unavailable, save the just-visible failed tool's error first in a dedicated failure record, including unfamiliar messages/cause and only the stage/time/IDs actually exposed. Continue offline collection: database access is not a prerequisite for preserving that error, and a database failure does not invalidate it. Keep existing bounded App evidence separate. Do not require the user to configure stderr or export/copy a database first, or try permission/WAL/locking workarounds. Check `evidenceSummary.hostLogCoverage` for retained original error, database read failures and remaining sources. A startup error hidden from the Agent with no accessible App log or retained stream remains a coverage gap.
 
 Save the actual error message and exposed error fields, rather than reconstructing a supposedly raw tool-result envelope. A JSON-RPC error does not establish a `result.isError` flag. The helper records `collectionContext` from the current Codex `CODEX_THREAD_ID`; this is the collecting thread, not automatic proof of the original failed thread. When the failure just happened in this same chat, its known thread ID may be copied into the Agent-supplied failure record with that source explained. Never use `CODEX_TOOL_CALL_ID` from the diagnostic command as the failed MCP call's ID.

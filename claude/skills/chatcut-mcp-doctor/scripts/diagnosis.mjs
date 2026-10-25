@@ -11,6 +11,15 @@ export function diagnose(report) {
   const failed = observations.map((item, index) => ({ ...item, index }))
     .filter((item) => item.outcome === "failed");
   const original = report.originalFailure;
+  (report.gaps ?? []).forEach((gap, index) => {
+    if (!((gap.source === "original_failure" && ["failure_record_unavailable", "unavailable"].includes(gap.reason)) ||
+          (gap.source === "host_snapshot" && gap.reason === "unavailable"))) return;
+    add("evidence_input_unavailable", [`gaps[${index}]`],
+      "A supplied evidence input could not be used. Preserve its exact error and use the accepted dedicated input schema; CLI registration facts belong in snapshot observations, not MCP failure records. Do not treat this incomplete capture as proof that no incident occurred, guess missing facts or change permissions.", "attention", {
+        source: gap.source, reason: gap.reason,
+        messageExcerpt: redact(gap.error?.message ?? "").slice(0, 2000),
+      });
+  });
   if (report.upload?.status === "skipped_intentionally_disabled" || snapshot?.configuration?.enabled === false || session?.connectionStatus === "disabled")
     add("intentionally_disabled", ["hostSnapshot"], "Preserve the disabled choice; do not enable or probe it.", "info");
   for (const [index, item] of observations.entries()) {
