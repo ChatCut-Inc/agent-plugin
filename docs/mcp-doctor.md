@@ -30,6 +30,11 @@ response supports `not_registered`; denied/timed-out/unrecognized lookups remain
 unknown. Saved `.mcp-error.txt` inputs can be formatted without Agent-authored
 schemas. `record-recheck.mjs` binds a separately supplied native safe-read result
 to the immutable report hash; it does not independently verify the Agent's claim.
+The program-generated `active-case.json` binds follow-up safe-read recording to
+the original incident path/hash. A later Skill entry may create a fresh baseline
+but cannot replace a recent same-endpoint case; the same saved original is not
+treated as a new event. Chinese user-facing diagnoses come from the deterministic
+note; the Agent adds only separately observed actions, rechecks and delivery.
 
 The basics scripts are compatibility forwarders; each host package contains
 one collector implementation under Doctor. The new `scripts/doctor.mjs`

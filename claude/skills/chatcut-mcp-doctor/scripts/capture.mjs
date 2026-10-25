@@ -6,6 +6,7 @@ import { fileURLToPath } from "node:url";
 import { parseArgs, promisify } from "node:util";
 import { redact, runDoctor, serverUrl } from "./mcp-doctor.mjs";
 import { writePacket } from "./doctor.mjs";
+import { selectActiveCase } from "./active-case.mjs";
 
 const execute = promisify(execFile);
 const save = (path, data) => writeFile(path, JSON.stringify(data, null, 2) + "\n", { flag: "wx", mode: 0o600 });
@@ -114,14 +115,26 @@ export async function capture(options, dependencies = {}) {
     hostSnapshot: snapshotPath, failureRecord, offline: true, output: join(dir, "diagnostic.mcp-report.json") }, dependencies);
   const packet = await writePacket(path, report);
   const zhPath = path + ".zh-CN.md";
-  const note = `# ChatCut MCP 本轮诊断\n\n诊断编号：${report.diagnosticId}\n采集时间：${report.collectedAt}（不是原始错误时间）\n宿主：${report.host}\n\n本轮事实：${lookup.message}\n\n原始错误：${report.originalFailure.status === "recorded" ? report.originalFailure.message : "未提供可见的原始 MCP 错误；未编造。"}\n原始时间：${report.originalFailure.occurredAt ?? "未知"}；调用 ID：${report.originalFailure.callId ?? "未知"}。\n\n程序已保存本轮 snapshot、schema-2 正式报告及诊断 sidecar。结论：${packet.findings.map(x => x.kind).join("、")}。根因尚未确认。\n实际处理：${options.nativeLookup ? "已运行一次用户允许的原生注册查询；该命令可能附带健康连接检查。" : "仅投影当前工程允许的配置字段并离线采集；没有调用原生 CLI 或发送诊断请求。"} 未修改注册、登录或权限。\n复验：尚未执行安全的原生工具读取；配置存在不代表当前连接或账号健康。后续复验单独记录，原报告不变。\n发送：未上报、未开工单，最终存储未验证。\n缺口：${report.evidenceSummary?.gaps?.join("；") || "详见正式报告"}。\n\n正式报告：${path}\n`;
+  const labels = { tool_call_failed: "已保留工具调用失败", startup_or_discovery_failed: "已保留启动或工具发现失败",
+    registration_lookup_unavailable: "注册状态未确认", not_registered: "原生查询明确报告所选名称未注册",
+    no_incident_demonstrated: "本轮证据不足以确认原始故障", original_failure_recorded_stage_unconfirmed: "已保留原错，阶段未确认" };
+  const registration = lookup.lookupResult === "found"
+    ? `${options.nativeLookup ? "原生查询返回" : "当前工程静态配置包含"}所选注册；这不能确认当前会话连接、认证或原故障恢复。`
+    : lookup.lookupResult === "not_found" ? `原生查询明确返回：${lookup.message}`
+      : "所选注册状态未确认。离线工程配置缺失、查询不可用或无法识别的输出都不能证明宿主未注册；本地、用户和插件作用域及当前会话仍有未覆盖范围。";
+  const original = report.originalFailure;
+  const note = `# ChatCut MCP 本轮诊断\n\n诊断编号：${report.diagnosticId}\n采集时间：${report.collectedAt}（不是原始错误时间）\n宿主：${report.host}\n所选地址：${report.serverUrl ?? "未确认"}\n\n注册观察：${registration}\n\n原始操作：${original.operation ?? "未知"}\n原始错误内容：${original.status === "recorded" ? original.message : "没有可用的原始 MCP 错误；没有编造。"}\n宿主暴露的错误码：${original.error?.code ?? "未提供"}\n原始时间：${original.occurredAt ?? "未知"}；调用 ID：${original.callId ?? "未知"}。\n\n结论：${packet.findings.map(x => labels[x.kind] ?? x.kind).join("；")}。根因尚未确认，现有证据不能排除或归因于注册、凭证、网络或服务端。\n实际处理：${options.nativeLookup ? "已运行一次用户允许的原生注册查询；该命令可能附带健康连接检查，不能称为全程离线。" : "仅投影当前工程允许的配置字段并离线采集；没有调用原生 CLI 或发送诊断请求。"} 程序未修改注册、登录或权限。\n复验：尚未执行安全的原生工具读取；后续复验单独记录，原报告不变。\n发送：未上报、未开工单，最终存储未验证。\n缺口：${report.evidenceSummary?.gaps?.join("；") || "详见正式报告"}。\n下一步：${lookup.lookupResult === "not_found" ? "在用户授权的宿主/范围内按修复指南检查缺失注册并保留回滚，再做一次安全原生读取。" : "如用户授权，按实际宿主/范围做一次安全原生读取，单独保留结果；不重复制造失败或猜测根因。"}\n\n正式报告：${path}\n`;
   await writeFile(zhPath, note, { flag: "wx", mode: 0o600 });
   const bytes = await readFile(path), saved = JSON.parse(bytes);
   if (saved.diagnosticId !== report.diagnosticId || saved.schemaVersion !== 2) throw new Error("Saved report identity check failed");
+  const sourceReportSha256 = createHash("sha256").update(bytes).digest("hex");
+  const activeReport = await selectActiveCase(cwd, report, path, sourceReportSha256,
+    report.originalFailure.status === "recorded" || (options.nativeLookup && lookup.lookupResult === "not_found"));
   const receipt = { schemaVersion: 1, startedAt, completedAt: now(), ...packet, snapshot: snapshotPath, chineseNote: zhPath,
-    sourceReportSha256: createHash("sha256").update(bytes).digest("hex"), savedReportVerified: true,
+    sourceReportSha256, savedReportVerified: true, activeReport,
     nativeLookupRequested: Boolean(options.nativeLookup), diagnosticHttpRequests: 0,
     nativeLookupMayConnect: Boolean(options.nativeLookup), lookupResult: lookup.lookupResult,
+    userFacingNote: note,
     originalInput: originalInput.originalError ? resolve(originalInput.originalError) : originalInput.failureRecord ? resolve(originalInput.failureRecord) : null };
   await save(join(dir, "capture-receipt.json"), receipt);
   return receipt;

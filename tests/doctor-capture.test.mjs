@@ -110,3 +110,15 @@ test("safe recheck record binds an immutable original report and never overwrite
   await assert.rejects(recordRecheck(options), /EEXIST/);
   assert.deepEqual(await readFile(receipt.report), original);
 });
+
+test("follow-up entry baseline cannot replace the active incident report for recheck", async t => {
+  const cwd = await temp(t), result = join(cwd, "read.mcp-recheck.txt");
+  const first = await capture({ host: "claude", cwd, nativeLookup: true }, { ...deps, nativeRegistration: async () => ({ lookupResult: "not_found", message: "Exact native scoped no-entry response" }) });
+  const baseline = await capture({ host: "claude", cwd }, deps);
+  assert.notEqual(baseline.diagnosticId, first.diagnosticId);
+  assert.equal(baseline.activeReport.diagnosticId, first.diagnosticId);
+  await writeFile(result, "actual safe native read returned []");
+  const recheck = await recordRecheck({ activeCase: true, cwd, result, operation: "list_projects", outcome: "success", scope: "same project; explicit new session" });
+  assert.equal(recheck.diagnosticId, first.diagnosticId);
+  assert.equal(recheck.sourceReportSha256, first.sourceReportSha256);
+});

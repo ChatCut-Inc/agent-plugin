@@ -5,9 +5,12 @@ import { fileURLToPath } from "node:url";
 import { parseArgs } from "node:util";
 import { readReport } from "./doctor.mjs";
 import { redact } from "./mcp-doctor.mjs";
+import { readActiveCase } from "./active-case.mjs";
 
 export async function recordRecheck(options) {
-  const path = resolve(options.report);
+  if (Boolean(options.report) === Boolean(options.activeCase)) throw new Error("Choose --active-case for the program-tracked incident, or an explicit --report");
+  const active = options.activeCase ? await readActiveCase(options.cwd ?? process.cwd()) : null;
+  const path = active ? active.report : resolve(options.report);
   const { report, sourceReportSha256 } = await readReport(path);
   if (!["success", "failed"].includes(options.outcome) || options.operation !== "list_projects" ||
       typeof options.scope !== "string" || !options.scope.trim() || options.scope.length > 1000)
@@ -31,9 +34,9 @@ export async function recordRecheck(options) {
 }
 
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
-  const { values } = parseArgs({ options: { report: { type: "string" }, result: { type: "string" },
+  const { values } = parseArgs({ options: { report: { type: "string" }, "active-case": { type: "boolean", default: false }, result: { type: "string" },
     outcome: { type: "string" }, operation: { type: "string" }, scope: { type: "string" } } });
-  recordRecheck(values).then(x => console.log(JSON.stringify(x))).catch(error => {
+  recordRecheck({ ...values, activeCase: values["active-case"] }).then(x => console.log(JSON.stringify(x))).catch(error => {
     console.error(JSON.stringify({ recheckRecordingFailed: true, message: redact(error.message) })); process.exitCode = 1;
   });
 }
