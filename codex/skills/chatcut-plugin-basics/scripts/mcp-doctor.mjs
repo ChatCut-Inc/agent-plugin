@@ -253,7 +253,7 @@ export async function probeEntry(endpoint, diagnosticId, fetchImpl = fetch) {
         params: {
           protocolVersion: "2025-11-25",
           capabilities: {},
-          clientInfo: { name: "chatcut-mcp-doctor", version: "1.2.3" },
+          clientInfo: { name: "chatcut-mcp-doctor", version: "1.2.5" },
         },
       }),
     });
@@ -902,7 +902,7 @@ export async function runDoctor(options, dependencies = {}) {
   const diagnosticId = randomUUID();
   const report = {
     schemaVersion: 2,
-    collectorVersion: "1.2.3",
+    collectorVersion: "1.2.5",
     diagnosticId,
     collectedAt: new Date().toISOString(),
     scope: "cloud",
@@ -1026,6 +1026,8 @@ export async function runDoctor(options, dependencies = {}) {
       report.originalFailure = clean(
         failureFromRecord(JSON.parse(await readFile(options.failureRecord, "utf8"))),
       );
+      for (const gap of report.originalFailure.metadataGaps ?? [])
+        report.gaps.push({ source: "original_failure", ...gap });
       if (!report.originalFailure.occurredAt && options.occurredAt) {
         report.originalFailure.occurredAt = options.occurredAt;
         report.originalFailure.timeSource =

@@ -10,6 +10,16 @@ const FIELDS = [
   "requestId",
   "error",
 ];
+const OPTIONAL_IDENTIFIERS = ["conversationId", "callId", "operation", "requestId"];
+const validIdentifier = (value) =>
+  value === undefined ||
+  value === null ||
+  (typeof value === "string" && /^[A-Za-z0-9_.:/-]{1,256}$/.test(value));
+const validTime = (value) =>
+  value === null ||
+  (typeof value === "string" &&
+    /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})$/.test(value) &&
+    Number.isFinite(Date.parse(value)));
 
 export function validateFailureRecord(input) {
   if (
@@ -29,23 +39,12 @@ export function validateFailureRecord(input) {
     throw new Error(
       "Failure record must identify the hosted ChatCut server and original error source",
     );
-  if (
-    input.occurredAt !== null &&
-    (typeof input.occurredAt !== "string" ||
-      !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})$/.test(
-        input.occurredAt,
-      ) ||
-      !Number.isFinite(Date.parse(input.occurredAt)))
-  )
+  if (!validTime(input.occurredAt))
     throw new Error(
       "Failure occurredAt must be its observed ISO timestamp with timezone, or null when unavailable",
     );
-  for (const key of ["conversationId", "callId", "operation", "requestId"])
-    if (
-      input[key] !== undefined &&
-      input[key] !== null &&
-      (typeof input[key] !== "string" || !/^[A-Za-z0-9_.:/-]{1,256}$/.test(input[key]))
-    )
+  for (const key of OPTIONAL_IDENTIFIERS)
+    if (!validIdentifier(input[key]))
       throw new Error(
         `Invalid original failure ${key}; never substitute a credential or a later probe ID`,
       );
@@ -63,7 +62,26 @@ export function validateFailureRecord(input) {
 }
 
 export function failureFromRecord(input) {
-  const record = validateFailureRecord(input);
+  const candidate =
+    input && typeof input === "object" && !Array.isArray(input) ? { ...input } : input;
+  const metadataGaps = [];
+  if (candidate && typeof candidate === "object" && !Array.isArray(candidate)) {
+    if (!validTime(candidate.occurredAt)) {
+      candidate.occurredAt = null;
+      metadataGaps.push({
+        field: "occurredAt",
+        reason: "invalid_optional_metadata; value_omitted",
+      });
+    }
+    for (const field of OPTIONAL_IDENTIFIERS) {
+      if (!validIdentifier(candidate[field])) {
+        // Invalid association hints must not discard the independent original error.
+        delete candidate[field];
+        metadataGaps.push({ field, reason: "invalid_optional_metadata; value_omitted" });
+      }
+    }
+  }
+  const record = validateFailureRecord(candidate);
   return {
     evidenceKind: "original_failure",
     status: "recorded",
@@ -78,6 +96,7 @@ export function failureFromRecord(input) {
     ...(record.callId && { callId: record.callId }),
     ...(record.operation && { operation: record.operation }),
     ...(record.requestId && { requestId: record.requestId }),
+    ...(metadataGaps.length && { metadataGaps }),
     association: "dedicated_original_failure_record; agent_supplied_not_independently_verified",
   };
 }
