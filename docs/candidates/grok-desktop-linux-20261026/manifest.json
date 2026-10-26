@@ -1,0 +1,40 @@
+{
+  "candidate": "grok-desktop-linux-20261026-v2",
+  "published_to_npm": false,
+  "app": {
+    "version": "0.7.21",
+    "url": "https://d2k0dx41dpnoir.cloudfront.net/ChatCut-0.7.21-x64-candidate-40056548143-1.AppImage",
+    "bytes": 696162360,
+    "sha256": "e9c04f60c10a023e2da4955b25d4e38bcbfd90654a3d1ca13fed65276ce41a05"
+  },
+  "libpci3": {
+    "url": "https://deb.debian.org/debian/pool/main/p/pciutils/libpci3_3.13.0-2_amd64.deb",
+    "bytes": 75572,
+    "sha256": "f8f01883368fe86417b3845aa08ea3508ca59f5e1bb0983673629e227f5ac868",
+    "requires": "Debian-compatible Linux x64, glibc >= 2.38; verify remaining dynamic dependencies"
+  },
+  "skill": {
+    "name": "chatcut-desktop",
+    "revision": "grok-desktop-qa-20261026-v2",
+    "body_sha256": "94d5e2b064fe55775ac1577ae99deac8a61602b65ebcc1231004f99d85c9ac71",
+    "previous_tested_body_sha256": "0cc3b07555521d333f1499dc7087c8ad8d7545e5144ec633f5afa2c721e5df3e",
+    "provenance": "Same exact v2 body as the local QA candidate; normal install Skill name is separate from the previously installed QA Skill."
+  },
+  "files": [
+    {
+      "path": "SKILL.md",
+      "bytes": 5530,
+      "sha256": "6f72e93d016bf7fad35888150d944e7b801f63fdd62ca3ed4d8e6d784711d771"
+    },
+    {
+      "path": "chatcut-desktop-mcp-0.1.2-linux-qa.0.tgz",
+      "bytes": 3288,
+      "sha256": "9fc81a56a59a10bcda8c84260c49bf58cb1aa58ef54343649d58f4af4a58b061"
+    },
+    {
+      "path": "native-update-skill-input.json",
+      "bytes": 5663,
+      "sha256": "271e9dc1e2b1a3079d07a60fbc3a33943888ec970870323339b70676b73c904d"
+    }
+  ]
+}
