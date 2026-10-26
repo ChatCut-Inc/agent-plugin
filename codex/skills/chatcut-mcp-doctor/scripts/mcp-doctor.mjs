@@ -1200,7 +1200,6 @@ export async function submitReport(report, fetchImpl = fetch) {
     return { status: "skipped_intentionally_disabled", storageVerified: false };
   if (!report.serverUrl) return { status: "skipped_endpoint_unavailable", storageVerified: false };
   let attempted = false;
-  let rejected = false;
   try {
     const endpoint = serverUrl(report.serverUrl);
     const events = fragmentEvents(report);
@@ -1209,14 +1208,14 @@ export async function submitReport(report, fetchImpl = fetch) {
       method: "POST", redirect: "manual", signal: AbortSignal.timeout(TIMEOUT_MS),
       headers: { "content-type": "application/json" }, body: JSON.stringify(events),
     });
-    rejected = !response.ok;
     const body = await limitedBody(response, 16 * 1024);
     if (!response.ok || JSON.parse(body).ok !== true)
       throw new Error(`Diagnostic ingest rejected: HTTP ${response.status}; ${body}`);
     return { status: "ingest_accepted", storageVerified: false, fragmentCount: events.length,
       reportSha256: events[0].properties.attributes.mcpDoctor.reportSha256 };
   } catch (error) {
-    return { status: "failed", storageVerified: false, deliveryUncertain: attempted && !rejected, error: errorDetails(error) };
+    // HTTP status alone cannot prove that no fragment was persisted downstream.
+    return { status: "failed", storageVerified: false, deliveryUncertain: attempted, error: errorDetails(error) };
   }
 }
 

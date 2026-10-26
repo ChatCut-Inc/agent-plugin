@@ -52,10 +52,10 @@ test("interrupted owner and persisted sending receipt never become automatic ret
   assert.equal(await readFile(path + ".upload.lock", "utf8"), "interrupted fixture owner");
 });
 
-test("a complete failure response permits a separately requested retry, and source hash mismatch refuses it", async t => {
+test("source hash mismatch refuses a changed report before any subsequent send", async t => {
   const { path } = await fixture(t); let posts = 0;
   const failed = await uploadReport(path, { fetchImpl: async () => { posts++; return new Response("busy", { status: 503 }); } });
-  assert.equal(failed.receipt.deliveryUncertain, false);
+  assert.equal(failed.receipt.deliveryUncertain, true);
   const changed = JSON.parse(await readFile(path)); changed.collectedAt = "2000-01-01T00:00:00Z";
   await writeFile(path, JSON.stringify(changed));
   await assert.rejects(uploadReport(path, { fetchImpl: () => assert.fail("must not send changed evidence") }), /does not match/);
@@ -70,6 +70,9 @@ test("incomplete checkpoint is locally deliverable and never posted", async t =>
   assert.equal(sent.receipt.status, "failed");
   assert.equal(sent.receipt.deliveryUncertain, false);
   assert.match(sent.receipt.error.message, /Incomplete collection/);
+  const retried = await uploadReport(path, { fetchImpl: () => assert.fail("no-attempt retry must still not send an incomplete report") });
+  assert.equal(retried.receipt.deliveryUncertain, false);
+  assert.equal(retried.sourceReportSha256, sent.sourceReportSha256);
   assert.deepEqual(await readFile(path), bytes);
 });
 
@@ -79,4 +82,28 @@ test("legacy failed delivery without certainty evidence is not treated as permis
   report.upload = { status: "failed", storageVerified: false, error: { message: "legacy connection closed" } };
   await writeFile(path, JSON.stringify(report));
   await assert.rejects(uploadReport(path, { fetchImpl: () => assert.fail("must not resend uncertain legacy evidence") }), /delivery is uncertain/);
+});
+
+for (const [label, response] of [
+  ["HTTP 500", () => new Response("upstream failed after ingest", { status: 500 })],
+  ["HTTP 503", () => new Response("upstream busy", { status: 503 })],
+  ["missing success ACK", () => new Response("{}")],
+  ["malformed ACK", () => new Response("{\"ok\":")],
+  ["interrupted ACK body", () => new Response(new ReadableStream({ start(controller) {
+    controller.enqueue(new TextEncoder().encode('{"ok":'));
+    controller.error(Object.assign(new Error("original response body interrupted"), { cause: { code: "E_ACK_BODY" } }));
+  } }))],
+]) test(label + " cannot prove no-write and blocks resend while retaining original evidence", async t => {
+  const { path, bytes } = await fixture(t); let posts = 0;
+  const fetchImpl = async () => { posts++; return response(); };
+  const sent = await uploadReport(path, { fetchImpl });
+  assert.equal(sent.receipt.status, "failed");
+  assert.equal(sent.receipt.deliveryUncertain, true);
+  assert.equal(sent.receipt.storageVerified, false);
+  if (label === "interrupted ACK body") assert.match(JSON.stringify(sent.receipt.error), /E_ACK_BODY/);
+  const saved = await readFile(path + ".upload.json");
+  await assert.rejects(uploadReport(path, { fetchImpl }), /delivery is uncertain/);
+  assert.equal(posts, 1);
+  assert.deepEqual(await readFile(path), bytes);
+  assert.deepEqual(await readFile(path + ".upload.json"), saved);
 });

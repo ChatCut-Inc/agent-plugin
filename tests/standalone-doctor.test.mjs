@@ -116,32 +116,31 @@ test("unsupported endpoint preserves the local report without retargeting or any
   assert.ok(report.gaps.some(gap => gap.reason.startsWith("unsupported_endpoint")));
 });
 
-test("failed ingest can resend the same saved report once, without probes or report mutations", async (t) => {
+test("an HTTP 503 leaves delivery uncertain and cannot trigger another POST", async (t) => {
   const dir = await temp(t);
-  let posts = 0;
-  let reject = true;
-  let received;
+  let posts = 0, reject = true, received;
   const origin = await service(t, (req, res) => {
     assert.equal(req.url, "/telemetry/events");
     assert.equal(req.headers.authorization, undefined);
     posts++;
     let body = "";
-    req.on("data", (chunk) => body += chunk);
+    req.on("data", chunk => body += chunk);
     req.on("end", () => { received = JSON.parse(body); res.writeHead(reject ? 503 : 200); res.end(reject ? "busy" : '{"ok":true}'); });
   });
-  const output = join(dir, "retry.mcp-report.json");
-  await runDoctor({ host: "codex", serverUrl: `${origin}/api/external-mcp/mcp`, offline: true, output }, { collectLogs: noLogs });
+  const output = join(dir, "uncertain.mcp-report.json");
+  await runDoctor({ host: "codex", serverUrl: origin + "/api/external-mcp/mcp", offline: true, output }, { collectLogs: noLogs });
   const before = await readFile(output, "utf8");
   await cli(join(skill, "scripts/doctor.mjs"), ["--upload-report", output], dir);
-  assert.equal(JSON.parse(await readFile(output + ".upload.json")).receipt.status, "failed");
-  reject = false;
-  await cli(join(skill, "scripts/doctor.mjs"), ["--upload-report", output], dir);
-  assert.equal(JSON.parse(await readFile(output + ".upload.json")).receipt.storageVerified, false);
-  assert.equal(JSON.parse(await readFile(output + ".upload.json")).receipt.status, "ingest_accepted");
+  const saved = JSON.parse(await readFile(output + ".upload.json"));
+  assert.equal(saved.receipt.status, "failed");
+  assert.equal(saved.receipt.deliveryUncertain, true);
+  assert.equal(saved.receipt.storageVerified, false);
   assert.equal(received[0].properties.attributes.mcpDoctor.diagnosticId, JSON.parse(before).diagnosticId);
+  reject = false;
+  await assert.rejects(cli(join(skill, "scripts/doctor.mjs"), ["--upload-report", output], dir), /delivery is uncertain/);
   assert.equal(await readFile(output, "utf8"), before);
-  await assert.rejects(cli(join(skill, "scripts/doctor.mjs"), ["--upload-report", output], dir), /already acknowledged/);
-  assert.equal(posts, 2);
+  assert.deepEqual(JSON.parse(await readFile(output + ".upload.json")), saved);
+  assert.equal(posts, 1);
 });
 
 test("private issue draft excludes local IDs, full stacks, paths, credential values and log dumps", async (t) => {

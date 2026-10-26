@@ -109,6 +109,24 @@ test("explicit report remains the baseline across another host and any age; no i
   await assert.rejects(recordRecheck({ activeCase: true, cwd, result }), /Explicit --report/);
 });
 
+test("content-only native MCP results append after failure without manufacturing projects or structuredContent", async t => {
+  const cwd = await temp(t), receipt = await capture({ host: "claude", cwd }, deps);
+  const original = await readFile(receipt.report), result = join(cwd, "native-result.json");
+  const options = { report: receipt.report, host: "claude", result, operation: "list_projects" };
+  await writeFile(result, JSON.stringify({ content: [{ type: "text", text: "original native read failed" }], isError: true }));
+  const failed = await recordRecheck({ ...options, outcome: "failed" });
+  const exposed = { content: [{ type: "text", text: "actual native safe-read result; no structured fields exposed" }], isError: false };
+  await writeFile(result, JSON.stringify(exposed));
+  const succeeded = await recordRecheck({ ...options, outcome: "success" });
+  assert.notEqual(failed.path, succeeded.path);
+  assert.equal(succeeded.sourceReportSha256, receipt.sourceReportSha256);
+  assert.equal(failed.sourceReportSha256, succeeded.sourceReportSha256);
+  assert.deepEqual(JSON.parse(succeeded.message), exposed);
+  assert.equal(succeeded.recoveryVerified, false);
+  assert.equal(succeeded.originalAttemptAssociation, "unconfirmed");
+  assert.deepEqual(await readFile(receipt.report), original);
+});
+
 test("a different actual Hosted safe read is preserved without a hardcoded operation or invented schema", async t => {
   const cwd = await temp(t), receipt = await capture({ host: "claude", cwd }, deps);
   const result = join(cwd, "native-result.txt");
