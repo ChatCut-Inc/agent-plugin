@@ -16,9 +16,27 @@ Use it to import media, change a project timeline, create motion graphics, gener
 - `claude/.claude-plugin/plugin.json` - Claude Code plugin metadata.
 - `grok/.cursor-plugin/plugin.json` - Grok Bot and Cursor plugin metadata.
 - `codex/.mcp.json` - Codex MCP server configuration.
-- `codex/skills/` - host adapters plus direct symlinks to canonical craft skills in `apps/agent/.claude/skills/`.
-- `claude/skills/` - Claude-specific adapters plus direct symlinks to the same canonical agent skills.
-- `codex/assets/` - plugin icons and brand assets, shared with Claude through a symlink.
+- `codex/skills/` - packaged craft skills and Codex host adapters.
+- `claude/skills/` - packaged craft skills and Claude-specific host adapters.
+- `codex/assets/` and `claude/assets/` - bundled plugin icons and public-media indexes.
+
+## Skill release ownership
+
+Hosted Web plugin skills ship from this repository's `codex/` and `claude/`
+packages. Desktop-connected agents receive separate skills from the ChatCut
+app's `packages/skills`; updating those does not update these plugin packages.
+When a shared workflow changes, port its host-relevant contract here and retain
+Codex's MCP App and Claude's `show_widget` adapters. Shared MCP schemas,
+renderers and catalog fields ship from the ChatCut application repository and
+must be available on the connected server before a skill can use them.
+
+Public media manifests live at `<plugin>/assets/widget-media/manifest.json`.
+Claude resolves them through `CLAUDE_PLUGIN_ROOT`; Desktop's standalone skill
+resource path is a different installation contract. Public avatar CDN URLs
+come from the live catalog, so the plugin has no hardcoded avatar list. Media
+files stay in `ChatCut-Inc/chatcut-widget-media`; private media is never
+published there. Update each changed package's version and matching MCP
+version header together, then run `node --test tests/*.test.mjs`.
 
 ## Requirements
 

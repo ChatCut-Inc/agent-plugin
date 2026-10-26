@@ -1,5 +1,5 @@
 {
-  "baseUrl": "https://cdn.jsdelivr.net/gh/ChatCut-Inc/chatcut-widget-media@bb7529532b2f97922f980d38251772370ac9d68f/widget-media/",
+  "baseUrl": "https://cdn.jsdelivr.net/gh/ChatCut-Inc/chatcut-widget-media@115f757787461b9c43236c496bb18d5eaf188b30/widget-media/",
   "entries": {
     "design-style/01c302d0-3b90-51e3-ae43-4a8a9ce947b5": {
       "kind": "image",
@@ -252,6 +252,122 @@
     "voice/sully": {
       "kind": "audio",
       "path": "voice-samples/elevenlabs-sully.mp3"
+    },
+    "scenario/app-promo-mg": {
+      "kind": "image",
+      "path": "scenarios/app-promo-mg.jpg"
+    },
+    "scenario/explainer": {
+      "kind": "image",
+      "path": "scenarios/explainer.jpg"
+    },
+    "scenario/footage-to-shorts": {
+      "kind": "image",
+      "path": "scenarios/footage-to-shorts.jpg"
+    },
+    "scenario/motion-graphics": {
+      "kind": "image",
+      "path": "scenarios/motion-graphics.jpg"
+    },
+    "scenario/seedance-video": {
+      "kind": "image",
+      "path": "scenarios/seedance-video.jpg"
+    },
+    "scenario/talking-head": {
+      "kind": "image",
+      "path": "scenarios/talking-head.jpg"
+    },
+    "voice/baqiqingshu/ja": {
+      "kind": "audio",
+      "path": "voice-samples/doubao-baqiqingshu-ja.mp3"
+    },
+    "voice/dayi/ja": {
+      "kind": "audio",
+      "path": "voice-samples/doubao-dayi-ja.mp3"
+    },
+    "voice/houge/ja": {
+      "kind": "audio",
+      "path": "voice-samples/doubao-houge-ja.mp3"
+    },
+    "voice/huiben/ja": {
+      "kind": "audio",
+      "path": "voice-samples/doubao-huiben-ja.mp3"
+    },
+    "voice/jitangnv/ja": {
+      "kind": "audio",
+      "path": "voice-samples/doubao-jitangnv-ja.mp3"
+    },
+    "voice/liuchang/ja": {
+      "kind": "audio",
+      "path": "voice-samples/doubao-liuchang-ja.mp3"
+    },
+    "voice/morgan/ja": {
+      "kind": "audio",
+      "path": "voice-samples/doubao-morgan-ja.mp3"
+    },
+    "voice/naiqimengwa/ja": {
+      "kind": "audio",
+      "path": "voice-samples/doubao-naiqimengwa-ja.mp3"
+    },
+    "voice/popo/ja": {
+      "kind": "audio",
+      "path": "voice-samples/doubao-popo-ja.mp3"
+    },
+    "voice/qingcang/ja": {
+      "kind": "audio",
+      "path": "voice-samples/doubao-qingcang-ja.mp3"
+    },
+    "voice/ruyayichen/ja": {
+      "kind": "audio",
+      "path": "voice-samples/doubao-ruyayichen-ja.mp3"
+    },
+    "voice/silang/ja": {
+      "kind": "audio",
+      "path": "voice-samples/doubao-silang-ja.mp3"
+    },
+    "voice/tangseng/ja": {
+      "kind": "audio",
+      "path": "voice-samples/doubao-tangseng-ja.mp3"
+    },
+    "voice/vivi/ja": {
+      "kind": "audio",
+      "path": "voice-samples/doubao-vivi-ja.mp3"
+    },
+    "voice/wenroumama/ja": {
+      "kind": "audio",
+      "path": "voice-samples/doubao-wenroumama-ja.mp3"
+    },
+    "voice/xiaohe/ja": {
+      "kind": "audio",
+      "path": "voice-samples/doubao-xiaohe-ja.mp3"
+    },
+    "voice/xiaotian/ja": {
+      "kind": "audio",
+      "path": "voice-samples/doubao-xiaotian-ja.mp3"
+    },
+    "voice/xionger/ja": {
+      "kind": "audio",
+      "path": "voice-samples/doubao-xionger-ja.mp3"
+    },
+    "voice/yingtaowanzi/ja": {
+      "kind": "audio",
+      "path": "voice-samples/doubao-yingtaowanzi-ja.mp3"
+    },
+    "voice/yuanboxiaoshu/ja": {
+      "kind": "audio",
+      "path": "voice-samples/doubao-yuanboxiaoshu-ja.mp3"
+    },
+    "voice/yunzhou/ja": {
+      "kind": "audio",
+      "path": "voice-samples/doubao-yunzhou-ja.mp3"
+    },
+    "voice/zhishuaiyingzi/ja": {
+      "kind": "audio",
+      "path": "voice-samples/doubao-zhishuaiyingzi-ja.mp3"
+    },
+    "voice/zhixingnv/ja": {
+      "kind": "audio",
+      "path": "voice-samples/doubao-zhixingnv-ja.mp3"
     }
   }
 }
