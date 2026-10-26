@@ -92,14 +92,6 @@ Sources: `current_session`, `tool_search`, `host_settings`,
 Observations accept `stage`, `operation`, `source`, `observedAt`, `outcome`
 (`success`/`failed`/`unknown`), optional `requestId`, `httpStatus`,
 `protocolCode`, `message`, and `originalAttemptMatch` (`confirmed`/`unconfirmed`).
-Only `host_registration` / `lookup_registered_server` observations from
-`cli_configuration` or `host_settings` may additionally carry `lookupResult`:
-`not_found`, `found`, or `unavailable`. `not_found` requires an explicit absence
-response from a completed named lookup or a successful complete scoped inventory;
-do not derive it from an exit code, permission/parse error, missing CLI, or empty
-tool list. Preserve the actual response in `message`. Failed/inconclusive lookups
-without this fact retain unknown registration state and do not recommend adding
-an entry. This is still agent-supplied evidence, not independent verification.
 Omit the match flag when unknown. Set `confirmed` only when the captured failed
 runtime/session observation explicitly identifies the original failed attempt
 and its actual server request ID; registration, nearby timestamps, successful
@@ -110,18 +102,55 @@ New stage names are preserved. Do not put an
 MCP session credential in `conversationId` or guess a server request ID.
 Only include ChatCut tool names; keep tool arguments and results out.
 
+Preflight remains strict. During collection, an invalid optional version,
+configuration or session group is omitted with a named gap while independent
+valid groups survive. Each observation is checked separately; invalid auxiliary
+time/ID fields remain unknown without discarding its valid error message. An
+unsupported source, extra payload field or malformed core observation is omitted.
+Invalid outer schema/capture time still rejects the snapshot. Never insert the
+package version as a missing actual host version. A static registration lookup
+may use `stage: host_registration`, `operation: lookup_registered_server`,
+`source: cli_configuration` or `host_settings`, and `lookupResult: found`,
+`not_found` or `unavailable`; it does not establish current tools or authentication.
+
+## Automatically retained host failures
+
+The helper keeps admitted native failure records ahead of normal notices within
+the existing bounded reads and a global 30-record / 128 KiB text-message budget.
+When a complete record cannot fit, the report names the omitted record count;
+it does not trim an error to make it appear complete. Native failed-item error
+projections remain separately bounded and the complete local report is retained
+when the upload budget is exceeded.
+
+`evidenceSummary.failureEvidence` mechanically indexes the original retained
+error blocks and failed native items. It records their actual source, log event
+time or native lifecycle, and available local call/item identifiers. Read the
+referenced original block for the full message and cause. A matching conversation
+and call ID is only a local binding to the Agent-supplied original record; nearby
+times, one remaining candidate, and the current collection conversation are not
+proof that a log is the user's reported failure. No candidate is automatically
+selected as `originalFailure`, and its log time never fills `occurredAt`.
+
+When no original failure record was supplied, the helper can still retain these
+host failures but cannot tell whether they are the user's reported attempt.
+Codex App startup notices, Claude debug logs, and native local IDs do not provide
+a missing server X-Request-ID. The helper cannot capture the host's original TLS
+bytes or HTTP response before its parser; later independent probes remain
+separate evidence. If the host discarded the original tool error, time, or
+response header and no accessible source retained it, those fields remain gaps.
+
 ## Run once for the reported failure
 
 ### Preserve the failed call before independent checks
 
-Database reads are supplementary. When the current tool error is visible, save
-its dedicated failure record before attempting runtime sources, then run the
-offline helper even if SQLite fails. `hostLogCoverage` explicitly distinguishes
-the retained error, database errors and other-source coverage. Existing App logs
-remain an independent bounded source. An already visible tool error needs no
-prior stderr setup; an unexposed startup error still needs an accessible source.
-Never copy a live database, use immutable/nolock mode, discard WAL or widen
-permissions to make collection pass. If no original error is exposed, say so.
+Database reads are supplementary. Save the currently visible error first, then
+continue local collection with `--offline` even when SQLite is unavailable.
+This option sends no probes or upload, including when `--upload` is also given.
+`evidenceSummary.hostLogCoverage` distinguishes the retained original error,
+database failures and remaining sources. Existing App logs remain independent.
+An already visible tool error needs no prior stderr setup; an unexposed startup
+error still needs an accessible source. Never copy a live database, parse its
+WAL separately, ignore locks or widen permissions to make collection pass.
 
 When the host exposes the original failed tool result or runtime event, the Agent
 copies only its error and available identifiers into a new dedicated
@@ -154,6 +183,38 @@ are useful even if the request never reaches ChatCut; they are not server
 request IDs. Copy a `requestId` only when the original failed call actually
 provides it. All supplied facts remain labelled as Agent-supplied evidence.
 
+When that same original error exposes an HTTP response, preserve the available
+status, headers and complete error body in optional `httpResponse`:
+
+```json
+{
+  "source": "host_original_error_response",
+  "status": 502,
+  "headers": { "X-Request-ID": "actual-original-response-id", "content-type": "application/json" },
+  "body": "Exact host-exposed error response body",
+  "bodyComplete": true
+}
+```
+
+`status` accepts an integer from 100 through 599; header values are strings or
+arrays of strings. Omit unavailable fields. Set `bodyComplete` only when the
+source establishes completeness, otherwise omit it or use null. This field is
+for the original failed response, never a later request or raw tool arguments/
+successful results. Preserve an exposed HTML/text response as well as JSON.
+The helper redacts credential header values and actual secrets in error text;
+ordinary fields, the rest of the error and causal details survive. A unique,
+valid original `X-Request-ID` is retained with its Agent-supplied provenance.
+Contradictory original IDs remain explicitly unresolved; a malformed header ID
+does not supply a replacement. Local call/native-item IDs never become server IDs.
+Invalid optional HTTP fields or association hints are omitted with value-free
+gaps while a valid original error remains recorded. The helper cannot recover
+response bytes that the host discarded before exposing the error.
+
+Dedicated original-error and failure-record input files are bounded to 128 KiB.
+An oversized input is explicitly omitted with its byte count and source-retained
+gap; its complete local file is left unchanged. Collected reports above the
+256 KiB upload budget remain local and are not silently trimmed.
+
 Prefer `--failure-record <name.mcp-failure.json>` to `--original-error` when
 this structured source is available; choose one input. The collector centers
 its bounded log window on the supplied failure time and uses its conversation
@@ -163,6 +224,24 @@ Do not start another authenticated session to manufacture replacement evidence.
 
 If only the original error text is accessible, use the text-file fallback below.
 Do not call a report with only startup-status notices a captured tool failure.
+
+Save actual error fields rather than reconstructing a raw tool-result envelope.
+The collector records a valid Codex `CODEX_THREAD_ID` in `collectionContext` as
+the current collecting thread. It does not fill the original failure's thread
+automatically. When the failure just happened in this same chat, that known
+thread may be supplied in its failure record with the source explained. Never
+use the diagnostic command's `CODEX_TOOL_CALL_ID` as the failed MCP call's ID.
+
+With a known original/session thread, `hostLogs.nativeFailedCalls` selects at
+most ten failed hosted ChatCut MCP items in the bounded window from the native
+`thread_history_1.sqlite` index. Only IDs, lifecycle times and error fields are
+projected; whole history items, conversations, arguments and successful results
+are not collected. An error above 128 KiB is explicitly omitted; the complete
+local report is never trimmed to fit the 256 KiB upload limit. `nativeItemId`
+is a native MCP item identity, distinct from Responses call IDs, RPC IDs and
+server request IDs. `startedAtMs`/`completedAtMs` are lifecycle times, not the
+original `occurredAt`. Matches remain unconfirmed; compare known thread, tool
+and exact error without promoting nearby times to proof of association.
 
 1. Obtain the existing server's registered URL through the host. Preserve its
    environment. The helper accepts ChatCut production/beta/dev endpoints and
@@ -201,10 +280,18 @@ Codex SQLite locations follow `CODEX_SQLITE_HOME` when present. If the current
 host already supplies its actual `sqlite_home` or `log_dir`, pass that directory
 with `--codex-sqlite-home` or `--codex-log-dir`; do not read whole config files to
 find it. These options select existing log locations and do not enable logging.
+If the caller already retained a dedicated native stderr stream, pass its
+existing `.codex-stderr.log` with `--codex-stderr-file`. The helper reads only
+its bounded ChatCut log tail, marks emission time as `loggedAt`, and does not
+fill original failure time or association. This source is optional; it does
+not capture a stream or recover discarded stderr.
 On Windows, SQLite error 14 can coexist with readable WAL files in a read-only
 sandbox. The report preserves the original error and bounded file-access facts;
 it does not prove a specific security product caused the restriction. Never copy
 the whole log database, ignore its WAL with immutable mode, or relax permissions.
+Both SQLite readers preserve the failing operation and error, then continue
+other sources; a close failure does not replace the primary error. Missing
+native IDs and lifecycle times remain missing when the database is unreadable.
 On Windows, the helper also reads the existing Codex App startup-status notices
 under `%LOCALAPPDATA%/Codex/Logs/YYYY/MM/DD`. This is independent of TUI logging.
 It selects only `AppServerConnection` startup notices for the hosted ChatCut
@@ -238,40 +325,6 @@ Codex exec prints diagnostics inline; `--json` stdout alone is not a complete
 MCP error stream. Preserve the original stderr/startup error when it is already
 visible to the current host. The helper cannot recover discarded parent-process
 stderr or reconstruct an old exec failure from App logs.
-
-When the caller actually retained this invocation's native stderr, explicitly
-select its known dedicated `.codex-stderr.log` with `--codex-stderr-file`.
-The same native ChatCut selector reads at most128 KiB and30 records; omitted
-bytes and inaccessible files remain gaps. `source: codex_stderr_log` records
-`loggedAt` as native log-emission time and keeps original attempt association
-unconfirmed. It does not assign original `occurredAt`, lifecycle time or IDs.
-No capture file is created, discovered or populated by this option. Unknown or
-discarded stderr remains unavailable; another host/session is not a substitute.
-
-For a known thread, the helper can also query the existing Codex
-`thread_history_1.sqlite` failed-MCP index in the same supplied SQLite root.
-It selects only native IDs, start/completion columns and `error` projections for
-that thread, ChatCut server, `mcpToolCall` type, failed status and the bounded
-time window. It returns at most ten items and at most128 KiB per error; limits,
-missing/unsupported schemas and denied reads remain gaps. It never returns
-whole `item_json`, user/assistant messages, tool arguments or successful results,
-and never reads a rollout transcript. `created_at_ms` is not substituted for a
-lifecycle or failure time.
-
-`collectionContext` identifies the current collecting thread from the host's
-`CODEX_THREAD_ID`; it is not silently copied into `originalFailure`.
-`hostLogs.nativeFailedCalls` preserves native `nativeItemId` with its explicit
-kind and `startedAtMs`/`completedAtMs`. These fields are native MCP item identity
-and lifecycle evidence, not Responses `call_id`, MCP RPC ID, server request ID,
-log-emission time or an automatically known original `occurredAt`. Native facts
-can be useful even when the original fields remain unknown. Only compare a
-known same thread, matching operation and exact error; duplicates or missing
-provenance remain candidates. A failed index read does not erase other evidence.
-The gap identifies the failed operation (locate/open/schema/query) and retains
-the native error. Windows error14 can occur at SELECT even when ordinary file
-reads and SQLite open succeed. No database copy, immutable mode or permission
-change is attempted. A report that exceeds the existing upload budget remains
-fully saved locally; errors are not shortened merely to make upload fit.
 
 If the current host already exposes native `mcpServer/startupStatus/updated`
 notifications or `mcpServerStatus/list`, preserve `error`, `failureReason`,
@@ -332,7 +385,16 @@ the cause. A disabled connection sends neither probes nor an upload.
   a successful finish does not prove valid framing after Node/ALB/local HTTPS
   inspection, nor receipt by Codex. Different requests may have different paths.
 
-The local JSON is written before any upload. `ingest_accepted` means that the
+The helper first writes the original evidence to the new local report before
+host-log collection, then checkpoints available logs before independent network
+checks. These checkpoints have `collectionStatus: in_progress` and a collection
+stage; they are incomplete evidence and cannot be fragmented or auto-uploaded.
+Updates atomically replace the previous complete checkpoint. A completed run
+keeps the same diagnostic ID, marks `collectionStatus: complete`, and attempts
+at most one upload. An interrupted run leaves its last saved local checkpoint;
+do not treat it as a complete diagnostic or rerun merely to manufacture a report.
+
+`ingest_accepted` means that the
 endpoint acknowledged the batch; `storageVerified:false` remains until support
 finds every fragment in the final log store. Failed uploads preserve the local
 report and upload error; do not automatically repeat the run or claim success.

@@ -138,12 +138,17 @@ export function validateSnapshot(input, endpoint) {
         "lookupResult",
       ]);
       source(item.source);
-      if (item.lookupResult !== undefined &&
-          (item.stage !== "host_registration" || item.operation !== "lookup_registered_server" ||
-           !["cli_configuration", "host_settings"].includes(item.source) ||
-           !["not_found", "found", "unavailable"].includes(item.lookupResult) ||
-           (item.lookupResult === "not_found" && item.outcome === "unknown")))
-        throw new Error("lookupResult is a host registration lookup result: not_found only for an explicit absence response; found or unavailable otherwise");
+      if (
+        item.lookupResult !== undefined &&
+        (item.stage !== "host_registration" ||
+          item.operation !== "lookup_registered_server" ||
+          !["cli_configuration", "host_settings"].includes(item.source) ||
+          !["not_found", "found", "unavailable"].includes(item.lookupResult) ||
+          (item.lookupResult === "not_found" && item.outcome === "unknown"))
+      )
+        throw new Error(
+          "lookupResult requires an explicit scoped host registration observation; it does not establish active session availability",
+        );
       if (
         !/^[a-z][a-z0-9_./:-]{0,127}$/.test(item.stage) ||
         !["success", "failed", "unknown"].includes(item.outcome) ||
@@ -179,6 +184,91 @@ export function validateSnapshot(input, endpoint) {
   return input;
 }
 
+export function snapshotFromRecord(input, endpoint) {
+  keys(input, [
+    "schemaVersion",
+    "observedAt",
+    "hostVersion",
+    "pluginVersion",
+    "configuration",
+    "session",
+    "observations",
+  ]);
+  const base = { schemaVersion: input.schemaVersion, observedAt: input.observedAt };
+  validateSnapshot(base, endpoint);
+  const snapshot = { ...base };
+  const metadataGaps = [];
+  const reject = (field) =>
+    metadataGaps.push({ field, reason: "invalid_optional_snapshot_evidence; value_omitted" });
+  for (const field of ["hostVersion", "pluginVersion", "configuration", "session"]) {
+    if (input[field] === undefined) continue;
+    try {
+      if (["configuration", "session"].includes(field) && !object(input[field]))
+        throw new Error("Snapshot group must be an object");
+      validateSnapshot({ ...base, [field]: input[field] }, endpoint);
+      snapshot[field] = input[field];
+    } catch {
+      reject(field);
+    }
+  }
+  if (input.observations !== undefined) {
+    if (!Array.isArray(input.observations) || input.observations.length > 32)
+      reject("observations");
+    else {
+      snapshot.observations = [];
+      for (const [index, item] of input.observations.entries()) {
+        const path = `observations[${index}]`;
+        if (!object(item)) {
+          reject(path);
+          continue;
+        }
+        const candidate = { ...item };
+        if (candidate.observedAt !== null && !instant(candidate.observedAt)) {
+          candidate.observedAt = null;
+          reject(path + ".observedAt");
+        }
+        for (const field of ["operation", "requestId", "message"]) {
+          if (candidate[field] !== undefined && typeof candidate[field] !== "string") {
+            delete candidate[field];
+            reject(path + "." + field);
+          }
+        }
+        if (
+          candidate.requestId !== undefined &&
+          !/^[A-Za-z0-9_.:/-]{1,256}$/.test(candidate.requestId)
+        ) {
+          delete candidate.requestId;
+          reject(path + ".requestId");
+        }
+        for (const field of ["httpStatus", "protocolCode"]) {
+          if (candidate[field] !== undefined && !Number.isSafeInteger(candidate[field])) {
+            delete candidate[field];
+            reject(path + "." + field);
+          }
+        }
+        if (
+          candidate.originalAttemptMatch !== undefined &&
+          (!["confirmed", "unconfirmed"].includes(candidate.originalAttemptMatch) ||
+            (candidate.originalAttemptMatch === "confirmed" &&
+              (!candidate.requestId ||
+                candidate.outcome !== "failed" ||
+                !["current_session", "runtime_log"].includes(candidate.source))))
+        ) {
+          delete candidate.originalAttemptMatch;
+          reject(path + ".originalAttemptMatch");
+        }
+        try {
+          validateSnapshot({ ...base, observations: [candidate] }, endpoint);
+          snapshot.observations.push(candidate);
+        } catch {
+          reject(path);
+        }
+      }
+    }
+  }
+  return { snapshot, metadataGaps };
+}
+
 export function logTime(line) {
   const match = line.match(TIMESTAMP)?.[0];
   return match && Number.isFinite(Date.parse(match)) ? new Date(match).toISOString() : null;
@@ -197,11 +287,93 @@ export function stageHint(message) {
   return "unclassified";
 }
 
+export function isHostFailure(entry) {
+  if (
+    ![
+      "codex_runtime_sqlite",
+      "codex_tui_log",
+      "codex_stderr_log",
+      "codex_app_log",
+      "claude_debug_log",
+    ].includes(entry.source)
+  )
+    return false;
+  if (entry.source === "codex_app_log")
+    return [...String(entry.message).matchAll(/(?:^|\s)status=([^\s]+)/g)].at(-1)?.[1] === "failed";
+  const level =
+    entry.level ??
+    String(entry.message)
+      .match(/^\d{4}-\d{2}-\d{2}T\S+\s+(?:\[(WARN|ERROR)\]|(WARN|ERROR))\s+/i)
+      ?.slice(1)
+      .find(Boolean);
+  return (
+    ["WARN", "ERROR"].includes(String(level).toUpperCase()) ||
+    /\b(?:connection failed|discovery failed|auth error|error during auth|MCP tool call error|startup failed|HTTP Connection failed)\b|(?:MCP server|Server)\s+["']?(?:plugin:chatcut:)?chatcut["']?:\s*Error\b/i.test(
+      entry.message,
+    )
+  );
+}
+
+export function hostFailureEvidence(report) {
+  const original = report.originalFailure;
+  const logs = (report.hostLogs.entries ?? []).flatMap((entry, index) => {
+    if (!isHostFailure(entry)) return [];
+    const sameCall =
+      original.status === "recorded" &&
+      original.conversationId &&
+      original.callId &&
+      entry.conversationId === original.conversationId &&
+      entry.callId === original.callId;
+    return [
+      {
+        evidence: `hostLogs.entries[${index}]`,
+        errorText: `hostLogs.entries[${index}].message`,
+        source: entry.source,
+        ...(entry.sourceFile && { sourceFile: entry.sourceFile }),
+        ...(entry.rowId !== undefined && { rowId: entry.rowId }),
+        loggedAt: entry.loggedAt ?? entry.occurredAt ?? null,
+        timeSource: "host_log_event_time; not_original_failure_occurredAt",
+        ...(entry.conversationId && { conversationId: entry.conversationId }),
+        ...(entry.callId && { callId: entry.callId }),
+        extractionRule:
+          "admitted_native_error_warning_or_explicit_failure_event; original_block_retained",
+        localCallBinding: sameCall
+          ? "same_conversation_and_call_id; original_record_agent_supplied"
+          : "unconfirmed; may_not_be_the_reported_failure",
+        originalAttemptMatch: "unconfirmed",
+      },
+    ];
+  });
+  const native = (report.hostLogs.nativeFailedCalls ?? []).flatMap((entry, index) =>
+    entry.status === "failed" && entry.error
+      ? [
+          {
+            evidence: `hostLogs.nativeFailedCalls[${index}]`,
+            errorText: `hostLogs.nativeFailedCalls[${index}].error`,
+            source: entry.source,
+            conversationId: entry.conversationId,
+            nativeItemId: entry.nativeItemId,
+            idKind: entry.idKind,
+            startedAtMs: entry.startedAtMs,
+            completedAtMs: entry.completedAtMs,
+            timeSource: entry.timeSource,
+            extractionRule: "scoped_native_failed_mcp_item_error_projection",
+            localCallBinding: "native_item_only; not_bound_to_original_call_or_server_request",
+            originalAttemptMatch: "unconfirmed",
+          },
+        ]
+      : [],
+  );
+  return [...logs, ...native];
+}
+
 export function evidenceSummary(report) {
   const snapshot = report.hostSnapshot;
   const observations = snapshot?.observations ?? [];
   const gaps = [];
   if (!snapshot) gaps.push("current_host_snapshot_unavailable");
+  if (snapshot && (report.gaps ?? []).some((gap) => gap.source === "host_snapshot" && gap.field))
+    gaps.push("current_host_snapshot_partial");
   if (!snapshot?.configuration) gaps.push("registration_state_unavailable");
   if (!snapshot?.session || snapshot.session.visibleToolCount === null)
     gaps.push("current_session_tools_unavailable");
@@ -210,7 +382,7 @@ export function evidenceSummary(report) {
   for (const gap of report.originalFailure.metadataGaps ?? [])
     gaps.push(`original_failure_${gap.field}_rejected`);
   const originalRequests =
-    report.originalFailure.status === "recorded"
+    report.originalFailure.status === "recorded" && !report.originalFailure.requestIdConflict
       ? observations.flatMap((item, observationIndex) =>
           item.requestId &&
           item.originalAttemptMatch === "confirmed" &&
@@ -220,12 +392,23 @@ export function evidenceSummary(report) {
             : [],
         )
       : [];
-  if (report.originalFailure.status === "recorded" && report.originalFailure.requestId)
+  if (
+    report.originalFailure.status === "recorded" &&
+    report.originalFailure.requestId &&
+    !report.originalFailure.requestIdConflict
+  )
     originalRequests.push({
       requestId: report.originalFailure.requestId,
       source: report.originalFailure.source,
+      requestIdSource:
+        report.originalFailure.requestIdSource ??
+        "failure_record; agent_supplied_not_independently_verified",
     });
   if (!originalRequests.length) gaps.push("original_request_id_unavailable");
+  const requestIdConflict =
+    report.originalFailure.requestIdConflict ||
+    new Set(originalRequests.map((item) => item.requestId)).size > 1;
+  if (requestIdConflict) gaps.push("original_request_id_conflict");
   if (!snapshot?.pluginVersion) gaps.push("actual_loaded_plugin_version_unavailable");
   if (!report.hostLogs.entries.length) gaps.push("matching_host_runtime_logs_unavailable");
   const appNotices = report.hostLogs.entries.filter((entry) => entry.source === "codex_app_log");
@@ -249,25 +432,41 @@ export function evidenceSummary(report) {
     ...(entry.conversationId && { conversationId: entry.conversationId }),
     ...(entry.callId && { callId: entry.callId }),
   }));
-  const databaseReadFailures = (report.hostLogs.gaps ?? []).filter(gap =>
-    ["codex_runtime_sqlite", "codex_native_failed_mcp_items"].includes(gap.source) &&
-    ["unavailable", "close_failed"].includes(gap.reason)).map(gap => ({
-      source: gap.source, operation: gap.operation ?? null,
-      code: gap.error?.code ?? null, errcode: gap.error?.errcode ?? null,
+  const databaseReadFailures = (report.hostLogs.gaps ?? [])
+    .filter(
+      (gap) =>
+        ["codex_runtime_sqlite", "codex_native_failed_mcp_items"].includes(gap.source) &&
+        ["unavailable", "close_failed"].includes(gap.reason),
+    )
+    .map((gap) => ({
+      source: gap.source,
+      operation: gap.operation ?? null,
+      code: gap.error?.code ?? null,
+      errcode: gap.error?.errcode ?? null,
     }));
   return {
     stages,
     otherObservations: unknown,
     logHints,
+    failureEvidence: hostFailureEvidence(report),
     collectionContext: report.collectionContext ?? null,
     nativeFailedCalls: (report.hostLogs.nativeFailedCalls ?? []).map((item, index) => ({
-      evidence: `hostLogs.nativeFailedCalls[${index}]`, source: item.source,
-      nativeItemId: item.nativeItemId, idKind: item.idKind, conversationId: item.conversationId,
-      operation: item.operation, startedAtMs: item.startedAtMs, completedAtMs: item.completedAtMs,
+      evidence: `hostLogs.nativeFailedCalls[${index}]`,
+      source: item.source,
+      nativeItemId: item.nativeItemId,
+      idKind: item.idKind,
+      conversationId: item.conversationId,
+      operation: item.operation,
+      startedAtMs: item.startedAtMs,
+      completedAtMs: item.completedAtMs,
       originalAttemptMatch: "unconfirmed",
     })),
     originalRequestCorrelation: {
-      status: originalRequests.length ? "agent_reported_same_attempt" : "unconfirmed",
+      status: requestIdConflict
+        ? "conflicting_agent_supplied_request_ids"
+        : originalRequests.length
+          ? "agent_reported_same_attempt"
+          : "unconfirmed",
       observations: originalRequests,
       provenance:
         "agent_supplied_confirmation; not_independently_verified; never_inferred_from_time_or_other_ids",
@@ -283,11 +482,16 @@ export function evidenceSummary(report) {
       : null,
     hostLogCoverage: {
       originalErrorRetained: report.originalFailure.status === "recorded",
-      originalErrorRetainedWithoutDatabase: report.originalFailure.status === "recorded" && databaseReadFailures.length > 0,
+      originalErrorRetainedWithoutDatabase:
+        report.originalFailure.status === "recorded" && databaseReadFailures.length > 0,
       databaseReadFailures,
-      runtimeCollectionFailed: (report.hostLogs.gaps ?? []).some(gap => gap.source === "host_logs" && gap.reason === "collector_failed"),
+      runtimeCollectionFailed: (report.hostLogs.gaps ?? []).some(
+        (gap) => gap.source === "host_logs" && gap.reason === "collector_failed",
+      ),
       nativeFailedMcpItems: report.hostLogs.nativeFailedCalls?.length ?? 0,
-      retainedStderrRecords: report.hostLogs.entries.filter(entry => entry.source === "codex_stderr_log").length,
+      retainedStderrRecords: report.hostLogs.entries.filter(
+        (entry) => entry.source === "codex_stderr_log",
+      ).length,
       priorStderrCaptureRequired: false,
       records: report.hostLogs.entries.length,
       appStartupRecords: appNotices.length,

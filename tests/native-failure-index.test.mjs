@@ -147,7 +147,7 @@ test("an explicit retained native stderr tail preserves log time and errors with
   assert.ok(found[0].message.includes("E_REAL_NATIVE"));
   assert.ok(!JSON.stringify(logs).includes("PRIVATE_"));
   assert.ok(logs.gaps.some(g => g.source === "codex_stderr_log" && g.reason === "only_log_tail_read"));
-  const report = { diagnosticId: "00000000-0000-0000-0000-000000000001", host: "codex", collectorVersion: "1.3.0",
+  const report = { diagnosticId: "00000000-0000-0000-0000-000000000001", host: "codex", collectorVersion: "1.2.6",
     originalFailure: { status: "unavailable", occurredAt: null }, hostLogs: logs, gaps: [] };
   const diagnosis = diagnose(report);
   assert.ok(diagnosis.findings.some(f => f.kind === "host_runtime_error_unassociated" && f.observed.level === "WARN" && f.observed.loggedAt === found[0].loggedAt));

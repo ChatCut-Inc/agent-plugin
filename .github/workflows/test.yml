@@ -9,3 +9,4 @@ jobs:
         with:
           node-version: 24
       - run: node --test tests/*.test.mjs
+      - run: node scripts/sync-mcp-helpers.mjs --check

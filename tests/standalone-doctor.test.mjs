@@ -15,19 +15,14 @@ const exec = promisify(execFile);
 const skill = fileURLToPath(new URL("../codex/skills/chatcut-mcp-doctor/", import.meta.url));
 const noLogs = async () => ({ entries: [], gaps: [{ source: "fixture", reason: "logs_unavailable" }] });
 
-test("Doctor reuses its dedicated short report names and rejects unusable output names before collection", async t => {
+test("existing reports are identified by content, not a required filename", async t => {
   const dir = await temp(t), helper = join(skill, "scripts/doctor.mjs");
-  for (const name of ["mcp-report.json", "mcp-report-2.json"]) {
-    const output = join(dir, name);
-    await cli(helper, ["--host", "codex", "--offline", "--output", output], dir);
-    const before = await readFile(output, "utf8"), id = JSON.parse(before).diagnosticId;
-    await cli(helper, ["--report", output], dir);
-    assert.equal(await readFile(output, "utf8"), before);
-    assert.equal(JSON.parse(await readFile(output + ".diagnosis.json", "utf8")).diagnosticId, id);
-  }
-  await assert.rejects(cli(helper, ["--host", "codex", "--offline", "--output", join(dir, "config.json")], dir), /saved report can be reused/);
-  await assert.rejects(cli(helper, ["--host", "codex", "--offline", `--output=${join(dir, "config.json")}`], dir), /saved report can be reused/);
-  assert.ok(!(await readdir(dir)).includes("config.json"));
+  const output = join(dir, "user-selected-evidence.json");
+  await runDoctor({ host: "codex", offline: true, output }, { collectLogs: noLogs });
+  const before = await readFile(output, "utf8");
+  await cli(helper, ["--report", output], dir);
+  assert.equal(await readFile(output, "utf8"), before);
+  await assert.rejects(cli(helper, ["--host", "codex", "--upload"], dir), /Collect only when needed/);
 });
 async function temp(t) {
   const dir = await mkdtemp(join(tmpdir(), "chatcut-standalone-doctor-"));
@@ -52,17 +47,17 @@ test("standalone copied skill runs offline without a parent plugin or a live MCP
   let requests = 0;
   const origin = await service(t, (_, res) => { requests++; res.end("{}"); });
   const output = join(dir, "offline.mcp-report.json");
-  await cli(join(dir, "doctor/scripts/doctor.mjs"), ["--host", "codex", "--server-url", `${origin}/api/external-mcp/mcp`, "--offline", "--upload", "--output", output], dir);
+  await cli(join(dir, "doctor/scripts/mcp-doctor.mjs"), ["--host", "codex", "--server-url", `${origin}/api/external-mcp/mcp`, "--offline", "--upload", "--output", output], dir);
   const report = JSON.parse(await readFile(output));
   assert.equal(requests, 0);
-  assert.equal(report.collectorVersion, "1.3.0");
+  assert.equal(report.collectorVersion, "1.2.6");
   assert.equal(report.upload.status, "skipped_offline");
   assert.equal(report.probes.length, 0);
   assert.ok(report.gaps.some((gap) => gap.source === "plugin_version"));
-  for (const suffix of [".diagnosis.json", ".summary.md", ".issue-draft.md"]) assert.ok((await readFile(output + suffix)).length > 0);
   const before = await readFile(output, "utf8");
   await cli(join(dir, "doctor/scripts/doctor.mjs"), ["--report", output], dir);
   assert.equal(await readFile(output, "utf8"), before);
+  for (const suffix of [".diagnosis.json", ".summary.md", ".issue-draft.md"]) assert.ok((await readFile(output + suffix)).length > 0);
   assert.equal(requests, 0);
 });
 
@@ -111,14 +106,14 @@ test("startup, post-connection tool failure, missing registration and truncated 
   }
 });
 
-test("unsupported endpoint yields a local report without retargeting or any requests", async (t) => {
+test("unsupported endpoint preserves the local report without retargeting or any requests", async t => {
   const dir = await temp(t);
   const { report } = await runDoctor({ host: "codex", serverUrl: "https://unrecognized.invalid/api/external-mcp/mcp", upload: true, output: join(dir, "unsupported.mcp-report.json") }, {
     collectLogs: noLogs, fetchImpl: () => assert.fail("must not send"),
   });
   assert.equal(report.serverUrl, null);
   assert.equal(report.upload.status, "skipped_endpoint_unavailable");
-  assert.ok(report.gaps.some((gap) => gap.reason.startsWith("unsupported_endpoint")));
+  assert.ok(report.gaps.some(gap => gap.reason.startsWith("unsupported_endpoint")));
 });
 
 test("failed ingest can resend the same saved report once, without probes or report mutations", async (t) => {
@@ -226,8 +221,8 @@ test("SQLite and text runtime records exclude content echoes from permitted MCP 
 test("both packages ship identical standalone executable resources and references", async () => {
   async function compare(relative = "") {
     for (const entry of await readdir(join(skill, relative), { withFileTypes: true })) {
-      // Claude uses native dynamic capture syntax; executable resources stay identical.
-      if (["agents", "SKILL.md"].includes(entry.name)) continue;
+      // Host catalog metadata differs; packaged evidence capabilities stay identical.
+      if (["agents"].includes(entry.name)) continue;
       const path = join(relative, entry.name);
       if (entry.isDirectory()) await compare(path);
       else assert.deepEqual(await readFile(join(skill, path)), await readFile(new URL(`../claude/skills/chatcut-mcp-doctor/${path.replaceAll("\\", "/")}`, import.meta.url)));

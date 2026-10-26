@@ -24,7 +24,7 @@ this Skill. The existing collector may still be bundled at
 not include these summary/draft sidecars.
 
 An agent with a trusted local copy of this repository can read this SKILL.md
-directly and execute `scripts/doctor.mjs` without installing or connecting MCP.
+directly and execute `scripts/capture.mjs` without installing or connecting MCP.
 For an explicitly requested standalone installation, copy the complete
 `chatcut-mcp-doctor` directory (including scripts and references) into a host
 supported project/personal skills directory, then verify discovery in a new

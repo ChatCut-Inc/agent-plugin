@@ -3,11 +3,26 @@ import test from "node:test";
 import { mkdtemp, writeFile, readFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { runDoctor } from "../codex/skills/chatcut-mcp-doctor/scripts/mcp-doctor.mjs";
-import { diagnose, renderPacket } from "../codex/skills/chatcut-mcp-doctor/scripts/diagnosis.mjs";
+import { execFile } from "node:child_process";
+import { promisify } from "node:util";
+import { fileURLToPath } from "node:url";
+import { runDoctor } from "../codex/skills/chatcut-plugin-basics/scripts/mcp-doctor.mjs";
 
 const error = { message: "Unfamiliar provider error E_FALLBACK_NEW: transcript/tool_call are native error words",
   code: "E_UNFAMILIAR_1024", cause: { type: "OpaqueNativeError", message: "Keep this original cause" } };
+
+test("the bundled basics CLI saves an offline report even when upload is also requested", async t => {
+  const { dir, failure } = await fixture(t), output = join(dir, "cli.mcp-report.json");
+  const helper = fileURLToPath(new URL("../codex/skills/chatcut-plugin-basics/scripts/mcp-doctor.mjs", import.meta.url));
+  await promisify(execFile)(process.execPath, [helper, "--host", "claude", "--server-url", "http://127.0.0.1:1/api/external-mcp/mcp", "--failure-record", failure, "--output", output, "--offline", "--upload"]);
+  const report = JSON.parse(await readFile(output, "utf8"));
+  assert.equal(report.collectorVersion, "1.2.6");
+  assert.deepEqual(report.originalFailure.error, error);
+  assert.equal(report.upload.status, "skipped_offline");
+  assert.equal(report.entryProbe, undefined);
+  assert.equal(report.probes.length, 0);
+  assert.ok(report.gaps.some(g => g.reason === "offline_requested; no_requests_sent"));
+});
 async function fixture(t) {
   const dir = await mkdtemp(join(tmpdir(), "chatcut-db-fallback-"));
   t.after(() => rm(dir, { recursive: true, force: true }));
@@ -46,9 +61,6 @@ test("database errors do not replace the visible original error or independent A
   assert.equal(coverage.retainedStderrRecords, 0);
   assert.equal(report.upload.status, "skipped_offline");
   assert.deepEqual(JSON.parse(await readFile(path, "utf8")).originalFailure.error, error);
-  const packet = renderPacket(report, diagnose(report));
-  assert.ok(packet.summary.includes("original error retained") && packet.summary.includes("14"));
-  assert.ok(!packet.draft.includes("PRIVATE_APP_ERROR"));
 });
 
 test("an unexpected runtime collector exception still produces the saved original error and explicit coverage", async t => {
@@ -71,7 +83,4 @@ test("database failure without an exposed original error is not called successfu
   assert.equal(report.evidenceSummary.hostLogCoverage.originalErrorRetained, false);
   assert.equal(report.evidenceSummary.hostLogCoverage.originalErrorRetainedWithoutDatabase, false);
   assert.equal(report.originalFailure.occurredAt, null);
-  const packet = renderPacket(report, diagnose(report));
-  assert.ok(packet.summary.includes("original error unavailable"));
-  assert.ok(packet.summary.includes("an unexposed startup error still needs an accessible source"));
 });

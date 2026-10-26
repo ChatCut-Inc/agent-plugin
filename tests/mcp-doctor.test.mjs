@@ -476,7 +476,7 @@ for (const [host, folder, manifest] of [
     assert.equal(receipt.upload.status, "ingest_accepted");
     assert.equal(receipt.upload.storageVerified, false);
     const report = JSON.parse(await readFile(output));
-    assert.equal(report.collectorVersion, "1.3.0");
+    assert.equal(report.collectorVersion, "1.2.6");
     assert.equal(initializeClientVersion, report.collectorVersion);
     assert.equal(uploadedCollectorVersion, report.collectorVersion);
     assert.equal(report.host, host);
@@ -731,7 +731,7 @@ test("App fallback remains bounded and does not promote host notices into the or
     codexLogDir: join(dir, "empty-tui"),
     output: join(dir, "report.json"),
   });
-  assert.equal(report.collectorVersion, "1.3.0");
+  assert.equal(report.collectorVersion, "1.2.6");
   assert.equal(
     report.hostLogs.entries.filter((entry) => entry.source === "codex_app_log").length,
     30,
