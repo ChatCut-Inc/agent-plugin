@@ -29,6 +29,30 @@ preconfigured stderr. Hidden startup errors with no accessible source remain
 unavailable. MCP session credentials in error text are redacted. This change
 adds no separate Doctor Skill, diagnosis/repair rules or publication workflow.
 
+The same collection candidate additionally preserves optional original HTTP
+response evidence through the dedicated failure record. It retains supplied
+status, headers, full available error body and completeness, while redacting
+credential fields and actual secrets. It never obtains this evidence from later
+probes. An original response X-Request-ID has explicit Agent-supplied provenance;
+conflicting original IDs remain unresolved. Invalid optional response/association
+fields do not discard a valid original error. Dedicated original inputs are
+bounded to 128 KiB; oversized input stays unchanged locally with an explicit gap.
+The 256 KiB report upload budget still applies without silently trimming errors.
+
+Snapshot collection salvages valid independent optional groups and observations
+with named, value-free gaps. Strict preflight remains available; unsupported
+sources/payload fields and malformed core observations remain excluded. Invalid
+outer schema/capture time still rejects the snapshot. Static `host_registration`
+lookup facts do not prove active tools, authentication or recovery.
+
+Before host-log collection the helper saves an `in_progress` checkpoint containing
+the original supplied error; before independent checks it saves available logs.
+Later saves use a task-specific same-directory temporary file and atomic rename
+to preserve the previous checkpoint if a write is interrupted. Partial reports
+cannot be fragmented/uploaded. Normal completion uses the same diagnostic ID and
+at most one upload. This protects evidence retention, not automatic retry or
+recovery. Neither host log event time nor checkpoint time fills original time.
+
 Collector 1.2.3 adds a dedicated `.mcp-failure.json` input for the original host
 tool/runtime error, its available failure time and local conversation/call IDs.
 The Skill preserves this evidence before retries; a missing failure timestamp

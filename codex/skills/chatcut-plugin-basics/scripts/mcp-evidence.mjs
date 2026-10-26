@@ -135,8 +135,20 @@ export function validateSnapshot(input, endpoint) {
         "protocolCode",
         "message",
         "originalAttemptMatch",
+        "lookupResult",
       ]);
       source(item.source);
+      if (
+        item.lookupResult !== undefined &&
+        (item.stage !== "host_registration" ||
+          item.operation !== "lookup_registered_server" ||
+          !["cli_configuration", "host_settings"].includes(item.source) ||
+          !["not_found", "found", "unavailable"].includes(item.lookupResult) ||
+          (item.lookupResult === "not_found" && item.outcome === "unknown"))
+      )
+        throw new Error(
+          "lookupResult requires an explicit scoped host registration observation; it does not establish active session availability",
+        );
       if (
         !/^[a-z][a-z0-9_./:-]{0,127}$/.test(item.stage) ||
         !["success", "failed", "unknown"].includes(item.outcome) ||
@@ -170,6 +182,91 @@ export function validateSnapshot(input, endpoint) {
     }
   }
   return input;
+}
+
+export function snapshotFromRecord(input, endpoint) {
+  keys(input, [
+    "schemaVersion",
+    "observedAt",
+    "hostVersion",
+    "pluginVersion",
+    "configuration",
+    "session",
+    "observations",
+  ]);
+  const base = { schemaVersion: input.schemaVersion, observedAt: input.observedAt };
+  validateSnapshot(base, endpoint);
+  const snapshot = { ...base };
+  const metadataGaps = [];
+  const reject = (field) =>
+    metadataGaps.push({ field, reason: "invalid_optional_snapshot_evidence; value_omitted" });
+  for (const field of ["hostVersion", "pluginVersion", "configuration", "session"]) {
+    if (input[field] === undefined) continue;
+    try {
+      if (["configuration", "session"].includes(field) && !object(input[field]))
+        throw new Error("Snapshot group must be an object");
+      validateSnapshot({ ...base, [field]: input[field] }, endpoint);
+      snapshot[field] = input[field];
+    } catch {
+      reject(field);
+    }
+  }
+  if (input.observations !== undefined) {
+    if (!Array.isArray(input.observations) || input.observations.length > 32)
+      reject("observations");
+    else {
+      snapshot.observations = [];
+      for (const [index, item] of input.observations.entries()) {
+        const path = `observations[${index}]`;
+        if (!object(item)) {
+          reject(path);
+          continue;
+        }
+        const candidate = { ...item };
+        if (candidate.observedAt !== null && !instant(candidate.observedAt)) {
+          candidate.observedAt = null;
+          reject(path + ".observedAt");
+        }
+        for (const field of ["operation", "requestId", "message"]) {
+          if (candidate[field] !== undefined && typeof candidate[field] !== "string") {
+            delete candidate[field];
+            reject(path + "." + field);
+          }
+        }
+        if (
+          candidate.requestId !== undefined &&
+          !/^[A-Za-z0-9_.:/-]{1,256}$/.test(candidate.requestId)
+        ) {
+          delete candidate.requestId;
+          reject(path + ".requestId");
+        }
+        for (const field of ["httpStatus", "protocolCode"]) {
+          if (candidate[field] !== undefined && !Number.isSafeInteger(candidate[field])) {
+            delete candidate[field];
+            reject(path + "." + field);
+          }
+        }
+        if (
+          candidate.originalAttemptMatch !== undefined &&
+          (!["confirmed", "unconfirmed"].includes(candidate.originalAttemptMatch) ||
+            (candidate.originalAttemptMatch === "confirmed" &&
+              (!candidate.requestId ||
+                candidate.outcome !== "failed" ||
+                !["current_session", "runtime_log"].includes(candidate.source))))
+        ) {
+          delete candidate.originalAttemptMatch;
+          reject(path + ".originalAttemptMatch");
+        }
+        try {
+          validateSnapshot({ ...base, observations: [candidate] }, endpoint);
+          snapshot.observations.push(candidate);
+        } catch {
+          reject(path);
+        }
+      }
+    }
+  }
+  return { snapshot, metadataGaps };
 }
 
 export function logTime(line) {
@@ -275,6 +372,8 @@ export function evidenceSummary(report) {
   const observations = snapshot?.observations ?? [];
   const gaps = [];
   if (!snapshot) gaps.push("current_host_snapshot_unavailable");
+  if (snapshot && (report.gaps ?? []).some((gap) => gap.source === "host_snapshot" && gap.field))
+    gaps.push("current_host_snapshot_partial");
   if (!snapshot?.configuration) gaps.push("registration_state_unavailable");
   if (!snapshot?.session || snapshot.session.visibleToolCount === null)
     gaps.push("current_session_tools_unavailable");
@@ -283,7 +382,7 @@ export function evidenceSummary(report) {
   for (const gap of report.originalFailure.metadataGaps ?? [])
     gaps.push(`original_failure_${gap.field}_rejected`);
   const originalRequests =
-    report.originalFailure.status === "recorded"
+    report.originalFailure.status === "recorded" && !report.originalFailure.requestIdConflict
       ? observations.flatMap((item, observationIndex) =>
           item.requestId &&
           item.originalAttemptMatch === "confirmed" &&
@@ -293,12 +392,23 @@ export function evidenceSummary(report) {
             : [],
         )
       : [];
-  if (report.originalFailure.status === "recorded" && report.originalFailure.requestId)
+  if (
+    report.originalFailure.status === "recorded" &&
+    report.originalFailure.requestId &&
+    !report.originalFailure.requestIdConflict
+  )
     originalRequests.push({
       requestId: report.originalFailure.requestId,
       source: report.originalFailure.source,
+      requestIdSource:
+        report.originalFailure.requestIdSource ??
+        "failure_record; agent_supplied_not_independently_verified",
     });
   if (!originalRequests.length) gaps.push("original_request_id_unavailable");
+  const requestIdConflict =
+    report.originalFailure.requestIdConflict ||
+    new Set(originalRequests.map((item) => item.requestId)).size > 1;
+  if (requestIdConflict) gaps.push("original_request_id_conflict");
   if (!snapshot?.pluginVersion) gaps.push("actual_loaded_plugin_version_unavailable");
   if (!report.hostLogs.entries.length) gaps.push("matching_host_runtime_logs_unavailable");
   const appNotices = report.hostLogs.entries.filter((entry) => entry.source === "codex_app_log");
@@ -352,7 +462,11 @@ export function evidenceSummary(report) {
       originalAttemptMatch: "unconfirmed",
     })),
     originalRequestCorrelation: {
-      status: originalRequests.length ? "agent_reported_same_attempt" : "unconfirmed",
+      status: requestIdConflict
+        ? "conflicting_agent_supplied_request_ids"
+        : originalRequests.length
+          ? "agent_reported_same_attempt"
+          : "unconfirmed",
       observations: originalRequests,
       provenance:
         "agent_supplied_confirmation; not_independently_verified; never_inferred_from_time_or_other_ids",

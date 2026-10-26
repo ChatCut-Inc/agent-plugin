@@ -1,5 +1,14 @@
 import { randomUUID, createHash } from "node:crypto";
-import { open, opendir, readFile, readdir, stat, writeFile } from "node:fs/promises";
+import {
+  open,
+  opendir,
+  readFile,
+  readdir,
+  rename,
+  stat,
+  unlink,
+  writeFile,
+} from "node:fs/promises";
 import { homedir, tmpdir, platform, arch } from "node:os";
 import { join, resolve, basename } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -11,6 +20,7 @@ import {
   inspectMetadata,
   isHostFailure,
   logTime,
+  snapshotFromRecord,
   validateSnapshot,
 } from "./mcp-evidence.mjs";
 import { probeMetadataWire } from "./mcp-wire.mjs";
@@ -33,14 +43,18 @@ function redactFieldValue(_match, prefix, value) {
 export function redact(text, jsonDepth = 0) {
   let value = String(text);
   // A host may quote/stringify an entire JSON response inside its error. Decode
-  // only JSON string tokens containing this credential label, redact their full
+  // only JSON string tokens containing credential labels, redact their full
   // value, then restore the quoting. A partial escaped-field regex can leak the
   // suffix after an escaped quote/backslash. Input collection is size bounded.
   if (jsonDepth < 16)
     value = value.replace(/"(?:\\.|[^"\\\r\n])*"/g, (token) => {
       try {
         const decoded = JSON.parse(token);
-        if (/mcp[-_]session[-_]id/i.test(decoded)) {
+        if (
+          /mcp[-_]session[-_]id|access_?token|refresh_?token|id_?token|session_?token|client_?secret|api[_-]?key|authorization|cookie/i.test(
+            decoded,
+          )
+        ) {
           const sanitized = redact(decoded, jsonDepth + 1);
           if (sanitized !== decoded) return JSON.stringify(sanitized);
         }
@@ -92,7 +106,7 @@ export function redact(text, jsonDepth = 0) {
 function clean(value) {
   return JSON.parse(
     JSON.stringify(value, (key, item) =>
-      /^(?:mcp[-_]session[-_]id|access_?token|refresh_?token|id_?token|client_?secret|session_?token|api[_-]?key|authorization|token|cookie|set-cookie)$/i.test(
+      /^(?:mcp[-_]session[-_]id|(?:proxy[-_])?authorization|(?:x[-_])?(?:access_?token|refresh_?token|id_?token|client_?secret|session_?token|api[_-]?key|token)|cookie|set-cookie)$/i.test(
         key,
       )
         ? "[REDACTED]"
@@ -1134,6 +1148,10 @@ export async function collectHostLogs(host, options = {}) {
 }
 
 export function fragmentEvents(report) {
+  if (report.collectionStatus === "in_progress")
+    throw new Error(
+      "Incomplete collection checkpoint cannot be uploaded; original local evidence remains available",
+    );
   const json = JSON.stringify(clean(report));
   if (Buffer.byteLength(json) > UPLOAD_LIMIT)
     throw new Error("Report exceeds upload budget; complete local report retained");
@@ -1258,7 +1276,28 @@ export async function runDoctor(options, dependencies = {}) {
       disabledBySnapshot =
         snapshot?.configuration?.enabled === false ||
         snapshot?.session?.connectionStatus === "disabled";
-      report.hostSnapshot = clean(validateSnapshot(snapshot, endpoint));
+      const captured = snapshotFromRecord(snapshot, endpoint);
+      report.hostSnapshot = clean(captured.snapshot);
+      if (report.hostSnapshot.session?.conversationId?.includes("[REDACTED]")) {
+        delete report.hostSnapshot.session.conversationId;
+        captured.metadataGaps.push({
+          field: "session.conversationId",
+          reason: "credential_removed_from_snapshot_metadata",
+        });
+      }
+      for (const [index, observation] of (report.hostSnapshot.observations ?? []).entries()) {
+        if (observation.requestId?.includes("[REDACTED]")) {
+          delete observation.requestId;
+          delete observation.originalAttemptMatch;
+          captured.metadataGaps.push({
+            field: `observations[${index}].requestId`,
+            reason: "credential_removed_from_snapshot_metadata",
+          });
+        }
+      }
+      report.gaps.push(
+        ...captured.metadataGaps.map((gap) => ({ source: "host_snapshot", ...gap })),
+      );
       report.hostSnapshotSource =
         "agent_supplied; see each field source; not_independently_verified";
       if (!report.hostVersion && report.hostSnapshot.hostVersion) {
@@ -1296,8 +1335,18 @@ export async function runDoctor(options, dependencies = {}) {
         );
       }
       const info = await stat(options.originalError);
-      if (info.size > 64 * 1024)
-        throw new Error("Original error file exceeds 64 KiB; source file retained without reading");
+      if (info.size > READ_LIMIT) {
+        report.gaps.push({
+          source: "original_failure",
+          reason: "original_error_input_size_limit",
+          maximumBytes: READ_LIMIT,
+          sourceBytes: info.size,
+          completeLocalSourceRetained: true,
+        });
+        throw new Error(
+          "Original error file exceeds 128 KiB; complete source file retained without reading",
+        );
+      }
       const message = await readFile(options.originalError, "utf8");
       if (!message.trim())
         throw new Error("Original error file is empty; original failure remains unavailable");
@@ -1321,11 +1370,29 @@ export async function runDoctor(options, dependencies = {}) {
         throw new Error(
           "Use a dedicated .mcp-failure.json file, never a config or session transcript",
         );
-      if ((await stat(options.failureRecord)).size > 64 * 1024)
-        throw new Error("Failure record exceeds 64 KiB; complete source retained without reading");
+      const info = await stat(options.failureRecord);
+      if (info.size > READ_LIMIT) {
+        report.gaps.push({
+          source: "original_failure",
+          reason: "failure_record_input_size_limit",
+          maximumBytes: READ_LIMIT,
+          sourceBytes: info.size,
+          completeLocalSourceRetained: true,
+        });
+        throw new Error("Failure record exceeds 128 KiB; complete source retained without reading");
+      }
       report.originalFailure = clean(
         failureFromRecord(JSON.parse(await readFile(options.failureRecord, "utf8"))),
       );
+      for (const field of ["conversationId", "callId", "operation", "requestId"]) {
+        if (report.originalFailure[field]?.includes("[REDACTED]")) {
+          delete report.originalFailure[field];
+          (report.originalFailure.metadataGaps ??= []).push({
+            field,
+            reason: "credential_removed_from_optional_metadata",
+          });
+        }
+      }
       for (const gap of report.originalFailure.metadataGaps ?? [])
         report.gaps.push({ source: "original_failure", ...gap });
       if (!report.originalFailure.occurredAt && options.occurredAt) {
@@ -1357,6 +1424,25 @@ export async function runDoctor(options, dependencies = {}) {
       });
     }
   }
+  const path = resolve(options.output ?? join(tmpdir(), `chatcut-mcp-doctor-${diagnosticId}.json`));
+  const save = async (flag) => {
+    const json = JSON.stringify(clean(report), null, 2) + "\n";
+    if (flag === "wx") return writeFile(path, json, { flag, mode: 0o600 });
+    const pending = `${path}.writing-${diagnosticId}`;
+    try {
+      await writeFile(pending, json, { flag: "wx", mode: 0o600 });
+      await rename(pending, path);
+    } catch (error) {
+      await unlink(pending).catch(() => {});
+      throw error;
+    }
+  };
+  report.collectionStatus = "in_progress";
+  report.collectionStage = "host_logs";
+  report.hostLogs = { entries: [], gaps: [{ source: "host_logs", reason: "collection_pending" }] };
+  report.evidenceSummary = evidenceSummary(report);
+  report.upload = { status: "not_attempted_collection_incomplete", storageVerified: false };
+  await save("wx");
   try {
     report.hostLogs = await (dependencies.collectLogs ?? collectHostLogs)(options.host, {
       occurredAt: report.originalFailure.occurredAt,
@@ -1377,6 +1463,9 @@ export async function runDoctor(options, dependencies = {}) {
       gaps: [{ source: "host_logs", reason: "collector_failed", error: errorDetails(error) }],
     };
   }
+  report.collectionStage = "independent_checks";
+  report.evidenceSummary = evidenceSummary(report);
+  await save("w");
   const disabled =
     disabledBySnapshot ||
     report.hostSnapshot?.configuration?.enabled === false ||
@@ -1491,6 +1580,8 @@ export async function runDoctor(options, dependencies = {}) {
     }
   }
   report.evidenceSummary = evidenceSummary(report);
+  report.collectionStatus = "complete";
+  report.collectionStage = "complete";
   report.upload = {
     status: disabled
       ? "skipped_intentionally_disabled"
@@ -1503,10 +1594,7 @@ export async function runDoctor(options, dependencies = {}) {
             : "not_requested",
     storageVerified: false,
   };
-  const path = resolve(options.output ?? join(tmpdir(), `chatcut-mcp-doctor-${diagnosticId}.json`));
-  const save = async (flag) =>
-    writeFile(path, JSON.stringify(clean(report), null, 2) + "\n", { flag, mode: 0o600 });
-  await save("wx");
+  await save("w");
   if (options.upload && !options.offline && !disabled && endpoint) {
     try {
       const events = fragmentEvents(report);

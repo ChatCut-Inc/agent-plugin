@@ -102,6 +102,17 @@ New stage names are preserved. Do not put an
 MCP session credential in `conversationId` or guess a server request ID.
 Only include ChatCut tool names; keep tool arguments and results out.
 
+Preflight remains strict. During collection, an invalid optional version,
+configuration or session group is omitted with a named gap while independent
+valid groups survive. Each observation is checked separately; invalid auxiliary
+time/ID fields remain unknown without discarding its valid error message. An
+unsupported source, extra payload field or malformed core observation is omitted.
+Invalid outer schema/capture time still rejects the snapshot. Never insert the
+package version as a missing actual host version. A static registration lookup
+may use `stage: host_registration`, `operation: lookup_registered_server`,
+`source: cli_configuration` or `host_settings`, and `lookupResult: found`,
+`not_found` or `unavailable`; it does not establish current tools or authentication.
+
 ## Automatically retained host failures
 
 The helper keeps admitted native failure records ahead of normal notices within
@@ -171,6 +182,38 @@ them null. A local `callId` and `conversationId` identify client-side work and
 are useful even if the request never reaches ChatCut; they are not server
 request IDs. Copy a `requestId` only when the original failed call actually
 provides it. All supplied facts remain labelled as Agent-supplied evidence.
+
+When that same original error exposes an HTTP response, preserve the available
+status, headers and complete error body in optional `httpResponse`:
+
+```json
+{
+  "source": "host_original_error_response",
+  "status": 502,
+  "headers": { "X-Request-ID": "actual-original-response-id", "content-type": "application/json" },
+  "body": "Exact host-exposed error response body",
+  "bodyComplete": true
+}
+```
+
+`status` accepts an integer from 100 through 599; header values are strings or
+arrays of strings. Omit unavailable fields. Set `bodyComplete` only when the
+source establishes completeness, otherwise omit it or use null. This field is
+for the original failed response, never a later request or raw tool arguments/
+successful results. Preserve an exposed HTML/text response as well as JSON.
+The helper redacts credential header values and actual secrets in error text;
+ordinary fields, the rest of the error and causal details survive. A unique,
+valid original `X-Request-ID` is retained with its Agent-supplied provenance.
+Contradictory original IDs remain explicitly unresolved; a malformed header ID
+does not supply a replacement. Local call/native-item IDs never become server IDs.
+Invalid optional HTTP fields or association hints are omitted with value-free
+gaps while a valid original error remains recorded. The helper cannot recover
+response bytes that the host discarded before exposing the error.
+
+Dedicated original-error and failure-record input files are bounded to 128 KiB.
+An oversized input is explicitly omitted with its byte count and source-retained
+gap; its complete local file is left unchanged. Collected reports above the
+256 KiB upload budget remain local and are not silently trimmed.
 
 Prefer `--failure-record <name.mcp-failure.json>` to `--original-error` when
 this structured source is available; choose one input. The collector centers
@@ -342,7 +385,16 @@ the cause. A disabled connection sends neither probes nor an upload.
   a successful finish does not prove valid framing after Node/ALB/local HTTPS
   inspection, nor receipt by Codex. Different requests may have different paths.
 
-The local JSON is written before any upload. `ingest_accepted` means that the
+The helper first writes the original evidence to the new local report before
+host-log collection, then checkpoints available logs before independent network
+checks. These checkpoints have `collectionStatus: in_progress` and a collection
+stage; they are incomplete evidence and cannot be fragmented or auto-uploaded.
+Updates atomically replace the previous complete checkpoint. A completed run
+keeps the same diagnostic ID, marks `collectionStatus: complete`, and attempts
+at most one upload. An interrupted run leaves its last saved local checkpoint;
+do not treat it as a complete diagnostic or rerun merely to manufacture a report.
+
+`ingest_accepted` means that the
 endpoint acknowledged the batch; `storageVerified:false` remains until support
 finds every fragment in the final log store. Failed uploads preserve the local
 report and upload error; do not automatically repeat the run or claim success.
