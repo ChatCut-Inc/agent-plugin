@@ -20,3 +20,20 @@ Use `trigger_transcript` when the user explicitly wants transcription started or
 For an `idle` or explicitly failed (`error`) run, call `trigger_transcript` with the asset id, then check transcription progress again. If an in-progress run has genuinely exceeded the stuck threshold, use `manage_transcript` action `retry_transcription` because `trigger_transcript` intentionally leaves in-progress work unchanged. The manage tool also remains available for low-level recovery where an external MCP host must supply prepared `audioBase64`. Repair source words with the transcript-fix action instead of rewriting visible captions when the source transcript itself is wrong.
 
 For semantic speech edits, load `talking-head-guide` and use the Script workflow. Use mechanical cleanup only for fixed fillers and pauses; do not replace transcript-aware editing with destructive physical timeline cuts.
+
+## Caption style choices
+
+Apply Plain directly for a simple "add captions" request, and apply concrete
+requested edits directly. When the user asks to see, compare, or choose caption
+styles, load `widget-forms` before changing the project. Its caption-preview
+reference covers ordinary presets, custom candidates and published Web MG
+templates, with exact catalog revisions and language codes: `en`, `zh-Hans`,
+`es`, `ja`, `zh-Hant`. Keep one Other entry for new style requirements; do not
+add More or browse-catalog choices.
+
+A sample style preview does not require transcription or generating content.
+Codex uses `ask_followup_questions` caption cards; Claude keeps its
+`show_widget` flow and states its inline-animation limitation. Preserve sample
+versus project labels and wait for selection before applying. Re-read the
+caption target and published revision before mutation; selection alone is not
+application, and changed revisions require a fresh preview.

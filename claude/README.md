@@ -40,7 +40,7 @@ Video and audio exports render in your open ChatCut editor tab and download
 through that browser. To deliver the file, the agent looks for it by name in
 your downloads folder; it does not read other files there.
 
-Optional forms load public catalog images and audio previews directly from
+Optional forms load public catalog images, audio previews and official-avatar videos directly from
 `cdn.jsdelivr.net`, outside the declared MCP connection. These requests expose
 normal network request metadata to the CDN. Project media and transcripts are
 not embedded in those public preview URLs.
