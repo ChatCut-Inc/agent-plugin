@@ -6,12 +6,15 @@ Use it to import media, change a project timeline, create motion graphics, gener
 
 ## What Is Included
 
-- `codex/` - the Codex plugin package.
+- `codex/` - the Hosted MCP Codex package, `chatcut@chatcut-inc`.
 - `claude/` - the Claude Code plugin package.
 - `grok/` - the Grok Bot and Cursor plugin package.
 - `kimi/` - the Kimi Work plugin package, with mandatory basics, core craft skills, and in-app browser adapters; see [its package and migration guide](./kimi/README.md).
-- `chatcut-desktop-codex-plugin/` - the store-facing, skill-only package that
-  helps Codex install and connect the signed ChatCut Desktop app.
+- `chatcut-desktop-codex-plugin/` - the Desktop setup-only Skill package that
+  helps Codex install and connect the signed ChatCut Desktop app, then choose
+  a creation scenario. Its optional repo installation is
+  `chatcut-desktop@chatcut-inc`; this is a different source from a public
+  OpenAI directory installation with the same display name.
 - `codex/.codex-plugin/plugin.json` - Codex plugin metadata.
 - `claude/.claude-plugin/plugin.json` - Claude Code plugin metadata.
 - `grok/.cursor-plugin/plugin.json` - Grok Bot and Cursor plugin metadata.
@@ -28,6 +31,11 @@ Use it to import media, change a project timeline, create motion graphics, gener
 
 ## Authentication
 
+Choose the intended surface first. The connection below belongs to the
+Hosted/Web package. The Desktop instructions-only package instead uses the
+signed Desktop app's `chatcut_desktop` connection. Do not install both routes
+by default or switch an existing project between them implicitly.
+
 The plugin connects to ChatCut through the hosted ChatCut MCP endpoint:
 
 ```text
@@ -37,6 +45,11 @@ https://api.chatcut.io/api/external-mcp/mcp
 The host handles authentication when the plugin is installed or first used (`codex mcp login chatcut`, or `claude mcp login plugin:chatcut:chatcut` in Claude Code). Grok Bot and Cursor users complete the authorization flow from the host's Plugins screen. Follow the sign-in flow to connect your ChatCut account.
 
 Install instructions per host: [chatcut.io/chatgpt](https://chatcut.io/chatgpt) for Codex, [chatcut.io/claude](https://chatcut.io/claude) for Claude Code (agent-executable copy in [./docs/claude-code-install.md](./docs/claude-code-install.md)), and [./grok/README.md](./grok/README.md) for Grok Bot and Cursor.
+
+The [Codex install and first-creation contract](./docs/codex-install.md) covers
+fresh installs, existing directory/repo packages, unavailable tools in an
+installation chat, and Web versus Desktop creation. Repo updates and public
+directory releases are separate operations.
 
 ## Example Prompts
 

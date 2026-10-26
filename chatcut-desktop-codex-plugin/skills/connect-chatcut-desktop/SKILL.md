@@ -10,7 +10,8 @@ and editing skills. This plugin contains instructions only, not an installer or
 MCP configuration.
 
 If `chatcut_desktop` tools are already available, call `get_active_project` and
-continue with the user's editing request. Do not reinstall the app or change MCP
+continue with the user's editing request using
+`../start-chatcut-desktop/SKILL.md`. Do not reinstall the app or change MCP
 configuration. If the current host is ChatCut Desktop's managed Codex agent,
 stop; its project-pinned MCP and built-in skills are already authoritative.
 
@@ -119,6 +120,9 @@ exact matching official URL above so they can install and open ChatCut with the
 visible operating-system flow.
 
 After ChatCut opens, ask the user to sign in there if needed. Do not handle their
-credentials or add `chatcut_desktop` to `config.toml` manually. Because Codex
-loads MCP tools and skills when a task starts, tell the user to start a new task
-after Desktop finishes connecting.
+credentials or add `chatcut_desktop` to `config.toml` manually. Check whether
+the current conversation can call Desktop tools. If it can, continue here
+using `../start-chatcut-desktop/SKILL.md`; an installation alone is not a reason
+to open another task. If it cannot after Desktop finishes connecting, use that
+Skill's continuation format to preserve the request, project and media for one
+new conversation. State that tool availability still needs verification there.

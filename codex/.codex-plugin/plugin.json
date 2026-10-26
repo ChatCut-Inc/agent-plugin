@@ -1,6 +1,6 @@
 {
   "name": "chatcut",
-  "version": "1.10.21",
+  "version": "1.10.22",
   "description": "ChatCut Codex plugin for editable video editing and creation workflows from Codex.",
   "author": {
     "name": "ChatCut",
@@ -31,11 +31,23 @@
     "longDescription": "Workflow skills and MCP server configuration for routing video editing and creation work to ChatCut: importing local or attached media, creating editable projects, editing timelines, adding captions/subtitles, transcribing and cleaning talking-head videos, adding B-roll or overlays, using generation tools for image/video/voice/sound/music/shader assets, exporting, and verifying editor-visible changes.",
     "developerName": "ChatCut",
     "category": "Creativity",
-    "capabilities": ["Read", "Write"],
+    "capabilities": [
+      "Read",
+      "Write"
+    ],
     "websiteURL": "https://chatcut.io",
-    "defaultPrompt": ["Help me connect to ChatCut Web"],
+    "defaultPrompt": [
+      "Help me choose a ChatCut Web creation scenario and continue with my request and media.",
+      "Edit this talking-head video in ChatCut.",
+      "Create an explainer in ChatCut from my topic."
+    ],
     "brandColor": "#111827",
     "composerIcon": "./assets/logo-light.png",
     "logo": "./assets/logo-light.png"
+  },
+  "extensions": {
+    "com.openai": {
+      "onboardingSkill": "./skills/start-chatcut-creation/SKILL.md"
+    }
   }
 }

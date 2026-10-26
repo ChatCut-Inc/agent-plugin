@@ -14,7 +14,19 @@
         "installation": "AVAILABLE",
         "authentication": "ON_INSTALL"
       },
-      "category": "Design"
+      "category": "Creativity"
+    },
+    {
+      "name": "chatcut-desktop",
+      "source": {
+        "source": "local",
+        "path": "./chatcut-desktop-codex-plugin"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_USE"
+      },
+      "category": "Creativity"
     }
   ]
 }

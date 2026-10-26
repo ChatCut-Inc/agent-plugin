@@ -15,6 +15,11 @@ Use this as the base operating context whenever Codex works with a ChatCut proje
 
 This skill provides the common ChatCut project model, editing operating context, project onboarding flow, editor handoff rules, and connector boundaries. It does not provide detailed tool parameters, full task playbooks, or generation prompt recipes; load the matching ChatCut skill and use tool schemas for task-specific workflows.
 
+When the user wants to explore Skills or continue creating after setup, load
+`start-chatcut-creation`. It preserves an existing brief, helps choose from the
+current catalog, and carries the chosen request and media into the intended
+project. Do not restart onboarding for an already specific editing request.
+
 ### MCP setup and authentication
 
 MCP-only setup rule: check the hosted `chatcut` MCP registration and

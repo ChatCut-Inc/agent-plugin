@@ -1,0 +1,4 @@
+interface:
+  display_name: "Start creating in ChatCut Desktop"
+  short_description: "Connect, choose a Skill, and continue your creation."
+  default_prompt: "Help me choose a ChatCut Desktop creation scenario and continue with my request and media."

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Start creating in ChatCut Web"
+  short_description: "Choose a Skill and continue with your project and media."
+  default_prompt: "Help me choose a ChatCut creation scenario and start with my existing request and media."

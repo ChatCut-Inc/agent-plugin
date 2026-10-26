@@ -1,7 +1,7 @@
 {
   "name": "chatcut-desktop",
-  "version": "1.0.5",
-  "description": "Install, open, and connect the signed ChatCut Desktop app from Codex.",
+  "version": "1.0.6",
+  "description": "Connect ChatCut Desktop, choose a creation scenario, and continue with your project and media.",
   "author": {
     "name": "ChatCut",
     "email": "dev@chatcut.io",
@@ -24,21 +24,29 @@
   "skills": "./skills/",
   "interface": {
     "displayName": "ChatCut",
-    "shortDescription": "Install and connect ChatCut Desktop",
-    "longDescription": "Download, install, open, connect, or repair the signed production ChatCut Desktop app so Codex can use its local video-editing tools and skills.",
+    "shortDescription": "Start creating in ChatCut Desktop",
+    "longDescription": "Connect the signed ChatCut Desktop app, discover available creation Skills, and continue with your request, project, and media. This instructions-only package guides setup and creation handoff; the Desktop app provides the editing tools and current editing Skills.",
     "developerName": "ChatCut",
     "category": "Creativity",
-    "capabilities": ["Interactive", "Write"],
+    "capabilities": [
+      "Interactive",
+      "Write"
+    ],
     "websiteURL": "https://chatcut.io",
     "privacyPolicyURL": "https://chatcut.io/privacy",
     "termsOfServiceURL": "https://chatcut.io/terms",
     "defaultPrompt": [
-      "Create a new ChatCut project and start editing my video.",
-      "Edit this talking-head video for a tighter story with captions, B-roll, music, and motion graphics.",
-      "Create an AI video-editing explainer with motion graphics and an English voiceover."
+      "Help me choose a ChatCut Desktop creation scenario and continue with my request and media.",
+      "Edit this talking-head video in ChatCut Desktop.",
+      "Create an explainer in ChatCut Desktop from my topic."
     ],
     "brandColor": "#111827",
     "composerIcon": "./assets/logo.png",
     "logo": "./assets/logo.png"
+  },
+  "extensions": {
+    "com.openai": {
+      "onboardingSkill": "./skills/start-chatcut-desktop/SKILL.md"
+    }
   }
 }
