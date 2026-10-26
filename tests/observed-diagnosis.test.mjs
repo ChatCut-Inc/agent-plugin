@@ -11,6 +11,18 @@ const makeReport = () => ({
   hostLogs: { entries: [], gaps: [] }, gaps: [], probes: [], wireProbes: [],
 });
 const issuerWarning = 'MCP server startup failed server_name="chatcut" error=OAuth refresh credentials for server chatcut are missing an authorization server issuer; authorization required: OAuth authorization required';
+
+test("rejected original/snapshot inputs are incomplete evidence rather than a no-incident result", () => {
+  for (const [source, reason] of [["original_failure", "failure_record_unavailable"], ["host_snapshot", "unavailable"]]) {
+    const input = makeReport();
+    input.gaps = [{ source, reason, error: { message: "Dedicated input source/schema rejected" } }];
+    const result = diagnose(input);
+    assert.ok(result.findings.some(f => f.kind === "evidence_input_unavailable" && f.observed.source === source));
+    assert.ok(!result.findings.some(f => f.kind === "no_incident_demonstrated"));
+    assert.equal(input.originalFailure.occurredAt, null);
+    assert.equal(result.rootCause, "unconfirmed");
+  }
+});
 const nativeWarning = () => ({
   source: "codex_runtime_sqlite", level: "WARN", target: "codex_mcp::rmcp_client",
   occurredAt: "2026-10-24T01:00:00Z", message: issuerWarning,

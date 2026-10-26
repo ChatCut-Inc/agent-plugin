@@ -1,56 +1,42 @@
 # Hosted MCP evidence report v2
 
-## Independent Doctor Skill
+## Unpublished Doctor candidate
 
-`codex/skills/chatcut-mcp-doctor` and `claude/skills/chatcut-mcp-doctor` now
-package the collector independently of MCP, with diagnosis and feedback sidecars.
-Use Codex's skill picker / `$chatcut:chatcut-mcp-doctor` (standalone copies use
-`$chatcut-mcp-doctor`; the existing store identity uses
-`$chatcut-desktop:chatcut-mcp-doctor`), or Claude Code's
-`/chatcut:chatcut-mcp-doctor`. Neither
-overrides the host's `/doctor`. Its description also enables agent selection for
-natural-language connection-failure requests. See its [entrypoint](../codex/skills/chatcut-mcp-doctor/SKILL.md)
-and [fallback guide](../codex/skills/chatcut-mcp-doctor/references/discovery.md).
-The Skill is included from Codex 1.10.22 / Claude plugin 1.10.24, with collector
-1.3.0. Check the installed version and catalog; Git availability, store approval
-and actual host adoption are separate checks.
+Use the existing Hosted evidence collector and actual host tools. The Doctor
+Skill is a thin explanation and local evidence entry, not an automatic repair
+service. Current collector code is aligned with 1.2.6; older candidate 1.3.0
+reports keep their original identity and bytes. Manifest versions and Skill
+folders do not establish publication, installation, natural triggering or user
+recovery. Doctor remains on hold.
 
-The basics scripts are compatibility forwarders; each host package contains
-one collector implementation under Doctor. The new `scripts/doctor.mjs`
-entrypoint keeps schema-2 collection unchanged and writes `.diagnosis.json`,
-`.summary.md`, `.issue-draft.md` beside the local report. `--offline` forbids
-all diagnostic HTTP requests even with a registered URL and `--upload`.
-`--report <existing.mcp-report.json>` rebuilds sidecars without probes;
-`--upload-report <existing.mcp-report.json>` sends the same report/ID and retains
-a separate receipt. An acknowledged report is not automatically resent. Derived
-sidecars can be regenerated; keep actual agent repair notes separately.
-Supplementary upload receipts bind the immutable report bytes' SHA-256 and its
-diagnostic ID; a foreign receipt cannot establish delivery. Disabled snapshots
-remain disabled through later submission even if snapshot validation failed.
-Credential redaction includes opaque MCP session headers, and permitted native
-SQLite modules still filter tool-call/content echoes before retaining records.
+Follow-ups explicitly reference their original report. No active-case index,
+time window, automatic original-file selection, mandatory new report or Chinese
+answer generator selects the incident. Agent reasoning is based on the actual
+error and canonical project/configuration state. The optional capture entry is
+offline unless the user explicitly permits a native lookup.
 
-Findings are evidence pointers to observed host boundaries and later checks,
-not root-cause assertions. The helper performs no host repair. The repair guide
-limits configuration changes to a genuinely absent manual registration in the
-selected host/scope, with rollback and lookup verification. Sign-in remains a
-host-guided action, and tool recovery requires an actual safe host call.
-The issue draft is private review material; a public issue destination is still
-undecided, and ingest acknowledgement does not create a ticket.
+Recheck observations are separate files referencing the original UUID and SHA.
+Multiple failed and successful observations can coexist. They preserve actual
+host, service, configuration scope and known project/session/call facts; unknown
+facts stay null. A safe native tool result is required. A project listing is not
+proof of access to an affected project. Agent-supplied observations are not
+independent verification or an automatic recovery conclusion.
 
-The Codex and Claude Code basics skills route actual connection failures to a
-bundled, dependency-free Node helper. This does not change the MCP URL, transport,
-authentication, plugin installation, or Desktop integration. It is triggered by
-the Agent during diagnosis and is not an automatic monitor of all connections.
+Saved-report upload has one Doctor entry, an exclusive local owner and SHA-bound
+receipt. Interrupted/ambiguous delivery needs review rather than an automatic
+retry; an ACK is still not complete storage. All local files remain deliverable
+without upload. Nothing in this candidate makes a production request during
+normal Skill loading.
 
-The two plugin packages contain identical copies of the helper and its reference
-because either package must remain self-contained. Update both; tests check
-parity. Node 18+ runs probes and text-log extraction. Optional Codex SQLite reads
-need a runtime with `node:sqlite`; missing support is an explicit evidence gap.
+Collection source: Codex basics scripts. Generated self-contained copies serve
+Claude basics and both Doctor Skills. Run `node scripts/sync-mcp-helpers.mjs`
+after changing those four helpers; CI runs `--check`. See the
+[Skill](../codex/skills/chatcut-mcp-doctor/SKILL.md) and
+[optional collection](../codex/skills/chatcut-mcp-doctor/references/advanced-collection.md).
 
 ## Evidence and delivery contract
 
-Collector 1.3.0 packages the independent Doctor workflow, offline mode and
+Historical candidate collector 1.3.0 packaged the independent Doctor workflow, offline mode and
 immutable-report feedback reuse. It adds explicit registration lookup results,
 surfaces later wire failures and unassociated native errors, and strengthens
 session-credential/content-echo filtering. These behavior changes have a new

@@ -63,9 +63,10 @@ Codex's skill picker (`$chatcut:chatcut-mcp-doctor` for the Git plugin,
 `$chatcut-desktop:chatcut-mcp-doctor` for the existing store identity), or
 `/chatcut:chatcut-mcp-doctor` in Claude Code. It runs locally even when ChatCut
 MCP cannot connect and prepares a report, explanation and private feedback draft.
-Doctor is included from Codex 1.10.22 / Claude Code plugin 1.10.24; check the
-installed version and skill catalog when using an older package. Local diagnosis
-does not require ChatCut authentication.
+Doctor is an unpublished candidate on this branch. Its manifest versions are
+not released minimum versions, and the separate collection-only packages do
+not include this entry. Check actual installed contents and the skill catalog.
+Local diagnosis does not require ChatCut authentication.
 See [Doctor discovery/fallback](codex/skills/chatcut-mcp-doctor/references/discovery.md).
 The host's own `/doctor` command is separate.
 

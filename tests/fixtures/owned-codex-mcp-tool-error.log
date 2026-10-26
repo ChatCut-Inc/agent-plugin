@@ -1,0 +1,1 @@
+2026-10-24T09:37:03.806685Z  WARN codex_core::mcp_tool_call: MCP tool call error: "tool call error: tool call failed for `chatcut/list_projects`\n\nCaused by:\n    Mcp error: -32041: Owned read-only project lookup failed: E_NATIVE_READ_ONLY_724({\"cause\":{\"code\":\"E_OWNED_SOURCE\",\"message\":\"Controlled original cause; no operation was written\"}})"

@@ -140,7 +140,7 @@ async function setup(host) {
   await mkdir(join(dir, "home"), { recursive: true });
   const skill = join(dir, host === "codex" ? values["codex-plugin"] ? "marketplace/codex/skills/chatcut-mcp-doctor" : ".agents/skills/chatcut-mcp-doctor" : "plugin/skills/chatcut-mcp-doctor");
   await cp(join(repo, `${host}/skills/chatcut-mcp-doctor`), skill, { recursive: true });
-  hostCommands.set(host, `node "${join(skill, "scripts/doctor.mjs").replaceAll("\\", "/")}" --host ${host} --server-url ${origin}/api/external-mcp/mcp --offline --output "${join(dir, "native.mcp-report.json").replaceAll("\\", "/")}"`);
+  hostCommands.set(host, `node "${join(skill, "scripts/mcp-doctor.mjs").replaceAll("\\", "/")}" --host ${host} --server-url ${origin}/api/external-mcp/mcp --offline --output "${join(dir, "native.mcp-report.json").replaceAll("\\", "/")}"`);
   if (values["tool-failure"]) hostCommands.set(host, hostCommands.get(host) + ` --failure-record "${join(dir, "native.mcp-failure.json").replaceAll("\\", "/")}" --host-snapshot "${join(dir, "native.mcp-snapshot.json").replaceAll("\\", "/")}"`);
   return { dir, skill, childEnv: env(dir) };
 }
@@ -169,7 +169,7 @@ async function registration(host, exe, context) {
       message: result.stderr || result.stdout,
     }] }, null);
     await writeFile(path, JSON.stringify(snapshot, null, 2));
-    await cli(process.execPath, [join(context.skill, "scripts/doctor.mjs"), "--host", host, "--host-snapshot", path, "--offline", "--output", output], context, `${label}-doctor`);
+    await cli(process.execPath, [join(context.skill, "scripts/mcp-doctor.mjs"), "--host", host, "--host-snapshot", path, "--offline", "--output", output], context, `${label}-doctor`);
     const report = JSON.parse(await readFile(output));
     const findings = diagnose(report).findings;
     assert.equal(findings.some((item) => item.kind === "not_registered"), lookupResult === "not_found");
@@ -253,7 +253,7 @@ try {
       await writeFile(join(context.dir, "skill-catalog.json"), JSON.stringify(catalog, null, 2));
       const found = catalog.data.flatMap((item) => item.skills).find((item) => ["chatcut-mcp-doctor", "chatcut:chatcut-mcp-doctor"].includes(item.name));
       assert.ok(found, "native skill catalog must discover standalone Doctor");
-      hostCommands.set("codex", hostCommands.get("codex").replace(join(context.skill, "scripts/doctor.mjs").replaceAll("\\", "/"), join(found.path, "../scripts/doctor.mjs").replaceAll("\\", "/")));
+      hostCommands.set("codex", hostCommands.get("codex").replace(join(context.skill, "scripts/mcp-doctor.mjs").replaceAll("\\", "/"), join(found.path, "../scripts/mcp-doctor.mjs").replaceAll("\\", "/")));
       const thread = await request("thread/start", { cwd: context.dir, ephemeral: true, approvalPolicy: "never", sandbox: "danger-full-access" });
       await request("turn/start", { threadId: thread.thread.id, input: [{ type: "text", text: "$chatcut-mcp-doctor Diagnose the controlled broken ChatCut MCP locally; no upload." }, { type: "skill", name: found.name, path: found.path }] });
       const deadline = Date.now() + 35000;
