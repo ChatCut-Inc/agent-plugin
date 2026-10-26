@@ -190,6 +190,86 @@ export function stageHint(message) {
   return "unclassified";
 }
 
+export function isHostFailure(entry) {
+  if (
+    ![
+      "codex_runtime_sqlite",
+      "codex_tui_log",
+      "codex_stderr_log",
+      "codex_app_log",
+      "claude_debug_log",
+    ].includes(entry.source)
+  )
+    return false;
+  if (entry.source === "codex_app_log")
+    return [...String(entry.message).matchAll(/(?:^|\s)status=([^\s]+)/g)].at(-1)?.[1] === "failed";
+  const level =
+    entry.level ??
+    String(entry.message)
+      .match(/^\d{4}-\d{2}-\d{2}T\S+\s+(?:\[(WARN|ERROR)\]|(WARN|ERROR))\s+/i)
+      ?.slice(1)
+      .find(Boolean);
+  return (
+    ["WARN", "ERROR"].includes(String(level).toUpperCase()) ||
+    /\b(?:connection failed|discovery failed|auth error|error during auth|MCP tool call error|startup failed|HTTP Connection failed)\b|(?:MCP server|Server)\s+["']?(?:plugin:chatcut:)?chatcut["']?:\s*Error\b/i.test(
+      entry.message,
+    )
+  );
+}
+
+export function hostFailureEvidence(report) {
+  const original = report.originalFailure;
+  const logs = (report.hostLogs.entries ?? []).flatMap((entry, index) => {
+    if (!isHostFailure(entry)) return [];
+    const sameCall =
+      original.status === "recorded" &&
+      original.conversationId &&
+      original.callId &&
+      entry.conversationId === original.conversationId &&
+      entry.callId === original.callId;
+    return [
+      {
+        evidence: `hostLogs.entries[${index}]`,
+        errorText: `hostLogs.entries[${index}].message`,
+        source: entry.source,
+        ...(entry.sourceFile && { sourceFile: entry.sourceFile }),
+        ...(entry.rowId !== undefined && { rowId: entry.rowId }),
+        loggedAt: entry.loggedAt ?? entry.occurredAt ?? null,
+        timeSource: "host_log_event_time; not_original_failure_occurredAt",
+        ...(entry.conversationId && { conversationId: entry.conversationId }),
+        ...(entry.callId && { callId: entry.callId }),
+        extractionRule:
+          "admitted_native_error_warning_or_explicit_failure_event; original_block_retained",
+        localCallBinding: sameCall
+          ? "same_conversation_and_call_id; original_record_agent_supplied"
+          : "unconfirmed; may_not_be_the_reported_failure",
+        originalAttemptMatch: "unconfirmed",
+      },
+    ];
+  });
+  const native = (report.hostLogs.nativeFailedCalls ?? []).flatMap((entry, index) =>
+    entry.status === "failed" && entry.error
+      ? [
+          {
+            evidence: `hostLogs.nativeFailedCalls[${index}]`,
+            errorText: `hostLogs.nativeFailedCalls[${index}].error`,
+            source: entry.source,
+            conversationId: entry.conversationId,
+            nativeItemId: entry.nativeItemId,
+            idKind: entry.idKind,
+            startedAtMs: entry.startedAtMs,
+            completedAtMs: entry.completedAtMs,
+            timeSource: entry.timeSource,
+            extractionRule: "scoped_native_failed_mcp_item_error_projection",
+            localCallBinding: "native_item_only; not_bound_to_original_call_or_server_request",
+            originalAttemptMatch: "unconfirmed",
+          },
+        ]
+      : [],
+  );
+  return [...logs, ...native];
+}
+
 export function evidenceSummary(report) {
   const snapshot = report.hostSnapshot;
   const observations = snapshot?.observations ?? [];
@@ -242,10 +322,35 @@ export function evidenceSummary(report) {
     ...(entry.conversationId && { conversationId: entry.conversationId }),
     ...(entry.callId && { callId: entry.callId }),
   }));
+  const databaseReadFailures = (report.hostLogs.gaps ?? [])
+    .filter(
+      (gap) =>
+        ["codex_runtime_sqlite", "codex_native_failed_mcp_items"].includes(gap.source) &&
+        ["unavailable", "close_failed"].includes(gap.reason),
+    )
+    .map((gap) => ({
+      source: gap.source,
+      operation: gap.operation ?? null,
+      code: gap.error?.code ?? null,
+      errcode: gap.error?.errcode ?? null,
+    }));
   return {
     stages,
     otherObservations: unknown,
     logHints,
+    failureEvidence: hostFailureEvidence(report),
+    collectionContext: report.collectionContext ?? null,
+    nativeFailedCalls: (report.hostLogs.nativeFailedCalls ?? []).map((item, index) => ({
+      evidence: `hostLogs.nativeFailedCalls[${index}]`,
+      source: item.source,
+      nativeItemId: item.nativeItemId,
+      idKind: item.idKind,
+      conversationId: item.conversationId,
+      operation: item.operation,
+      startedAtMs: item.startedAtMs,
+      completedAtMs: item.completedAtMs,
+      originalAttemptMatch: "unconfirmed",
+    })),
     originalRequestCorrelation: {
       status: originalRequests.length ? "agent_reported_same_attempt" : "unconfirmed",
       observations: originalRequests,
@@ -262,6 +367,18 @@ export function evidenceSummary(report) {
         }
       : null,
     hostLogCoverage: {
+      originalErrorRetained: report.originalFailure.status === "recorded",
+      originalErrorRetainedWithoutDatabase:
+        report.originalFailure.status === "recorded" && databaseReadFailures.length > 0,
+      databaseReadFailures,
+      runtimeCollectionFailed: (report.hostLogs.gaps ?? []).some(
+        (gap) => gap.source === "host_logs" && gap.reason === "collector_failed",
+      ),
+      nativeFailedMcpItems: report.hostLogs.nativeFailedCalls?.length ?? 0,
+      retainedStderrRecords: report.hostLogs.entries.filter(
+        (entry) => entry.source === "codex_stderr_log",
+      ).length,
+      priorStderrCaptureRequired: false,
       records: report.hostLogs.entries.length,
       appStartupRecords: appNotices.length,
       failedAppStartupRecords: failedAppNotices.length,

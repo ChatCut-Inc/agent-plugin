@@ -12,6 +12,23 @@ need a runtime with `node:sqlite`; missing support is an explicit evidence gap.
 
 ## Evidence and delivery contract
 
+Collector 1.2.6 keeps the complete collector in the existing basics skills.
+It includes the collection-only changes from #28, optional-metadata recovery
+from #29, and failure-prioritized bounded host-log retention with machine-linked
+failure evidence. It does not add a standalone Doctor Skill. Candidate event
+times and local/native IDs remain distinct from the original attempt's time
+and server request ID; the host's pre-parser TLS response is not captured.
+It adds bounded Codex failed-MCP index projections, current collecting-thread
+context, explicit already-retained stderr, native tool-error formats and SQL
+thread scoping before the row limit. Original, lifecycle and log times stay
+separate; no native identity is promoted to a server request ID. SQLite errors
+retain the failing operation while original errors and independent sources
+continue. `evidenceSummary.hostLogCoverage` makes these gaps explicit, and
+`--offline` suppresses all probes/uploads. Already visible errors need no
+preconfigured stderr. Hidden startup errors with no accessible source remain
+unavailable. MCP session credentials in error text are redacted. This change
+adds no separate Doctor Skill, diagnosis/repair rules or publication workflow.
+
 Collector 1.2.3 adds a dedicated `.mcp-failure.json` input for the original host
 tool/runtime error, its available failure time and local conversation/call IDs.
 The Skill preserves this evidence before retries; a missing failure timestamp

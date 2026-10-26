@@ -6,7 +6,13 @@ import { fileURLToPath } from "node:url";
 import { parseArgs } from "node:util";
 import { connect as connectTls } from "node:tls";
 import { isIP } from "node:net";
-import { evidenceSummary, inspectMetadata, logTime, validateSnapshot } from "./mcp-evidence.mjs";
+import {
+  evidenceSummary,
+  inspectMetadata,
+  isHostFailure,
+  logTime,
+  validateSnapshot,
+} from "./mcp-evidence.mjs";
 import { probeMetadataWire } from "./mcp-wire.mjs";
 import { failureFromRecord } from "./mcp-failure.mjs";
 
@@ -24,8 +30,39 @@ function redactFieldValue(_match, prefix, value) {
   return prefix + (quote ? quote + "[REDACTED]" + quote : "[REDACTED]");
 }
 
-export function redact(text) {
-  return String(text)
+export function redact(text, jsonDepth = 0) {
+  let value = String(text);
+  // A host may quote/stringify an entire JSON response inside its error. Decode
+  // only JSON string tokens containing this credential label, redact their full
+  // value, then restore the quoting. A partial escaped-field regex can leak the
+  // suffix after an escaped quote/backslash. Input collection is size bounded.
+  if (jsonDepth < 16)
+    value = value.replace(/"(?:\\.|[^"\\\r\n])*"/g, (token) => {
+      try {
+        const decoded = JSON.parse(token);
+        if (/mcp[-_]session[-_]id/i.test(decoded)) {
+          const sanitized = redact(decoded, jsonDepth + 1);
+          if (sanitized !== decoded) return JSON.stringify(sanitized);
+        }
+      } catch {
+        /* Non-JSON diagnostic text is retained for the normal rules. */
+      }
+      return token;
+    });
+  return value
+    .replace(/\b(Mcp-Session-Id[ \t]*:[ \t]*)\S+/gi, "$1[REDACTED]")
+    .replace(
+      /(["']mcp[-_]session[-_]id["']\s*[:=]\s*)("(?:\\.|[^"\\\r\n])*"|'(?:\\.|[^'\\\r\n])*')/gi,
+      redactFieldValue,
+    )
+    .replace(
+      /\b((?:mcp[-_]session[-_]id)\s*[:=]\s*)("(?:\\.|[^"\\\r\n])*"|'(?:\\.|[^'\\\r\n])*'|[^\s"'<>]+)/gi,
+      redactFieldValue,
+    )
+    .replace(
+      /((?:\\*["'])mcp[-_]session[-_]id(?:\\*["'])\s*[:=]\s*(?:\\*["']))[^"'\\\r\n]*/gi,
+      "$1[REDACTED]",
+    )
     .replace(
       /\bBearer\s+(?!(?:token|required)\b|<|(?:realm|scope|error(?:_description|_uri)?|resource_metadata)\s*=)[A-Za-z0-9._~+/=-]+/gi,
       "Bearer [REDACTED]",
@@ -55,7 +92,7 @@ export function redact(text) {
 function clean(value) {
   return JSON.parse(
     JSON.stringify(value, (key, item) =>
-      /^(?:access_?token|refresh_?token|id_?token|client_?secret|session_?token|api[_-]?key|authorization|token|cookie|set-cookie)$/i.test(
+      /^(?:mcp[-_]session[-_]id|access_?token|refresh_?token|id_?token|client_?secret|session_?token|api[_-]?key|authorization|token|cookie|set-cookie)$/i.test(
         key,
       )
         ? "[REDACTED]"
@@ -253,7 +290,7 @@ export async function probeEntry(endpoint, diagnosticId, fetchImpl = fetch) {
         params: {
           protocolVersion: "2025-11-25",
           capabilities: {},
-          clientInfo: { name: "chatcut-mcp-doctor", version: "1.2.5" },
+          clientInfo: { name: "chatcut-mcp-doctor", version: "1.2.6" },
         },
       }),
     });
@@ -390,8 +427,16 @@ function runtimeContext(body) {
   return { ...(conversationId && { conversationId }), ...(callId && { callId }) };
 }
 
-function hostedTextRecord(line) {
+function hostedTextRecord(line, nativeLevel) {
   if (/^\s/.test(line)) return false;
+  // Inspect explicit echo prefixes before stripping trace context: a payload
+  // itself can contain "}:" and must not become a diagnostic via lastIndex.
+  if (
+    /(?:^|\}:\s*)(?:tool (?:call|result)\s*:|(?:function_call(?:_output)?|tool_call(?:_output)?)\s*:?\s*[{[])/i.test(
+      line,
+    )
+  )
+    return false;
   let body = line.replace(
     /^\d{4}-\d{2}-\d{2}T\S+\s+(?:(?:\[(?:TRACE|DEBUG|INFO|WARN|ERROR)\]|TRACE|DEBUG|INFO|WARN|ERROR)\s+)?/i,
     "",
@@ -399,7 +444,9 @@ function hostedTextRecord(line) {
   const module = body.match(/^([A-Za-z_]\w*(?:::\w+)+):\s*/);
   if (module) {
     if (
-      !/^(?:codex_(?:mcp|rmcp_client|plugins|core(?:::|_)plugins)(?:::|$)|rmcp::)/.test(module[1])
+      !/^(?:codex_(?:mcp|rmcp_client|plugins|core(?:::|_)plugins)(?:::|$)|rmcp::|codex_core::mcp_tool_call$)/.test(
+        module[1],
+      )
     )
       return false;
     body = body.slice(module[0].length);
@@ -417,9 +464,31 @@ function hostedTextRecord(line) {
   const server =
     context.match(/\bserver_name=["']?([\w:.-]+)/)?.[1] ?? scope?.[1] ?? scope?.[2] ?? scope?.[3];
   if (server && !["chatcut", "plugin:chatcut:chatcut"].includes(server)) return false;
-  if (!CHATCUT_MESSAGE.test(body)) return false;
-  if (/\bmethod=["']?tools\/call(?:["'\s}]|$)/.test(context)) return false;
-  const message = scope ? body.slice(scope[0].length) : body;
+  const header = line.match(/^\d{4}-\d{2}-\d{2}T\S+\s+(?:\[(WARN|ERROR)\]|(WARN|ERROR))\s+/i);
+  const level = String(nativeLevel ?? header?.[1] ?? header?.[2]).toUpperCase();
+  const nativeToolError =
+    module?.[1] === "codex_core::mcp_tool_call" &&
+    ["ERROR", "WARN"].includes(level) &&
+    /^MCP tool call error:\s*["']?tool call error: tool call failed for `(?:chatcut|plugin:chatcut:chatcut)\/[A-Za-z0-9_.:-]+`/.test(
+      body,
+    );
+  if (module?.[1] === "codex_core::mcp_tool_call" && !nativeToolError) return false;
+  if (!CHATCUT_MESSAGE.test(body) && !nativeToolError) return false;
+  if (/\bmethod=["']?tools\/call(?:["'\s}]|$)/.test(context)) {
+    // A trusted native ERROR/WARN can describe a failed tools/call without
+    // echoing its content. SQLite supplies its separate native level column.
+    if (!module || !["ERROR", "WARN"].includes(level)) return false;
+    // Inspect the unstripped body: a payload can itself contain "}:".
+    const contentCheck = body.replace(/\\+(?=["'])/g, "");
+    if (
+      /["'](?:params|arguments)["']\s*:\s*[{[]|["'](?:prompt|transcript)["']\s*:\s*["'{[]|["']result["']\s*:\s*\{[\s\S]*?["']content["']\s*:\s*\[|["']role["']\s*:\s*["'](?:user|assistant|system|developer)["']|["']type["']\s*:\s*["'](?:function_call(?:_output)?|tool_call(?:_output)?|tool_result|user(?:_message)?|assistant(?:_message)?)["']/i.test(
+        contentCheck,
+      )
+    )
+      return false;
+    if (/(?:^|\}:\s*)(?:prompt|transcript)\s*:/i.test(body)) return false;
+  }
+  const message = scope ? body.slice(scope[0].length) : logMessage(body);
   // Runtime error contents can name tools; only explicit echo records are excluded.
   if (TEXT_ECHO.test(message)) return false;
   if (
@@ -507,7 +576,15 @@ async function textLog(path, source, gaps, window, select = hostedTextRecord) {
         !TEXT_ECHO.test(lines[i + 1].trimStart())
       )
         block.push(lines[++i]);
+      if (block.length > 1 && !select(block.join("\n"))) continue;
       const occurredAt = logTime(block[0]);
+      const context = runtimeContext(block[0]);
+      if (
+        window.conversationId &&
+        context.conversationId &&
+        context.conversationId !== window.conversationId
+      )
+        continue;
       if (
         occurredAt &&
         (Date.parse(occurredAt) < window.since * 1000 ||
@@ -520,7 +597,7 @@ async function textLog(path, source, gaps, window, select = hostedTextRecord) {
         occurredAt,
         timeStatus: occurredAt ? "within_requested_window" : "unknown; not_confirmed_within_window",
         message: redact(block.join("\n")),
-        ...runtimeContext(block[0]),
+        ...context,
         originalAttemptMatch: "unconfirmed",
       });
     }
@@ -529,10 +606,43 @@ async function textLog(path, source, gaps, window, select = hostedTextRecord) {
     const unknownTimes = entries.filter((entry) => !entry.occurredAt).length;
     if (unknownTimes)
       gaps.push({ source, reason: "records_with_unknown_time", count: unknownTimes });
-    return entries.slice(-30);
+    return retainFailureLogs(entries, gaps, source);
   } finally {
     await handle.close();
   }
+}
+
+function retainFailureLogs(entries, gaps, source = "host_logs") {
+  const failures = entries.filter(isHostFailure);
+  const others = entries.filter((entry) => !isHostFailure(entry));
+  const selected = new Set();
+  let bytes = 0;
+  const newest = (values) =>
+    values
+      .map((entry, index) => ({
+        entry,
+        index,
+        time: Date.parse(entry.loggedAt ?? entry.occurredAt) || -Infinity,
+      }))
+      .sort((a, b) => b.time - a.time || b.index - a.index)
+      .map((value) => value.entry);
+  for (const entry of [...newest(failures), ...newest(others)]) {
+    const size = Buffer.byteLength(entry.message ?? "");
+    if (selected.size === 30 || bytes + size > READ_LIMIT) continue;
+    selected.add(entry);
+    bytes += size;
+  }
+  if (selected.size < entries.length)
+    gaps.push({
+      source,
+      reason: "failure_prioritized_log_budget",
+      maximumRecords: 30,
+      maximumMessageBytes: READ_LIMIT,
+      retainedMessageBytes: bytes,
+      omitted: entries.length - selected.size,
+      omittedFailureRecords: failures.filter((entry) => !selected.has(entry)).length,
+    });
+  return entries.filter((entry) => selected.has(entry));
 }
 
 async function codexAppLogs(root, gaps, window, conversationId, selectedFiles = [], readOffset) {
@@ -625,9 +735,11 @@ async function codexAppLogs(root, gaps, window, conversationId, selectedFiles = 
       omitted: entries.length - 30,
     });
   return {
-    entries: entries
-      .sort((a, b) => (a.occurredAt ?? "").localeCompare(b.occurredAt ?? ""))
-      .slice(-30),
+    entries: retainFailureLogs(
+      entries.sort((a, b) => (a.occurredAt ?? "").localeCompare(b.occurredAt ?? "")),
+      gaps,
+      "codex_app_log",
+    ),
     scan: {
       directoryEntriesScanned: scanned,
       matchingFiles: files.length,
@@ -679,11 +791,131 @@ async function inspectSqliteAccess(path) {
   };
 }
 
+async function nativeFailedMcpItems(sqliteRoot, conversationId, window, gaps) {
+  const source = "codex_native_failed_mcp_items";
+  if (!conversationId) {
+    gaps.push({ source, reason: "known_conversation_id_unavailable; no_history_query" });
+    return [];
+  }
+  let db;
+  const databasePath = join(sqliteRoot, "thread_history_1.sqlite");
+  let operation = "locate_database";
+  try {
+    await stat(databasePath);
+    operation = "load_sqlite_module";
+    const { DatabaseSync } = await import("node:sqlite");
+    operation = "open_database";
+    db = new DatabaseSync(databasePath, { readOnly: true, timeout: 1000 });
+    operation = "set_query_only";
+    db.exec("PRAGMA query_only=ON");
+    operation = "inspect_schema";
+    const columns = db
+      .prepare("PRAGMA table_info(thread_items)")
+      .all()
+      .map((column) => column.name);
+    if (
+      ![
+        "thread_id",
+        "turn_id",
+        "item_id",
+        "item_type",
+        "item_json",
+        "started_at_ms",
+        "completed_at_ms",
+      ].every((name) => columns.includes(name))
+    ) {
+      gaps.push({ source, reason: "unsupported_schema; no_conversation_rows_read" });
+      return [];
+    }
+    // Only scalar/error projections leave SQLite; never select whole item_json,
+    // chat roles, arguments, successful results or rollout contents.
+    const field = (name) =>
+      `json_extract(CASE WHEN json_valid(item_json) THEN item_json ELSE '{}' END,'$.${name}')`;
+    const error = field("error");
+    operation = "prepare_failed_items_query";
+    const query = db.prepare(`SELECT thread_id,turn_id,item_id,started_at_ms,completed_at_ms,
+      ${field("server")} AS server,${field("tool")} AS operation,
+      CASE WHEN length(CAST(${error} AS BLOB))<=${READ_LIMIT} THEN ${error} END AS error_json,
+      length(CAST(${error} AS BLOB)) AS error_bytes
+      FROM thread_items WHERE thread_id=? AND item_type='mcpToolCall'
+      AND ((started_at_ms>=? AND started_at_ms<=?) OR (completed_at_ms>=? AND completed_at_ms<=?))
+      AND ${field("type")}='mcpToolCall' AND ${field("server")} IN ('chatcut','plugin:chatcut:chatcut')
+      AND ${field("status")}='failed' ORDER BY completed_at_ms DESC,item_id LIMIT 11`);
+    operation = "select_failed_mcp_items";
+    const rows = query.all(
+      conversationId,
+      window.since * 1000,
+      window.until * 1000,
+      window.since * 1000,
+      window.until * 1000,
+    );
+    if (rows.length > 10) gaps.push({ source, reason: "native_failure_record_limit", limit: 10 });
+    if (!rows.length) gaps.push({ source, reason: "no_failed_mcp_items_in_bounded_window" });
+    return rows.slice(0, 10).map((row) => {
+      if (row.error_bytes > READ_LIMIT)
+        gaps.push({
+          source,
+          reason: "native_error_size_limit",
+          nativeItemId: row.item_id,
+          limitBytes: READ_LIMIT,
+        });
+      let error = null;
+      if (row.error_json) {
+        try {
+          error = JSON.parse(row.error_json);
+        } catch {
+          error = { message: String(row.error_json) };
+        }
+      }
+      return {
+        source,
+        sourceFile: "thread_history_1.sqlite",
+        conversationId: row.thread_id,
+        turnId: row.turn_id,
+        nativeItemId: row.item_id,
+        idKind: "codex_native_mcp_item_id; not_responses_call_id_rpc_id_or_server_request_id",
+        serverName: row.server,
+        operation: row.operation,
+        status: "failed",
+        startedAtMs: row.started_at_ms,
+        completedAtMs: row.completed_at_ms,
+        timeSource: "native_thread_items_lifecycle_columns; not_original_occurredAt_or_log_time",
+        error,
+        ...(row.error_bytes > READ_LIMIT && { errorCaptureLimited: true }),
+        originalAttemptMatch: "unconfirmed",
+      };
+    });
+  } catch (error) {
+    gaps.push({
+      source,
+      reason: "unavailable",
+      operation,
+      error: errorDetails(error),
+      ...(platform() === "win32" && error?.errcode === 14
+        ? { accessEvidence: await inspectSqliteAccess(databasePath) }
+        : {}),
+    });
+    return [];
+  } finally {
+    try {
+      db?.close();
+    } catch (error) {
+      gaps.push({
+        source,
+        reason: "close_failed",
+        operation: "close_database",
+        error: errorDetails(error),
+      });
+    }
+  }
+}
+
 export async function collectHostLogs(host, options = {}) {
   const userHome = options.home ?? homedir();
   const gaps = [];
   const entries = [];
   let appLog;
+  let nativeFailedCalls;
   const now = options.now ?? Date.now();
   const center = options.occurredAt ? Date.parse(options.occurredAt) : now;
   const since = Math.floor((center - (options.occurredAt ? 15 : 30) * 60_000) / 1000);
@@ -694,20 +926,31 @@ export async function collectHostLogs(host, options = {}) {
     const logRoot = options.codexLogDir ?? join(root, "log");
     const databasePath = join(sqliteRoot, "logs_2.sqlite");
     let db;
+    let operation = "locate_database";
     try {
       await stat(databasePath);
+      operation = "load_sqlite_module";
       const { DatabaseSync } = await import("node:sqlite");
+      operation = "open_database";
       db = new DatabaseSync(databasePath, { readOnly: true, timeout: 1000 });
+      operation = "set_query_only";
       db.exec("PRAGMA query_only=ON");
+      operation = "inspect_schema";
       const hasThreadId = db
         .prepare("PRAGMA table_info(logs)")
         .all()
         .some((column) => column.name === "thread_id");
-      const rows = db
-        .prepare(
-          `SELECT id,ts,level,target,feedback_log_body${hasThreadId ? ",thread_id" : ""} FROM logs WHERE ts>=? AND ts<=? AND (target LIKE 'codex_mcp%' OR target LIKE 'rmcp%' OR target LIKE 'codex_plugins%' OR target LIKE 'codex_core::plugins%') AND feedback_log_body LIKE '%chatcut%' ORDER BY ts DESC LIMIT 200`,
-        )
-        .all(since, until);
+      const threadFilter =
+        hasThreadId && options.conversationId
+          ? " AND (thread_id IS NULL OR thread_id='' OR thread_id=?)"
+          : "";
+      operation = "prepare_runtime_logs_query";
+      const query = db.prepare(
+        `SELECT id,ts,level,target,feedback_log_body${hasThreadId ? ",thread_id" : ""} FROM logs WHERE ts>=? AND ts<=?${threadFilter} AND (target LIKE 'codex_mcp%' OR target LIKE 'codex_rmcp_client%' OR target LIKE 'rmcp%' OR target LIKE 'codex_plugins%' OR target LIKE 'codex_core::plugins%' OR target='codex_core::mcp_tool_call') AND feedback_log_body LIKE '%chatcut%' ORDER BY ts DESC LIMIT 200`,
+      );
+      operation = "select_runtime_logs";
+      const rows = query.all(since, until, ...(threadFilter ? [options.conversationId] : []));
+      operation = "filter_runtime_logs";
       for (const row of rows) {
         const message = logMessage(row.feedback_log_body ?? "");
         const original = row.feedback_log_body ?? "";
@@ -719,7 +962,10 @@ export async function collectHostLogs(host, options = {}) {
           context.conversationId !== options.conversationId
         )
           continue;
-        if (!CHATCUT_MESSAGE.test(original) || /server_name="?chatcut_desktop/.test(original))
+        if (
+          !hostedTextRecord(`${row.target}: ${original}`, row.level) ||
+          !hostedTextRecord(`MCP server "chatcut" ${message}`)
+        )
           continue;
         if (
           !["ERROR", "WARN"].includes(row.level) &&
@@ -744,6 +990,7 @@ export async function collectHostLogs(host, options = {}) {
       gaps.push({
         source: "codex_runtime_sqlite",
         reason: "unavailable",
+        operation,
         error: errorDetails(error),
         locationSource: options.codexSqliteHome
           ? "explicit_host_location"
@@ -755,17 +1002,59 @@ export async function collectHostLogs(host, options = {}) {
           : {}),
       });
     } finally {
-      db?.close();
+      try {
+        db?.close();
+      } catch (error) {
+        gaps.push({
+          source: "codex_runtime_sqlite",
+          reason: "close_failed",
+          operation: "close_database",
+          error: errorDetails(error),
+        });
+      }
     }
+    nativeFailedCalls = await nativeFailedMcpItems(
+      sqliteRoot,
+      options.conversationId,
+      { since, until },
+      gaps,
+    );
     try {
       entries.push(
         ...(await textLog(join(logRoot, "codex-tui.log"), "codex_tui_log", gaps, {
           since,
           until,
+          conversationId: options.conversationId,
         })),
       );
     } catch (error) {
       gaps.push({ source: "codex_tui_log", reason: "unavailable", error: errorDetails(error) });
+    }
+    if (options.codexStderrFile) {
+      try {
+        if (!basename(options.codexStderrFile).endsWith(".codex-stderr.log"))
+          throw new Error(
+            "Use an existing dedicated .codex-stderr.log native capture, never config/auth/session files",
+          );
+        const captured = await textLog(options.codexStderrFile, "codex_stderr_log", gaps, {
+          since,
+          until,
+          conversationId: options.conversationId,
+        });
+        entries.push(
+          ...captured.map(({ occurredAt, ...entry }) => ({
+            ...entry,
+            loggedAt: occurredAt,
+            timestampKind: "native_log_time_not_original_failure_time",
+          })),
+        );
+      } catch (error) {
+        gaps.push({
+          source: "codex_stderr_log",
+          reason: "unavailable",
+          error: errorDetails(error),
+        });
+      }
     }
     const appData = options.localAppData ?? process.env.LOCALAPPDATA;
     const sandboxAppData =
@@ -830,12 +1119,13 @@ export async function collectHostLogs(host, options = {}) {
       gaps.push({ source: "claude_debug_log", reason: "unavailable", error: errorDetails(error) });
     }
   }
-  if (!entries.length)
+  if (!entries.length && !nativeFailedCalls?.length)
     gaps.push({ source: "host_logs", reason: "no_matching_records_in_bounded_window" });
   return clean({
-    entries,
+    entries: retainFailureLogs(entries, gaps),
     gaps,
     ...(appLog ? { appLog } : {}),
+    ...(nativeFailedCalls ? { nativeFailedCalls } : {}),
     window: {
       since: new Date(since * 1000).toISOString(),
       until: new Date(until * 1000).toISOString(),
@@ -899,16 +1189,26 @@ export async function runDoctor(options, dependencies = {}) {
     throw new Error("--occurred-at must be an ISO timestamp with timezone; omit it when unknown");
   }
   const fetchImpl = dependencies.fetchImpl ?? fetch;
+  const threadEnv = options.host === "codex" ? process.env.CODEX_THREAD_ID : undefined;
+  const collectionConversationId =
+    /^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/i.test(threadEnv ?? "")
+      ? threadEnv
+      : null;
   const diagnosticId = randomUUID();
   const report = {
     schemaVersion: 2,
-    collectorVersion: "1.2.5",
+    collectorVersion: "1.2.6",
     diagnosticId,
     collectedAt: new Date().toISOString(),
     scope: "cloud",
     host: options.host,
     hostVersion: options.hostVersion ?? null,
     hostVersionSource: options.hostVersion ? "agent_supplied" : "unavailable",
+    collectionContext: {
+      conversationId: collectionConversationId,
+      source: collectionConversationId ? "CODEX_THREAD_ID" : "unavailable",
+      association: "current_collection_thread; original_failed_attempt_unconfirmed",
+    },
     environment: {
       platform: platform(),
       architecture: arch(),
@@ -1065,10 +1365,11 @@ export async function runDoctor(options, dependencies = {}) {
       codexAppLogDir: options.codexAppLogDir,
       codexAppLogFiles: options.codexAppLogFiles,
       codexAppLogOffset: options.codexAppLogOffset,
+      codexStderrFile: options.codexStderrFile,
       conversationId:
         report.originalFailure.conversationId ??
         report.hostSnapshot?.session?.conversationId ??
-        process.env.CODEX_THREAD_ID,
+        collectionConversationId,
     });
   } catch (error) {
     report.hostLogs = {
@@ -1080,12 +1381,14 @@ export async function runDoctor(options, dependencies = {}) {
     disabledBySnapshot ||
     report.hostSnapshot?.configuration?.enabled === false ||
     report.hostSnapshot?.session?.connectionStatus === "disabled";
-  if (disabled || !endpoint) {
+  if (options.offline || disabled || !endpoint) {
     report.gaps.push({
       source: "probes",
       reason: disabled
         ? "host_reports_intentionally_disabled; no_requests_sent"
-        : "registered_endpoint_unavailable; no_requests_sent",
+        : options.offline
+          ? "offline_requested; no_requests_sent"
+          : "registered_endpoint_unavailable; no_requests_sent",
     });
   } else {
     report.entryProbe = await guardProbe(endpoint.href, () =>
@@ -1191,18 +1494,20 @@ export async function runDoctor(options, dependencies = {}) {
   report.upload = {
     status: disabled
       ? "skipped_intentionally_disabled"
-      : !endpoint
-        ? "skipped_endpoint_unavailable"
-        : options.upload
-          ? "pending"
-          : "not_requested",
+      : options.offline
+        ? "skipped_offline"
+        : !endpoint
+          ? "skipped_endpoint_unavailable"
+          : options.upload
+            ? "pending"
+            : "not_requested",
     storageVerified: false,
   };
   const path = resolve(options.output ?? join(tmpdir(), `chatcut-mcp-doctor-${diagnosticId}.json`));
   const save = async (flag) =>
     writeFile(path, JSON.stringify(clean(report), null, 2) + "\n", { flag, mode: 0o600 });
   await save("wx");
-  if (options.upload && !disabled && endpoint) {
+  if (options.upload && !options.offline && !disabled && endpoint) {
     try {
       const events = fragmentEvents(report);
       const response = await fetchImpl(new URL("/telemetry/events", endpoint.origin).href, {
@@ -1242,11 +1547,13 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
         "occurred-at": { type: "string" },
         "codex-sqlite-home": { type: "string" },
         "codex-log-dir": { type: "string" },
+        "codex-stderr-file": { type: "string" },
         "codex-app-log-dir": { type: "string" },
         "codex-app-log-file": { type: "string", multiple: true },
         "codex-app-log-offset": { type: "string" },
         output: { type: "string" },
         upload: { type: "boolean", default: false },
+        offline: { type: "boolean", default: false },
         "wire-evidence": { type: "boolean", default: true },
         "create-snapshot": { type: "string" },
         "validate-snapshot": { type: "string" },
@@ -1286,7 +1593,7 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
       console.log(JSON.stringify({ snapshotValid: true, networkRequests: 0 }));
     } else if (values.help) {
       console.log(
-        "node mcp-doctor.mjs --create-snapshot <new.mcp-snapshot.json> | --validate-snapshot <file> | --host codex|claude --server-url <registered URL> [--host-snapshot <dedicated .mcp-snapshot.json>] [--host-version <version>] [--failure-record <dedicated .mcp-failure.json> | --original-error <error-only text file>] [--occurred-at <ISO timestamp>] [--codex-sqlite-home <known host SQLite directory>] [--codex-log-dir <known host log directory>] [--codex-app-log-dir <known host App log directory>] [--codex-app-log-file <known native log; at most three>] [--wire-evidence] [--output <new JSON path>] [--upload]",
+        "node mcp-doctor.mjs --create-snapshot <new.mcp-snapshot.json> | --validate-snapshot <file> | --host codex|claude --server-url <registered URL> [--host-snapshot <dedicated .mcp-snapshot.json>] [--host-version <version>] [--failure-record <dedicated .mcp-failure.json> | --original-error <error-only text file>] [--occurred-at <ISO timestamp>] [--codex-sqlite-home <known host SQLite directory>] [--codex-log-dir <known host log directory>] [--codex-stderr-file <existing .codex-stderr.log>] [--codex-app-log-dir <known host App log directory>] [--codex-app-log-file <known native log; at most three>] [--wire-evidence] [--output <new JSON path>] [--offline] [--upload]",
       );
     } else {
       const { path, report } = await runDoctor({
@@ -1299,6 +1606,7 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
         occurredAt: values["occurred-at"],
         codexSqliteHome: values["codex-sqlite-home"],
         codexLogDir: values["codex-log-dir"],
+        codexStderrFile: values["codex-stderr-file"],
         codexAppLogDir: values["codex-app-log-dir"],
         codexAppLogFiles: values["codex-app-log-file"],
         codexAppLogOffset:
@@ -1307,6 +1615,7 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
             : Number(values["codex-app-log-offset"]),
         output: values.output,
         upload: values.upload,
+        offline: values.offline,
         wireEvidence: values["wire-evidence"],
       });
       console.log(
@@ -1315,6 +1624,7 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
           path,
           upload: report.upload,
           evidenceGaps: report.evidenceSummary.gaps,
+          hostFailureEvidence: report.evidenceSummary.failureEvidence,
           collectionGaps: report.gaps,
           recoveryVerified: false,
         }),

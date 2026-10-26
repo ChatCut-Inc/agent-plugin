@@ -722,7 +722,7 @@ test("App fallback remains bounded and does not promote host notices into the or
     codexLogDir: join(dir, "empty-tui"),
     output: join(dir, "report.json"),
   });
-  assert.equal(report.collectorVersion, "1.2.5");
+  assert.equal(report.collectorVersion, "1.2.6");
   assert.equal(
     report.hostLogs.entries.filter((entry) => entry.source === "codex_app_log").length,
     30,
@@ -769,4 +769,16 @@ test("self-contained host packages ship identical helpers and diagnostic referen
       ),
     );
   }
+});
+
+test("MCP session credentials in native errors are redacted across punctuation and nested JSON strings", () => {
+  for (let code = 0x21; code <= 0x7e; code++) {
+    const opaque = `opaque${String.fromCharCode(code)}SECRET_SUFFIX`;
+    const document = JSON.stringify({ "Mcp-Session-Id": opaque, code: "E_KEEP" });
+    for (const text of [`Mcp-Session-Id: ${opaque}\nError E_KEEP`, document, `Response: ${JSON.stringify(document)}`, `Response: ${JSON.stringify(JSON.stringify(document))}`]) {
+      assert.ok(!redact(text).includes("SECRET_SUFFIX"));
+      assert.ok(redact(text).includes("E_KEEP"));
+    }
+  }
+  assert.ok(redact("Mcp-Session-Id: private\ncallId=local-call").includes("callId=local-call"));
 });

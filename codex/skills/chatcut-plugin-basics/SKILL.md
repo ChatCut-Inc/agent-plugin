@@ -32,6 +32,8 @@ Also use connection diagnostics when previously available tools disappear or the
 
 For a failed hosted ChatCut tool request after connection, immediately preserve the original tool error and any available failure time, conversation ID and local call ID in the dedicated failure record described there. The Agent gathers these facts; do not ask the user to manually reconstruct them. Startup-status notices and later successful checks do not establish what happened to that tool request.
 
+Save the visible error before reading runtime databases, including unfamiliar error messages and cause. A failed Windows database read does not invalidate that error or prevent local collection with `--offline`. Keep independent bounded App evidence separate and check `evidenceSummary.hostLogCoverage` for retained and missing sources. Do not require prior stderr setup, database export or permission changes. A startup error hidden from the Agent still needs an accessible source.
+
 1. **Server not registered:** Offer to register the Hosted MCP server directly. Do not install, reinstall, repair, or enable a plugin to obtain the server:
 
 ```sh
