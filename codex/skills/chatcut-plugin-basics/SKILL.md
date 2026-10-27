@@ -22,11 +22,11 @@ authentication first and use that connection exclusively. Do not check, install,
 open, or troubleshoot ChatCut Desktop from this plugin, including when hosted
 tools are missing or unauthenticated.
 
-ChatCut tools are served through the configured Hosted `chatcut` MCP server, whether registered directly or provided by an existing plugin. Route tool calls through `mcp__chatcut__*` and treat the active MCP manifest as the runtime contract.
+ChatCut tools are served through the configured Hosted `chatcut` MCP server, whether registered directly or provided by an existing plugin. Route tool calls through `mcp__chatcut__*` and use the current host's tool discovery and schemas. An earlier startup manifest with no ChatCut tools is historical evidence, not proof that this conversation still has no tools.
 
-If the tools are available and authenticated, continue normal work without reinstalling or starting a new session. Otherwise, check registration with `codex mcp get chatcut` (or inspect Codex's MCP settings when the CLI is unavailable). If it exists, use that server and do not create a duplicate. Follow the matching MCP path:
+For a connection check, discover ChatCut tools in this conversation first, using the host's tool search when available. If `list_projects` is callable, call it with `{}` once through the current host. A successful read, including an empty project list, confirms that this conversation can use Hosted MCP now: tell the user and continue their original task here. Do not create or target a project just to test the connection. Otherwise, check registration with `codex mcp get chatcut` (or inspect Codex's MCP settings when the CLI is unavailable). If it exists, use that server and do not create a duplicate. Follow the matching MCP path:
 
-When an existing connection or OAuth attempt reports an error, or tools remain absent after successful authentication, preserve that evidence and follow [connection diagnostics](references/connection-diagnostics.md) before retrying login or changing anything. An initial sign-in requirement by itself is expected, not a confirmed connection defect. The diagnostic helper collects evidence independently of the broken MCP connection; it does not require ChatCut Desktop.
+When an existing connection or OAuth attempt reports an error, or a fresh check below still finds no usable tools after authentication, preserve that evidence and follow [connection diagnostics](references/connection-diagnostics.md) before retrying login or changing anything. An initial sign-in requirement by itself is expected, not a confirmed connection defect. The diagnostic helper collects evidence independently of the broken MCP connection; it does not require ChatCut Desktop.
 
 Also use connection diagnostics when previously available tools disappear or the host reports an unfamiliar MCP/protocol error. Capture the current-host snapshot described in that reference; preserve unknown errors and stages.
 
@@ -42,7 +42,13 @@ codex mcp add chatcut --url https://api.chatcut.io/api/external-mcp/mcp --oauth-
 
 Codex stores direct MCP registrations in its `config.toml`, not a project `.mcp.json`. Preserve other configuration and set `http_headers = { "x-chatcut-mcp-surface" = "codex" }` inside the `mcp_servers.chatcut` table created by the command; `codex mcp add` does not expose a static-header flag. If an available ChatCut `.mcp.json` specifies a different URL, OAuth resource, or headers, use those values instead of the example. Never retarget an existing registration or store auth tokens in configuration. Without the CLI, add the same HTTP server and header through the host's MCP settings if supported. Verify registration with `codex mcp get chatcut`, then complete authentication below.
 
-2. **Server registered but authentication required:** Offer to run `codex mcp login chatcut` and have the user complete the browser sign-in. Without the CLI, have them re-authorize ChatCut in Codex's MCP/connector settings. An unauthenticated server can return 401 and leave the session with no tools; reinstalling does not fix that. Do not assume every missing-tool case is an auth failure: if authentication succeeds but tools remain absent, start a new session and check the server's reported connection error.
+2. **Server registered but authentication required:** Offer to run `codex mcp login chatcut` and have the user complete the browser sign-in. Without the CLI, have them re-authorize ChatCut in Codex's MCP/connector settings. An unauthenticated server can return 401 and leave the session with no tools; reinstalling does not fix that. Missing tools alone do not establish an authentication failure.
+
+3. **Authentication completed:** Recheck the current conversation's tool discovery, including tool search when available, and call `list_projects` with `{}` once if callable. CLI login success or an OAuth callback page confirms the sign-in flow completed; it does not establish tool availability in this conversation. Do not repeat OAuth merely because an earlier manifest was empty. On success, report that the current read works and continue the original task. Preserve any earlier failure separately; a later success does not identify when or why the connection became usable.
+
+4. **Tools still unavailable on a fresh check:** Preserve the current discovery result and any reported connection error, then use connection diagnostics. If this host exposes a refresh/reconnect action for the existing MCP connection, use it once and recheck here. Do not invent a refresh command, assume that a newer host's UI exists in this version, or start a separate app-server and present its tools as this conversation's. If the host has no supported refresh, or that attempt still leaves no callable tools, offer a new chat as a fallback with the original task and chosen project context carried forward. Explain that the current chat has not loaded usable tools; do not claim every existing chat requires a restart. In the continuation, verify `list_projects` before saying the connection works. Never carry tokens or callback URLs into a handoff.
+
+Keep MCP and browser authentication separate. An old `/authenticate` URL, another browser's callback, or an empty tab inventory does not establish the current editor's cookie state. Inspect the actual current page or session only when editor access needs checking; otherwise report Web sign-in as unknown. Do not turn a working MCP connection into another OAuth loop because the editor may need its own sign-in.
 
 Explain whether registration, authentication, or connection failed and provide the matching concrete step, rather than only saying ChatCut is unavailable or asking the user to reconnect. Directly registering the Hosted MCP server above is allowed; do not install plugins or bootstrap unrelated local MCP surfaces or Desktop integrations from this skill.
 
@@ -213,7 +219,7 @@ First action for a new ChatCut task: use `list_projects`, `create_project`, `tar
 
 If a ChatCut project is already available from an editor URL, read the `projectId` from the `/editor/<projectId>` URL and pass it directly to project-scoped tools.
 
-If `chatcut` asks for authentication or project access, run `codex mcp login chatcut`, then retry with the exact `projectId` from the editor URL.
+If `chatcut` explicitly requires authentication, follow the setup and authentication checks above, then retry with the exact `projectId` from the editor URL. A project-access error alone calls for checking the account, project id, and access; it does not establish a need to repeat OAuth.
 
 ### Open the visible editor
 
