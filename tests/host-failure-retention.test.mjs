@@ -47,7 +47,7 @@ test("recorded Claude native failures survive later normal debug notices within 
   await writeFile(join(dir, "debug", "owned.txt"), native + notices.join("\n"));
   const logs = await collectHostLogs("claude", options(dir));
   assert.equal(logs.entries.length, 30);
-  assert.ok(logs.entries.some((entry) => entry.message === native.trimEnd().split("\n")[0]));
+  assert.ok(logs.entries.some((entry) => entry.message === native.trimEnd().split(/\r?\n/)[0]));
   assert.ok(logs.entries.some((entry) => entry.message.includes("Connection failed after 59ms")));
   const candidates = hostFailureEvidence(report(logs));
   assert.equal(candidates.length, 2);
