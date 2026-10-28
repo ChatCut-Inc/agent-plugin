@@ -6,24 +6,32 @@ const read = (path) => readFile(new URL(`../${path}`, import.meta.url), "utf8");
 
 const codexExport = await read("codex/skills/export/SKILL.md");
 const claudeExport = await read("claude/skills/export/SKILL.md");
+const grokExport = await read("grok/skills/export/SKILL.md");
+const kimiExport = await read("kimi/skills/chatcut-export-guide/SKILL.md");
 
 // An earlier local-delivery rewrite never reached the published plugin, and the
 // cloud-link wording kept sending agents to cloud rendering.
-test("Codex and Claude ship the same export skill", () => {
+test("host packages ship consistent export recovery", () => {
   assert.equal(claudeExport, codexExport);
+  const recovery = (skill) =>
+    skill.split("## Local Export Recovery")[1]?.split(/^## /m)[0].trim();
+  assert.ok(recovery(codexExport));
+  assert.equal(recovery(grokExport), recovery(codexExport));
+  assert.equal(recovery(kimiExport), recovery(codexExport));
 });
 
-test("export delivers the downloaded file and keeps cloud opt-in", () => {
+test("export delivers the downloaded file and keeps cloud fallback scoped", () => {
   assert.match(codexExport, /omit `renderMode`/);
   assert.match(codexExport, /`expectedFilename`, allowing a browser suffix/);
   assert.match(codexExport, /entry.s `name` \(the submitted name plus/);
   assert.match(codexExport, /\*\*Download again\*\*/);
   assert.match(codexExport, /click \*\*Save\*\* in the save dialog/);
   assert.match(codexExport, /Do not skip these steps to switch to cloud/);
-  assert.match(codexExport, /explain the local blocker in one sentence and ask whether to export in the cloud/);
-  assert.match(codexExport, /Do not offer cloud before the user has had that chance/);
-  assert.match(codexExport, /Only when cloud cannot do it either/);
-  assert.match(codexExport, /`renderMode:"cloud"` only when the user asks for it/);
+  assert.match(codexExport, /No extra cloud confirmation is required/);
+  assert.match(codexExport, /Honor explicit local-only, no-upload/);
+  assert.match(codexExport, /no usable local path exists or the user chooses it/);
+  assert.doesNotMatch(codexExport, /Only when cloud cannot do it either/);
+  assert.match(codexExport, /`renderMode:"cloud"` when the user asks for it/);
   assert.doesNotMatch(codexExport, /return its `downloadUrl`/);
 });
 
