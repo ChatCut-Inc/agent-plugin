@@ -660,7 +660,62 @@ test("Windows App fallback keeps native ChatCut startup errors with thread, time
   assert.match(JSON.stringify(result.entries), /preserved original cause/);
 });
 
-test("MXC AppData redirection falls back to the host user profile without changing other platforms", async (t) => {
+test("macOS automatically finds native App logs without using Windows paths or widening event scope", async (t) => {
+  const dir = await temporary(t);
+  const now = Date.now();
+  const appRoot = join(dir, "Library", "Logs", "com.openai.codex");
+  const logDir = join(
+    appRoot,
+    new Date(now).toISOString().slice(0, 10).replaceAll("-", "/"),
+  );
+  await mkdir(logDir, { recursive: true });
+  const event = (error, server = "chatcut", threadId = "target-thread") =>
+    `${new Date(now).toISOString()} info [AppServerConnection] mcp_server_startup_status_updated error=${JSON.stringify(error)} failureReason=null hostId=local server=${server} status=failed threadId=${threadId}`;
+  await writeFile(
+    join(logDir, "codex-desktop-macos.log"),
+    [
+      event(
+        "Original native E_MAC_SOURCE; Bearer mac-private-canary; cause=socket closed",
+      ),
+      event("other-thread-private", "chatcut", "other-thread"),
+      event("other-server-private", "other-server"),
+      `${new Date(now).toISOString()} info [Renderer] user prompt private-task-content`,
+    ].join("\n"),
+  );
+  const options = {
+    home: dir,
+    codexHome: dir,
+    codexSqliteHome: dir,
+    platform: "darwin",
+    localAppData: join(dir, "wrong-windows-root"),
+    conversationId: "target-thread",
+    now,
+  };
+  const result = await collectHostLogs("codex", options);
+  const entries = result.entries.filter(
+    (entry) => entry.source === "codex_app_log",
+  );
+  assert.equal(entries.length, 1);
+  assert.match(entries[0].message, /Original native E_MAC_SOURCE/);
+  assert.match(entries[0].message, /cause=socket closed/);
+  assert.equal(entries[0].originalAttemptMatch, "unconfirmed");
+  assert.equal(result.appLog.locationSource, "macos_default");
+  assert.equal(result.appLog.filesRead, 1);
+  assert.equal(result.appLog.maximumTailBytesPerFile, 128 * 1024);
+  assert.equal(result.appLog.sandboxLocalAppDataRedirected, false);
+  assert.doesNotMatch(
+    JSON.stringify(result),
+    /mac-private-canary|other-thread-private|other-server-private|private-task-content/,
+  );
+  const explicit = await collectHostLogs("codex", {
+    ...options,
+    codexAppLogDir: appRoot,
+  });
+  assert.deepEqual(explicit.entries, result.entries);
+  assert.equal(explicit.appLog.locationSource, "explicit_host_location");
+});
+
+test("MXC AppData redirection falls back to the host user profile without changing Linux", async (t) => {
   const dir = await temporary(t);
   const now = Date.now();
   const logDir = join(
@@ -691,7 +746,7 @@ test("MXC AppData redirection falls back to the host user profile without changi
     const otherPlatform = await collectHostLogs("codex", {
       home: dir,
       codexHome: dir,
-      platform: "darwin",
+      platform: "linux",
       now,
     });
     assert.equal(otherPlatform.appLog, undefined);
@@ -722,7 +777,7 @@ test("App fallback remains bounded and does not promote host notices into the or
     codexLogDir: join(dir, "empty-tui"),
     output: join(dir, "report.json"),
   });
-  assert.equal(report.collectorVersion, "1.2.6");
+  assert.equal(report.collectorVersion, "1.2.7");
   assert.equal(
     report.hostLogs.entries.filter((entry) => entry.source === "codex_app_log").length,
     30,

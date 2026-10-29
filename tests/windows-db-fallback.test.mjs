@@ -16,7 +16,7 @@ test("the bundled basics CLI saves an offline report even when upload is also re
   const helper = fileURLToPath(new URL("../codex/skills/chatcut-plugin-basics/scripts/mcp-doctor.mjs", import.meta.url));
   await promisify(execFile)(process.execPath, [helper, "--host", "claude", "--server-url", "http://127.0.0.1:1/api/external-mcp/mcp", "--failure-record", failure, "--output", output, "--offline", "--upload"]);
   const report = JSON.parse(await readFile(output, "utf8"));
-  assert.equal(report.collectorVersion, "1.2.6");
+  assert.equal(report.collectorVersion, "1.2.7");
   assert.deepEqual(report.originalFailure.error, error);
   assert.equal(report.upload.status, "skipped_offline");
   assert.equal(report.entryProbe, undefined);

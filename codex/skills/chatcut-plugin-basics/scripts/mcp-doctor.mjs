@@ -304,7 +304,7 @@ export async function probeEntry(endpoint, diagnosticId, fetchImpl = fetch) {
         params: {
           protocolVersion: "2025-11-25",
           capabilities: {},
-          clientInfo: { name: "chatcut-mcp-doctor", version: "1.2.6" },
+          clientInfo: { name: "chatcut-mcp-doctor", version: "1.2.7" },
         },
       }),
     });
@@ -1073,16 +1073,19 @@ export async function collectHostLogs(host, options = {}) {
     const sandboxAppData =
       !options.localAppData &&
       /[\\/]Packages[\\/]sandbox\.[^\\/]+[\\/]AC(?:[\\/]|$)/i.test(appData ?? "");
+    const hostPlatform = options.platform ?? platform();
     const appLogRoot =
       options.codexAppLogDir ??
-      ((options.platform ?? platform()) === "win32"
+      (hostPlatform === "win32"
         ? join(
             // MXC redirects LOCALAPPDATA; the running App logs stay in the user profile.
             (!sandboxAppData && appData) || join(userHome, "AppData", "Local"),
             "Codex",
             "Logs",
           )
-        : null);
+        : hostPlatform === "darwin"
+          ? join(userHome, "Library", "Logs", "com.openai.codex")
+          : null);
     if (appLogRoot) {
       const result = await codexAppLogs(
         appLogRoot,
@@ -1095,8 +1098,12 @@ export async function collectHostLogs(host, options = {}) {
       entries.push(...result.entries);
       appLog = {
         ...result.scan,
-        locationSource: options.codexAppLogDir ? "explicit_host_location" : "windows_default",
-        sandboxLocalAppDataRedirected: Boolean(sandboxAppData),
+        locationSource: options.codexAppLogDir
+          ? "explicit_host_location"
+          : hostPlatform === "darwin"
+            ? "macos_default"
+            : "windows_default",
+        sandboxLocalAppDataRedirected: hostPlatform === "win32" && Boolean(sandboxAppData),
       };
       if (!result.entries.length)
         gaps.push({ source: "codex_app_log", reason: "no_matching_records_in_bounded_window" });
@@ -1214,7 +1221,7 @@ export async function runDoctor(options, dependencies = {}) {
   const diagnosticId = randomUUID();
   const report = {
     schemaVersion: 2,
-    collectorVersion: "1.2.6",
+    collectorVersion: "1.2.7",
     diagnosticId,
     collectedAt: new Date().toISOString(),
     scope: "cloud",

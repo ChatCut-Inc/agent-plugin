@@ -252,21 +252,27 @@ and exact error without promoting nearby times to proof of association.
    configuration, environment, or conversation dumps into the report.
    An intentionally disabled hosted server is not a failed connection; preserve
    that choice instead of starting diagnostics or re-enabling it.
-2. Save only the original connection error and its available cause chain into a
-   new temporary text file. Use the exact original text, not a generated root
-   cause. If unavailable, omit `--original-error`. Obtain the actual bundled
-   host version if accessible without starting a session. Do not treat update
-   metadata as the running version.
+2. Save the dedicated `.mcp-failure.json` described above with the original
+   error and all host-exposed error metadata, including cause, failure time,
+   local call/thread IDs and original response fields when available. Keep
+   unknown fields omitted or null; do not reconstruct them from later checks.
+   Only when the source provides plain error text without structured metadata,
+   use a dedicated text file with `--original-error` instead. Obtain the actual
+   running host version if accessible without starting a session. Do not use
+   package or update metadata as the running host version.
 3. Run the bundled `scripts/mcp-doctor.mjs` relative to this Skill's directory:
 
    ```text
-   node <skill-directory>/scripts/mcp-doctor.mjs --host codex --server-url <registered-url> --host-snapshot <dedicated.mcp-snapshot.json> --original-error <error-only-file> --host-version <actual-version> --upload
+   node <skill-directory>/scripts/mcp-doctor.mjs --host codex --server-url <registered-url> --host-snapshot <dedicated.mcp-snapshot.json> --failure-record <dedicated.mcp-failure.json> --host-version <actual-version> --upload
    ```
 
    For Claude Code, use `--host claude`. Quote paths as shell arguments; do not
    interpolate error text into shell code. Omit unknown optional fields. Supply
    `--occurred-at` only when the failure's actual ISO timestamp and timezone are
    known. A missing timestamp remains unknown; the collection time is separate.
+   For the plain-text fallback, replace `--failure-record` with
+   `--original-error <error-only-file>`; never pass both. If the original error
+   is unavailable, omit that input and preserve the named evidence gap.
    If transfer is denied, omit `--upload` and retain the local JSON report.
 
 Use an available Node.js 18+ runtime. Do not install a runtime or ChatCut Desktop
@@ -292,8 +298,11 @@ the whole log database, ignore its WAL with immutable mode, or relax permissions
 Both SQLite readers preserve the failing operation and error, then continue
 other sources; a close failure does not replace the primary error. Missing
 native IDs and lifecycle times remain missing when the database is unreadable.
-On Windows, the helper also reads the existing Codex App startup-status notices
-under `%LOCALAPPDATA%/Codex/Logs/YYYY/MM/DD`. This is independent of TUI logging.
+The helper also reads existing Codex App startup-status notices under
+`%LOCALAPPDATA%/Codex/Logs/YYYY/MM/DD` on Windows and
+`~/Library/Logs/com.openai.codex/YYYY/MM/DD` on macOS. This is independent of
+TUI logging. A missing directory remains a named gap, not an invitation to
+create logs, read browser profiles or change host settings.
 It selects only `AppServerConnection` startup notices for the hosted ChatCut
 server, uses the current conversation ID when available, and keeps at most 30
 records from three 128 KiB tails. Missing/rotated/denied logs remain explicit

@@ -12,7 +12,14 @@ need a runtime with `node:sqlite`; missing support is an explicit evidence gap.
 
 ## Evidence and delivery contract
 
-Collector 1.2.6 keeps the complete collector in the existing basics skills.
+Collector 1.2.7 keeps the complete collector in the existing basics skills.
+It adds automatic discovery of the observed macOS Codex App log location,
+using the same bounded startup-event/thread filtering as Windows. Explicit
+locations still take precedence; Linux gains no guessed App log directory.
+The primary collection command now uses the structured original-failure input
+already supported in 1.2.6; plain-text input remains a fallback. These changes
+do not supply host-discarded causes, original timestamps, or server request IDs,
+and do not prove the historical reports or affected users are now resolved.
 It includes the collection-only changes from #28, optional-metadata recovery
 from #29, and failure-prioritized bounded host-log retention with machine-linked
 failure evidence. It does not add a standalone Doctor Skill. Candidate event
