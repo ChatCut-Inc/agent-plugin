@@ -996,9 +996,8 @@ export async function collectHostLogs(host, options = {}) {
           ...context,
           originalAttemptMatch: "unconfirmed",
         });
-        if (entries.length === 30) break;
       }
-      if (rows.length === 200 || entries.length === 30)
+      if (rows.length === 200)
         gaps.push({ source: "codex_runtime_sqlite", reason: "log_record_limit" });
     } catch (error) {
       gaps.push({
