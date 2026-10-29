@@ -198,15 +198,27 @@ When work spans several related visual outputs, align on or follow one coherent 
 
 Skip design-style work for one-off quick fixes unless the user asks for it. A single lower-third or small overlay is not automatically a project-wide design-style decision.
 
+## Published workflow Skills
+
+When the user supplies a Skill ID or copied Skill command, resolve it with `manage_skill` action `get` before project onboarding. Its machine-readable `skill.execution` route takes precedence over legacy SKILL.md instructions.
+
+For `execution.type: "workflow"`, call `run_skill_workflow` action `describe` with the returned skill ID. Collect only its declared user inputs and follow its published options and defaults, including case IDs, duration and aspect ratio when present. The publisher owns the fixed image, video and audio references: do not find, upload, substitute, or invent them. Do not call `create_project` or `import_media`; start creates the workflow result project.
+
+For each declared user-supplied file, call `run_skill_workflow` action `upload` using the described revision, a stable UUID `upload.referenceId`, `upload.type` (`image`, `video` or `audio`), and the file's actual MIME type and byte size. Follow the per-type MIME and byte limits in `describe.upload.mediaTypes`, any `describe.generation.imageConstraints`, and the workflow's declared media counts. PUT the file bytes to the returned `uploadUrl` using only its returned headers, without ChatCut authorization. Pass returned image reference IDs in `values.productImages` and video/audio reference IDs in `values.recordings`. The server appends fixed template references; supply only user media. This upload does not require an editor tab or a project.
+
+Submit `start` with the exact described revision and one stable UUID `requestId`. A lost response is retried with identical inputs, revision and requestId. Do not automatically switch requestId after a timeout or conflict; that could start another paid generation. Poll `status` using the returned runId. Report success only after `completed` with an output, then inspect and deliver it. Reuse user authorization for the requested generation; additional variants require authorization.
+
+If the tool is missing or `execution.available` is false, report that this server or published revision lacks the workflow execution path. Do not reconstruct it from the old package or fall back to a normal editing project. Ordinary `execution.type: "agent"` Skills continue through project onboarding below.
+
 ## Project Onboarding And Editor Handoff
 
 ### Establish the target project
 
-Before nontrivial ChatCut work, ensure the session is operating on the intended project.
+For ordinary editing and agent Skills, ensure the session is operating on the intended project.
 
 "Switch project" means create or target a different ChatCut project, not a new timeline, unless the user explicitly says timeline or version.
 
-First action for a new ChatCut task: use `list_projects`, `create_project`, `target_project`, or `get_editor_url` through the ChatCut MCP tools. Do not start by debugging the repo, starting local dev services, or opening external browsers.
+First action for a new ordinary editing task (after resolving any supplied Skill execution route): use `list_projects`, `create_project`, `target_project`, or `get_editor_url` through the ChatCut MCP tools. Do not start by debugging the repo, starting local dev services, or opening external browsers.
 
 1. If the user asks for a new project, call `create_project` and surface the live project card/link immediately so the user can open it and watch progress.
 2. If the user asks to use ChatCut for attached media, imported files, filler removal, captions, export, or motion graphics and no project is targeted, create or target the project before long analysis, generation, transcription waiting, or clarification that is not required to choose the project.
