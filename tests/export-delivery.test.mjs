@@ -27,7 +27,7 @@ test("export delivers the downloaded file and keeps cloud fallback scoped", () =
   assert.match(codexExport, /\*\*Download again\*\*/);
   assert.match(codexExport, /click \*\*Save\*\* in the save dialog/);
   assert.match(codexExport, /Do not skip these steps to switch to cloud/);
-  assert.match(codexExport, /No extra cloud confirmation is required/);
+  assert.match(codexExport, /a free cloud quote needs no extra confirmation and a nonzero charge needs one explicit confirmation/);
   assert.match(codexExport, /Honor explicit local-only, no-upload/);
   assert.match(codexExport, /no usable local path exists or the user chooses it/);
   assert.doesNotMatch(codexExport, /Only when cloud cannot do it either/);
