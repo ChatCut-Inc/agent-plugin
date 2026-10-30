@@ -60,7 +60,7 @@ Talk about content and outcomes, not mechanics. Never mention MCP tool names, `b
 
 ## Recreating a viral video
 
-Requests to recreate, clone, or remake a viral or reference video with the user's own people, product, or footage (复刻爆款、做同款) use ChatCut Desktop's remake workflow; the hosted plugin does not include it. Say so plainly and give the user https://chatcut.io/viralvideocloner to set it up, and keep using the hosted tools for any ordinary editing in the same request. Work only with media the user owns or is licensed to use.
+Requests to recreate, clone, or remake a viral or reference video with the user's own people, product, or footage (复刻爆款、做同款) happen in the ChatCut Desktop app, and generating them needs a membership; this host cannot install it. Say so plainly and give the user https://chatcut.io/viralvideocloner, which has the download and a message they can send to a local agent such as Codex or Claude Code. Keep using the hosted tools for any ordinary editing in the same request. Work only with media the user owns or is licensed to use.
 
 ## Boundaries
 
