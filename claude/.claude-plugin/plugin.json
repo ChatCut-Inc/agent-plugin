@@ -38,7 +38,7 @@
         "x-chatcut-mcp-client": "claude_code",
         "x-chatcut-mcp-surface": "embedded-preview",
         "x-chatcut-plugin-version": "1.10.29",
-        "x-chatcut-install-source": "chatcut_github"
+        "x-chatcut-install-source": "official_plugin"
       }
     }
   },
