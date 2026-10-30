@@ -66,4 +66,4 @@ For installed-client acceptance: list projects without opening one; create/selec
 
 Imported files go to ChatCut cloud storage only with the user's authorization. A denied transfer must not be bypassed. Host OAuth tokens never go into shell/configuration; boot-token links stay in browser control. Chargeable generation and voice cloning follow their explicit confirmation/consent requirements.
 
-Plugin source is licensed under GPL-3.0-only (see `LICENSE`, matching the other official plugin packages). Use of the hosted service is subject to ChatCut's service terms. Support: [chatcut.io](https://chatcut.io).
+Plugin source is licensed under Apache-2.0 (see `LICENSE`, matching the other official plugin packages). Use of the hosted service is subject to ChatCut's service terms. Support: [chatcut.io](https://chatcut.io).

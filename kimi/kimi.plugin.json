@@ -5,7 +5,7 @@
   "description": "ChatCut plugin for Kimi Work: let the agent edit speech, create motion graphics and media, and deliver editable video projects in the live in-app editor.",
   "author": "ChatCut",
   "homepage": "https://chatcut.io",
-  "license": "GPL-3.0-only",
+  "license": "Apache-2.0",
   "keywords": [
     "chatcut",
     "video",

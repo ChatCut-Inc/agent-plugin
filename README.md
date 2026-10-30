@@ -65,4 +65,4 @@ For product information, visit [chatcut.io](https://chatcut.io).
 
 ## License
 
-GPL-3.0-only; see [LICENSE](./LICENSE). The `grok/` package is licensed separately under Apache-2.0; see [grok/LICENSE](./grok/LICENSE).
+Apache-2.0; see [LICENSE](./LICENSE).

@@ -20,7 +20,7 @@
         "email": "dev@chatcut.io",
         "url": "https://chatcut.io"
       },
-      "license": "GPL-3.0-only",
+      "license": "Apache-2.0",
       "keywords": [
         "chatcut",
         "video",

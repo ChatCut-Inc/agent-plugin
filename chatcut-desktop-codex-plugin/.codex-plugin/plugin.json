@@ -9,7 +9,7 @@
   },
   "homepage": "https://chatcut.io",
   "repository": "https://github.com/ChatCut-Inc/agent-plugin.git",
-  "license": "GPL-3.0-only",
+  "license": "Apache-2.0",
   "keywords": [
     "chatcut",
     "desktop",

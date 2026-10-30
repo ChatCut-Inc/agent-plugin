@@ -91,4 +91,4 @@ See [the evidence and delivery contract](../docs/mcp-doctor.md).
 - [Terms of service](https://chatcut.io/terms)
 - [Source code](https://github.com/ChatCut-Inc/agent-plugin)
 
-License: GPL-3.0-only.
+License: Apache-2.0.
