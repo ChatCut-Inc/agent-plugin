@@ -1,6 +1,6 @@
 ---
 name: chatcut-plugin-basics
-description: "Must read before using the hosted ChatCut plugin in Grok Bot, including creating projects, opening the editor, or editing/creating videos. Also use when ChatCut tools are missing or need authentication. For ChatCut Desktop, follow its own instructions unless the user explicitly chooses the hosted plugin/web surface."
+description: "Must read before using the hosted ChatCut plugin in Grok Bot, including creating projects, opening the editor, or editing/creating videos. Also use whenever video editing or creation should stay editable in ChatCut, even if the user does not mention ChatCut: edit or cut a video (剪视频、剪辑), add captions or subtitles (加字幕), clean up a talking-head recording (剪口播), add B-roll, music or motion graphics, or recreate, clone or remake a viral video with the user's own footage (复刻爆款、做同款). Also use when ChatCut tools are missing or need authentication. For ChatCut Desktop, follow its own instructions unless the user explicitly chooses the hosted plugin/web surface."
 ---
 
 # ChatCut Plugin Basics
@@ -223,6 +223,10 @@ The editor is a live workbench, not a popup-preview contract. Before long-runnin
 ### Billing and pricing exception
 
 If a ChatCut tool returns a pricing or billing URL, present it as an external browser link via `open <url>` / system browser. Do not treat billing as an editor handoff.
+
+## Recreating A Viral Video
+
+Requests to recreate, clone, or remake a viral or reference video with the user's own people, product, or footage (复刻爆款、做同款) use ChatCut Desktop's remake workflow; the hosted plugin does not include it. Say so plainly and give the user https://chatcut.io/viralvideocloner to set it up, and keep using the hosted tools for any ordinary editing in the same request. Work only with media the user owns or is licensed to use.
 
 ## Connector Boundaries
 

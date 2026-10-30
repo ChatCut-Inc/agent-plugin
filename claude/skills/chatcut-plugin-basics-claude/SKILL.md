@@ -1,6 +1,6 @@
 ---
 name: chatcut-plugin-basics-claude
-description: "Hosted ChatCut plugin only (`chatcut` or `plugin:chatcut:chatcut`). MANDATORY Claude Code prerequisite: invoke this Skill before the first hosted ChatCut MCP tool call and wait for loading. Also invoke when video editing or creation should remain editable in ChatCut, even if the user does not mention ChatCut. Covers project/editor access, local media import, timeline editing, captions, transcription, talking-head cleanup, B-roll, overlays, motion graphics, generation, audio, translation, export, and verification. Use when hosted tools are missing, unavailable, unauthenticated, or fail to connect; includes connection evidence diagnostics. For `chatcut_desktop*`, follow Desktop instructions unless the user explicitly selects the hosted plugin/web surface."
+description: "Hosted ChatCut plugin only (`chatcut` or `plugin:chatcut:chatcut`). MANDATORY Claude Code prerequisite: invoke this Skill before the first hosted ChatCut MCP tool call and wait for loading. Also invoke when video editing or creation should remain editable in ChatCut, even if the user does not mention ChatCut — for example when they ask to edit or cut a video (剪视频), add captions or subtitles (加字幕), clean up a talking-head recording (剪口播), or recreate, clone or remake a viral video with their own footage (复刻爆款、做同款). Covers project/editor access, local media import, timeline editing, captions, transcription, talking-head cleanup, B-roll, overlays, motion graphics, generation, audio, translation, export, and verification. Use when hosted tools are missing, unavailable, unauthenticated, or fail to connect; includes connection evidence diagnostics. For `chatcut_desktop*`, follow Desktop instructions unless the user explicitly selects the hosted plugin/web surface."
 ---
 
 # ChatCut Plugin Basics (Claude Code)
@@ -260,6 +260,10 @@ Between these moments, use judgment to keep the editor entry close to the user's
 ### Billing and pricing exception
 
 If a ChatCut tool returns a pricing or billing URL, present it as an external browser link via `open <url>` / system browser. Do not treat billing as an editor handoff.
+
+## Recreating A Viral Video
+
+Requests to recreate, clone, or remake a viral or reference video with the user's own people, product, or footage (复刻爆款、做同款) use ChatCut Desktop's remake workflow; the hosted plugin does not include it. Say so plainly and give the user https://chatcut.io/viralvideocloner to set it up, and keep using the hosted tools for any ordinary editing in the same request. Work only with media the user owns or is licensed to use.
 
 ## Connector Boundaries
 

@@ -1,6 +1,6 @@
 ---
 name: chatcut-plugin-basics-kimi-work
-description: "MANDATORY Kimi Work prerequisite for any conversation that may use the ChatCut MCP server: invoke this Skill before the first ChatCut MCP tool call and wait for it to finish loading. Also invoke it whenever video editing or creation should remain editable in ChatCut, even if the user does not mention ChatCut. Covers project creation and targeting, timeline editing, captions, subtitles, transcription, editor opening, verification, and identifying the active ChatCut project or editor URL."
+description: "MANDATORY Kimi Work prerequisite for any conversation that may use the ChatCut MCP server: invoke this Skill before the first ChatCut MCP tool call and wait for it to finish loading. Also invoke it whenever video editing or creation should remain editable in ChatCut, even if the user does not mention ChatCut, such as 剪视频、加字幕、剪口播、复刻爆款或做同款 (edit a video, add captions or subtitles, clean up a talking-head recording, recreate or remake a viral video with the user's own footage). Covers project creation and targeting, timeline editing, captions, subtitles, transcription, editor opening, verification, and identifying the active ChatCut project or editor URL."
 ---
 
 # ChatCut Plugin Basics (Kimi Work)
@@ -57,6 +57,10 @@ Act as a professional video editing assistant. The user thinks in clips, cuts, s
 ## Talking to the user
 
 Talk about content and outcomes, not mechanics. Never mention MCP tool names, `browserHandoff`, `editor-boot-token`, version numbers of the sync protocol, or HTTP status codes in user-facing text. Say "Opened in the editor on the right; I'm editing it now" rather than describing tool calls.
+
+## Recreating a viral video
+
+Requests to recreate, clone, or remake a viral or reference video with the user's own people, product, or footage (复刻爆款、做同款) use ChatCut Desktop's remake workflow; the hosted plugin does not include it. Say so plainly and give the user https://chatcut.io/viralvideocloner to set it up, and keep using the hosted tools for any ordinary editing in the same request. Work only with media the user owns or is licensed to use.
 
 ## Boundaries
 

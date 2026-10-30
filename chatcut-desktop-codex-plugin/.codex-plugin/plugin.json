@@ -1,7 +1,7 @@
 {
   "name": "chatcut-desktop",
-  "version": "1.0.5",
-  "description": "Install, open, and connect the signed ChatCut Desktop app from Codex.",
+  "version": "1.11.0",
+  "description": "AI video editing in ChatCut: install and connect the signed ChatCut Desktop app so Codex can edit videos, add captions, and recreate viral videos with your own footage.",
   "author": {
     "name": "ChatCut",
     "email": "dev@chatcut.io",
@@ -15,6 +15,12 @@
     "desktop",
     "video",
     "video-editing",
+    "ai-video-editor",
+    "captions",
+    "subtitles",
+    "talking-head",
+    "viral-video",
+    "video-remake",
     "codex",
     "mcp",
     "apple-silicon",
@@ -24,8 +30,8 @@
   "skills": "./skills/",
   "interface": {
     "displayName": "ChatCut",
-    "shortDescription": "Install and connect ChatCut Desktop",
-    "longDescription": "Download, install, open, connect, or repair the signed production ChatCut Desktop app so Codex can use its local video-editing tools and skills.",
+    "shortDescription": "AI video editing in ChatCut",
+    "longDescription": "Edit videos with AI in ChatCut. Ask in your own words to cut footage, add captions and subtitles, clean up a talking-head recording, add B-roll, music and motion graphics, or recreate a viral video's shots and pacing with your own footage, and get an editable timeline you can review. This plugin installs, opens, connects, or repairs the signed ChatCut Desktop app, which provides the video-editing tools and skills and keeps the project on your computer.",
     "developerName": "ChatCut",
     "category": "Creativity",
     "capabilities": ["Interactive", "Write"],
@@ -33,9 +39,9 @@
     "privacyPolicyURL": "https://chatcut.io/privacy",
     "termsOfServiceURL": "https://chatcut.io/terms",
     "defaultPrompt": [
-      "Create a new ChatCut project and start editing my video.",
-      "Edit this talking-head video for a tighter story with captions, B-roll, music, and motion graphics.",
-      "Create an AI video-editing explainer with motion graphics and an English voiceover."
+      "Recreate this viral video with my own footage, keeping its shots and pacing.",
+      "Cut this talking-head video tighter and add captions.",
+      "Add subtitles to my video and export a vertical version."
     ],
     "brandColor": "#111827",
     "composerIcon": "./assets/logo.png",

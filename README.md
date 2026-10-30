@@ -1,8 +1,8 @@
 # ChatCut Agent Plugins
 
-The ChatCut Agent Plugins connect Codex, Claude Code, Grok Bot, Cursor, and Kimi Work to ChatCut so you can edit ChatCut video projects with AI assistance.
+AI video editing for your agent. The ChatCut Agent Plugins connect Codex, Claude Code, Grok Bot, Cursor, and Kimi Work to ChatCut, so you can ask your agent to edit a video, add captions, clean up a talking-head recording, or recreate a viral video with your own footage, and get an editable timeline back.
 
-Use it to import media, change a project timeline, create motion graphics, generate assets, transcribe audio, add captions, export videos, and verify that edits are visible in the editor.
+Under the hood the plugins import media, change a project timeline, create motion graphics, generate assets, transcribe audio, add captions, export videos, and verify that edits are visible in the editor.
 
 ## What Is Included
 
@@ -40,13 +40,15 @@ Install instructions per host: [chatcut.io/chatgpt](https://chatcut.io/chatgpt) 
 
 ## Example Prompts
 
-After installing and authenticating the plugin, try prompts like:
+After installing and authenticating the plugin, ask in your own words, for example:
 
-- `Import this video into my ChatCut project.`
+- `Cut this talking-head video tighter and add captions.`
+- `Add subtitles to my video and export a vertical version.`
 - `Add a simple motion graphic overlay.`
 - `Generate a voiceover and background music.`
-- `Transcribe this clip and add captions.`
-- `Export the current project.`
+- `帮我把这段口播剪干净，加上字幕。`
+
+To recreate a viral video's shots and pacing with your own footage (复刻爆款), use ChatCut Desktop: see [chatcut.io/viralvideocloner](https://chatcut.io/viralvideocloner).
 
 ## Repository
 
@@ -59,3 +61,7 @@ https://github.com/ChatCut-Inc/agent-plugin.git
 ## Support
 
 For product information, visit [chatcut.io](https://chatcut.io).
+
+## License
+
+GPL-3.0-only; see [LICENSE](./LICENSE). The `grok/` package is licensed separately under Apache-2.0; see [grok/LICENSE](./grok/LICENSE).

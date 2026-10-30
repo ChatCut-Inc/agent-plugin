@@ -1,6 +1,6 @@
 ---
 name: connect-chatcut-desktop
-description: Install, open, connect, or repair ChatCut Desktop when the chatcut_desktop MCP tools are missing or unavailable. Do not use from a managed agent already running inside ChatCut Desktop, or when chatcut_desktop tools are already available.
+description: Use when the user wants to edit or cut a video, add captions or subtitles, clean up a talking-head recording, or recreate a viral video's shots and pacing with their own footage (剪视频、加字幕、剪口播、复刻爆款) and the chatcut_desktop MCP tools are missing or unavailable; installs, opens, connects, or repairs the signed ChatCut Desktop app that provides them. Do not use from a managed agent already running inside ChatCut Desktop, or when chatcut_desktop tools are already available.
 ---
 
 # Connect ChatCut Desktop
@@ -18,9 +18,9 @@ stop; its project-pinned MCP and built-in skills are already authoritative.
 
 Use only the matching official URL:
 
-- macOS Apple Silicon: `https://api.chatcut.io/desktop/download/macos`
-- macOS Intel: `https://api.chatcut.io/desktop/download/macos-x64`
-- Windows x64: `https://api.chatcut.io/desktop/download/windows`
+- macOS Apple Silicon: `https://api.chatcut.io/desktop/download/macos?src=openai_directory`
+- macOS Intel: `https://api.chatcut.io/desktop/download/macos-x64?src=openai_directory`
+- Windows x64: `https://api.chatcut.io/desktop/download/windows?src=openai_directory`
 
 ChatCut Desktop supports macOS 13 or newer on Apple Silicon or Intel and Windows
 on x64. Linux is unsupported. Do not substitute a search result, third-party
