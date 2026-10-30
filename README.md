@@ -15,6 +15,7 @@ Under the hood the plugins import media, change a project timeline, create motio
 - `codex/.codex-plugin/plugin.json` - Codex plugin metadata.
 - `claude/.claude-plugin/plugin.json` - Claude Code plugin metadata.
 - `grok/.cursor-plugin/plugin.json` - Grok Bot and Cursor plugin metadata.
+- `gemini-extension.json` - Gemini CLI extension manifest (hosted MCP only; install with `gemini extensions install https://github.com/ChatCut-Inc/agent-plugin`).
 - `codex/.mcp.json` - Codex MCP server configuration.
 - `codex/skills/` - host adapters plus direct symlinks to canonical craft skills in `apps/agent/.claude/skills/`.
 - `claude/skills/` - Claude-specific adapters plus direct symlinks to the same canonical agent skills.
