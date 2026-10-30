@@ -36,6 +36,7 @@
     "category": "Creativity",
     "capabilities": ["Interactive", "Write"],
     "websiteURL": "https://chatcut.io",
+    "supportURL": "https://chatcut.io/contact",
     "privacyPolicyURL": "https://chatcut.io/privacy",
     "termsOfServiceURL": "https://chatcut.io/terms",
     "defaultPrompt": [
