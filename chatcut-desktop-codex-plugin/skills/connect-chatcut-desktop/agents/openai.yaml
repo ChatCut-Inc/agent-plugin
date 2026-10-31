@@ -1,4 +1,4 @@
 interface:
   display_name: "Connect ChatCut Desktop"
-  short_description: "Edit videos with AI: install and connect ChatCut."
-  default_prompt: "Recreate this viral video with my own footage, keeping its shots and pacing."
+  short_description: "Install ChatCut Desktop to edit or recreate videos."
+  default_prompt: "Install and connect ChatCut Desktop, then help me continue my video task."

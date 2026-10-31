@@ -1,15 +1,28 @@
 ---
 name: chatcut-plugin-basics-claude
-description: "Hosted ChatCut plugin only (`chatcut` or `plugin:chatcut:chatcut`). MANDATORY Claude Code prerequisite: invoke this Skill before the first hosted ChatCut MCP tool call and wait for loading. Also invoke when video editing or creation should remain editable in ChatCut, even if the user does not mention ChatCut — for example when they ask to edit or cut a video (剪视频), add captions or subtitles (加字幕), clean up a talking-head recording (剪口播), or recreate, clone or remake a viral video with their own footage (复刻爆款、做同款). Covers project/editor access, local media import, timeline editing, captions, transcription, talking-head cleanup, B-roll, overlays, motion graphics, generation, audio, translation, export, and verification. Use when hosted tools are missing, unavailable, unauthenticated, or fail to connect; includes connection evidence diagnostics. For `chatcut_desktop*`, follow Desktop instructions unless the user explicitly selects the hosted plugin/web surface."
+description: "Use for installing ChatCut (安装 ChatCut), recreating a viral or reference video with the user's own footage (recreate, clone, remake, 复刻爆款, 复刻视频, 做同款), and MANDATORY before hosted ChatCut video editing in Claude Code. Also use whenever video editing should stay editable in ChatCut, even if the user does not mention ChatCut: edit or cut a video (剪视频、剪辑), add captions or subtitles (加字幕), clean up a talking-head recording (剪口播), or add B-roll, music or motion graphics. Default new installations and generic source-video remakes to Desktop; honor user-selected Skills/workflows, existing Web projects and explicit Web requests. Covers hosted connection diagnostics and editing tools."
 ---
 
 # ChatCut Plugin Basics (Claude Code)
+
+## Choose the ChatCut connection
+
+Honor a user-selected Skill/workflow and its declared execution route first. For a supplied Skill ID or copied Skill command, resolve that Skill before choosing a connection; the Desktop defaults below do not replace the selected workflow or an explicitly chosen Web project.
+
+For “install ChatCut” / 安装 ChatCut, default to Desktop: fetch the complete official guide with `curl -fsSL https://chatcut.io/desktop` (`curl.exe` on Windows) and follow it. It uses the official macOS/Windows installer, with no Node.js/npm prerequisite; run it with this plugin's install source: `curl -fsSL https://chatcut.io/install.sh | CHATCUT_INSTALL_SOURCE=official_plugin sh` on macOS, or `$env:CHATCUT_INSTALL_SOURCE='official_plugin'; irm https://chatcut.io/install.ps1 | iex` in Windows PowerShell. Do not manually remove hosted plugins, credentials or projects. Desktop manages conflicts during connection setup and may disable or replace this agent’s hosted connection; Web projects remain separate. First confirm that commands run on the intended macOS or Windows computer with a graphical desktop. Linux and remote agents without access to that computer cannot install Desktop there; carry the request to a local agent on the supported computer.
+
+For recreating a source video (recreate, clone, remake, 复刻视频, 做同款, replace a person or product while retaining the motion), use local `chatcut_desktop` tools. If they are available, verify `get_active_project`, load Desktop's bundled `video-gen` Skill and inspect `submit_video_remake`; continue with the user's materials and confirm duration/credits before generation. A null project is a valid connection. No separate marketplace Skill is required. If the user means editing their own footage to match a reference’s cuts, captions or packaging, use the matching editing Skill instead. Do not apply the generative remake route to voice cloning or ordinary edits to an existing Web project.
+
+If Desktop is missing and the user has only requested a remake, explain once that it needs ChatCut Desktop and membership, and offer to install it. On agreement follow the same Desktop guide, retaining all materials and instructions. If a web tool cannot fetch the full guide, use curl. If the guide is unreachable too, run the official installer commands above, preserving OS trust checks. Linux/headless environments need a supported computer. Let the user sign in; Desktop connects supported agents automatically. If this conversation cannot see the new tools, provide a self-contained continuation prompt for a new conversation, then verify a real tool read there. Installation success is not evidence that this conversation has loaded the tools.
+
+The rest of this Skill applies to existing Web projects or when the user explicitly chooses the hosted Web plugin. Its hosted-only setup rules do not apply to Desktop installation or remake requests above.
+
 
 ## Purpose
 
 Use this as the base operating context whenever Claude Code works with a ChatCut project through the ChatCut plugin.
 
-Surface scope: this skill covers the hosted ChatCut plugin (`plugin:chatcut:chatcut`) only. When the conversation uses ChatCut Desktop (`chatcut_desktop*` servers), follow the desktop server's own instructions and skip this skill unless the user explicitly chooses the plugin/web surface — desktop media is registered locally (no uploads) and delivery happens in the ChatCut Desktop window, not a browser.
+Surface scope of the sections below: they cover the hosted ChatCut plugin (`plugin:chatcut:chatcut`) only. When the conversation uses ChatCut Desktop (`chatcut_desktop*` servers), follow the desktop server's own instructions and skip this skill unless the user explicitly chooses the plugin/web surface — desktop media is registered locally (no uploads) and delivery happens in the ChatCut Desktop window, not a browser.
 
 Host scope: this is the Claude Code edition. In Codex, use the `chatcut-plugin-basics` skill instead of this one.
 
@@ -17,10 +30,7 @@ This skill provides the common ChatCut project model, editing operating context,
 
 ### MCP setup and authentication
 
-MCP-first rule: before checking, installing, opening, or troubleshooting ChatCut
-Desktop, check the hosted ChatCut MCP registration and authentication. Desktop
-is never the first setup path for this plugin, and a missing or unauthenticated
-hosted MCP server is not evidence that the Desktop app needs to be installed.
+For hosted Web tasks, check the hosted ChatCut MCP registration and authentication first. A missing or unauthenticated hosted server is not evidence that Desktop needs to be installed.
 
 ChatCut tools are served through the configured Hosted MCP server: `chatcut` for direct registration or `plugin:chatcut:chatcut` for an existing plugin-provided registration. Resolve tools from your visible tool list by the ChatCut tool name (`read_project`, `edit_item`, ...), using the registered server's namespace. Treat the active MCP manifest as the runtime contract.
 
