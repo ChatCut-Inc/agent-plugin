@@ -1,7 +1,7 @@
 {
   "name": "chatcut",
-  "version": "1.10.27",
-  "description": "ChatCut Codex plugin for editable video editing and creation workflows from Codex.",
+  "version": "1.11.0",
+  "description": "Install ChatCut Desktop, recreate reference videos, and continue editing existing ChatCut Web projects from your agent.",
   "author": {
     "name": "ChatCut",
     "email": "dev@chatcut.io",
@@ -21,19 +21,30 @@
     "timeline",
     "local-video",
     "codex",
-    "mcp"
+    "mcp",
+    "desktop",
+    "install",
+    "video-remake",
+    "video-recreation"
   ],
   "mcpServers": "./.mcp.json",
   "skills": "./skills/",
   "interface": {
     "displayName": "ChatCut",
-    "shortDescription": "Edit and create videos in ChatCut from Codex",
-    "longDescription": "Workflow skills and MCP server configuration for routing video editing and creation work to ChatCut: importing local or attached media, creating editable projects, editing timelines, adding captions/subtitles, transcribing and cleaning talking-head videos, adding B-roll or overlays, using generation tools for image/video/voice/sound/music/shader assets, exporting, and verifying editor-visible changes.",
+    "shortDescription": "Install ChatCut and recreate or edit videos",
+    "longDescription": "Install ChatCut Desktop, recreate reference videos, and continue editing existing ChatCut Web projects from your agent.",
     "developerName": "ChatCut",
     "category": "Creativity",
-    "capabilities": ["Read", "Write"],
+    "capabilities": [
+      "Read",
+      "Write"
+    ],
     "websiteURL": "https://chatcut.io",
-    "defaultPrompt": ["Help me connect to ChatCut Web"],
+    "defaultPrompt": [
+      "Install ChatCut on this computer.",
+      "Recreate this reference video with my product.",
+      "Continue editing my existing ChatCut project."
+    ],
     "brandColor": "#111827",
     "composerIcon": "./assets/logo-light.png",
     "logo": "./assets/logo-light.png"

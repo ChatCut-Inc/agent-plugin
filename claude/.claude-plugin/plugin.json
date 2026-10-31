@@ -1,8 +1,8 @@
 {
   "name": "chatcut",
   "displayName": "ChatCut",
-  "version": "1.10.28",
-  "description": "ChatCut plugin for editable video editing and creation workflows from Claude Code.",
+  "version": "1.11.0",
+  "description": "Install ChatCut Desktop, recreate reference videos, and continue editing existing ChatCut Web projects from your agent.",
   "author": {
     "name": "ChatCut",
     "email": "dev@chatcut.io",
@@ -27,7 +27,11 @@
     "timeline",
     "local-video",
     "claude-code",
-    "mcp"
+    "mcp",
+    "desktop",
+    "install",
+    "video-remake",
+    "video-recreation"
   ],
   "mcpServers": {
     "chatcut": {
@@ -37,7 +41,7 @@
       "headers": {
         "x-chatcut-mcp-client": "claude_code",
         "x-chatcut-mcp-surface": "embedded-preview",
-        "x-chatcut-plugin-version": "1.10.28"
+        "x-chatcut-plugin-version": "1.11.0"
       }
     }
   },

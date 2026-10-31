@@ -12,7 +12,7 @@
     {
       "name": "chatcut",
       "source": "./claude",
-      "description": "Edit and create videos in ChatCut from Claude Code: import media, edit timelines, captions, motion graphics, generation, export.",
+      "description": "Install ChatCut Desktop and recreate reference videos; continue editing existing Web projects through the hosted plugin.",
       "category": "productivity",
       "homepage": "https://chatcut.io",
       "author": {
@@ -29,7 +29,10 @@
         "subtitles",
         "transcription",
         "timeline",
-        "mcp"
+        "mcp",
+        "desktop",
+        "installation",
+        "video-remake"
       ]
     }
   ]

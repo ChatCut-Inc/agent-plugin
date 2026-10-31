@@ -4,6 +4,14 @@ The ChatCut Agent Plugins connect Codex, Claude Code, Grok Bot, Cursor, and Kimi
 
 Use it to import media, change a project timeline, create motion graphics, generate assets, transcribe audio, add captions, export videos, and verify that edits are visible in the editor.
 
+## Install ChatCut Desktop (recommended)
+
+Ask your agent to read the complete [ChatCut Desktop setup guide](https://chatcut.io/desktop) using `curl -fsSL https://chatcut.io/desktop` (`curl.exe` on Windows), then install ChatCut and connect the current agent. The official macOS and Windows installers do not need Node.js or npm. Desktop owns its local tools and Skills. Run setup on a supported macOS or Windows computer with a graphical desktop. Linux and remote agents without access to that computer cannot install Desktop there; continue in a local agent on the supported computer.
+
+To recreate a reference video with your person or product while retaining its motion and timing, use Desktop’s bundled `video-gen` Skill and `submit_video_remake`. See the [video recreation guide](https://chatcut.io/viralvideocloner). Quotes use current account access and require approval before spending credits.
+
+The hosted packages below remain available for existing Web projects and explicit Web-only use. Web projects and original media remain separate and are not automatically migrated. Connecting Desktop to the same agent may disable or replace its conflicting hosted connection; do not promise that both connections stay active.
+
 ## What Is Included
 
 - `codex/` - the Codex plugin package.
@@ -26,7 +34,7 @@ Use it to import media, change a project timeline, create motion graphics, gener
 - Codex with plugin support, Claude Code 2.x (CLI or desktop app), Grok Bot, Cursor, or Kimi Work.
 - Access to a ChatCut project you want to edit.
 
-## Authentication
+## Optional hosted Web plugin authentication
 
 The plugin connects to ChatCut through the hosted ChatCut MCP endpoint:
 
@@ -36,7 +44,7 @@ https://api.chatcut.io/api/external-mcp/mcp
 
 The host handles authentication when the plugin is installed or first used (`codex mcp login chatcut`, or `claude mcp login plugin:chatcut:chatcut` in Claude Code). Grok Bot and Cursor users complete the authorization flow from the host's Plugins screen. Follow the sign-in flow to connect your ChatCut account.
 
-Install instructions per host: [chatcut.io/chatgpt](https://chatcut.io/chatgpt) for Codex, [chatcut.io/claude](https://chatcut.io/claude) for Claude Code (agent-executable copy in [./docs/claude-code-install.md](./docs/claude-code-install.md)), and [./grok/README.md](./grok/README.md) for Grok Bot and Cursor.
+Install instructions per host: [Codex Web guide](https://chatcut.io/web-plugin/chatgpt) for Codex, [Claude Code Web guide](https://chatcut.io/web-plugin/claude) for Claude Code (agent-executable copy in [./docs/claude-code-web-install.md](./docs/claude-code-web-install.md)), and [./grok/README.md](./grok/README.md) for Grok Bot and Cursor.
 
 ## Example Prompts
 
