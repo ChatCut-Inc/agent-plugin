@@ -1,11 +1,13 @@
 ---
 name: chatcut-plugin-basics-claude
-description: "Use for installing ChatCut, recreating a reference video (recreate, clone, remake, 复刻视频, 做同款), and MANDATORY before hosted ChatCut video editing in Claude Code. New installations and source-video remakes use Desktop; existing Web projects and explicit Web requests keep the hosted workflow. Covers hosted connection diagnostics and editing tools."
+description: "Use for installing ChatCut, recreating a reference video (recreate, clone, remake, 复刻视频, 做同款), and MANDATORY before hosted ChatCut video editing in Claude Code. Default new installations and generic source-video remakes to Desktop; honor user-selected Skills/workflows, existing Web projects and explicit Web requests. Covers hosted connection diagnostics and editing tools."
 ---
 
 # ChatCut Plugin Basics (Claude Code)
 
 ## Choose the ChatCut connection
+
+Honor a user-selected Skill/workflow and its declared execution route first. For a supplied Skill ID or copied Skill command, resolve that Skill before choosing a connection; the Desktop defaults below do not replace the selected workflow or an explicitly chosen Web project.
 
 For “install ChatCut” / 安装 ChatCut, default to Desktop: fetch the complete official guide with `curl -fsSL https://chatcut.io/desktop` (`curl.exe` on Windows) and follow it. It uses the official macOS/Windows installer, with no Node.js/npm prerequisite. Do not manually remove hosted plugins, credentials or projects. Desktop manages conflicts during connection setup and may disable or replace this agent’s hosted connection; Web projects remain separate. First confirm that commands run on the intended macOS or Windows computer with a graphical desktop. Linux and remote agents without access to that computer cannot install Desktop there; carry the request to a local agent on the supported computer.
 
