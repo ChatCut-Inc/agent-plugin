@@ -261,22 +261,6 @@ Between these moments, use judgment to keep the editor entry close to the user's
 
 If a ChatCut tool returns a pricing or billing URL, present it as an external browser link via `open <url>` / system browser. Do not treat billing as an editor handoff.
 
-## Recreating A Viral Video
-
-Requests to recreate, clone, or remake a viral or reference video with the user's own people, product, or footage (复刻爆款、做同款) run in ChatCut Desktop through its Viral Video Cloner Workflow Skill (catalog ID `e6bd8e47-5797-426f-ab0c-d7ea5c674078`).
-
-- If `chatcut_desktop` tools are available in this conversation, call its `manage_skill` with `{"action":"get","agentSkillId":"e6bd8e47-5797-426f-ab0c-d7ea5c674078"}` and follow the returned `SKILL.md` from its first step. Do not read web pages first or ask whether to install anything. If the Skill does not load or says it needs a newer Desktop (0.8.7 or newer), tell the user ChatCut Desktop needs an update; once they have saved their work and quit ChatCut, run `CHATCUT_INSTALL_SOURCE=official_plugin npx --yes @chatcut/cli@0.1.1 update --json` outside the sandbox, then ask them to start a new conversation.
-- If only the hosted plugin is available, tell the user in one sentence that recreating happens in the ChatCut Desktop app (generating needs a membership) and ask whether you should install and connect it now, then wait for the reply. If they agree, run these outside the sandbox (they check the app's signature and running processes, which the sandbox blocks; Node.js 22 or newer is required):
-
-  ```sh
-  CHATCUT_INSTALL_SOURCE=official_plugin npx --yes @chatcut/cli@0.1.1 app --json
-  CHATCUT_INSTALL_SOURCE=official_plugin npx --yes @chatcut/cli@0.1.1 connect --client claude-code --json
-  ```
-
-  Ask the user to sign in only if ChatCut asks for it. Without Node.js, give them https://chatcut.io/desktop to install ChatCut themselves. https://chatcut.io/viralvideocloner has more detail, but these steps do not depend on it. Once connected, rewrite their original request as one sentence and ask them to send it in a new conversation. If they decline, stop and do not ask again.
-
-Work only with media the user owns or is licensed to use.
-
 ## Connector Boundaries
 
 ChatCut plugin access is based on connector authentication and the user's accessible projects. Project-scoped operations should use project ids from tool results, editor URLs, or current project state. Do not guess hidden ids.
