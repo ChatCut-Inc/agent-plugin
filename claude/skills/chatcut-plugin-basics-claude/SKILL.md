@@ -52,7 +52,20 @@ claude mcp add-json --scope user chatcut '{"type":"http","url":"https://api.chat
 
 Preserve other configuration. If an available ChatCut MCP definition specifies a different URL, OAuth resource, or headers, use those values instead of the example. Never retarget an existing registration or store auth tokens in configuration. Without the CLI, add the same HTTP server and headers at user scope through the host's MCP settings if supported. Have the user approve the user-scoped MCP server if prompted, verify registration with `claude mcp get chatcut`, then complete authentication below.
 
-2. **Server registered but authentication required:** Have the user open `/mcp`, select the registered ChatCut server, and choose **Authenticate** to complete the browser sign-in. For an existing `plugin:chatcut:chatcut` registration only, you can instead offer to launch `sh "${CLAUDE_PLUGIN_ROOT}/skills/chatcut-plugin-basics-claude/login-chatcut.sh"` when that helper is available; it writes login output to `/tmp/chatcut-login.log`. Do not use that plugin-specific helper for a direct `chatcut` registration. An unauthenticated server can return 401 and leave the session with no tools; reinstalling does not fix that. Do not assume every missing-tool case is an auth failure: if authentication succeeds but tools remain absent, start a new session and check the server's reported connection error.
+2. **Server registered but authentication required:** Offer to run Claude Code's `claude mcp login` for the registered server and have the user complete the browser sign-in. It needs a terminal, so start it in the background inside a pseudo-terminal, using the line for this computer (for a direct registration, replace `plugin:chatcut:chatcut` with `chatcut`):
+
+```text
+# macOS
+script -qF /tmp/chatcut-login.log claude mcp login plugin:chatcut:chatcut < /dev/null > /dev/null 2>&1 &
+
+# Linux
+script -qfc "claude mcp login plugin:chatcut:chatcut" /tmp/chatcut-login.log > /dev/null 2>&1 &
+
+# Windows PowerShell
+Start-Process cmd -ArgumentList '/c','claude mcp login plugin:chatcut:chatcut > %TEMP%\chatcut-login.log 2>&1'
+```
+
+Immediately read and poll the log (`$env:TEMP\chatcut-login.log` on Windows). Claude Code opens the ChatCut authorization page; if the browser does not open, open the authorization URL from the log for the user. Sign-in succeeded when the log shows `Authenticated with "plugin:chatcut:chatcut"` (or `"chatcut"`); `Connected` alone does not prove it. Never run concurrent login attempts. If the CLI is unavailable or has no `claude mcp login` (older than 2.1.210), have the user open `/mcp`, select the registered ChatCut server, and choose **Authenticate** instead. An unauthenticated server can return 401 and leave the session with no tools; reinstalling does not fix that. Do not assume every missing-tool case is an auth failure: if authentication succeeds but tools remain absent, start a new session and check the server's reported connection error.
 
 Explain whether registration, authentication, or connection failed and provide the matching concrete step, rather than only saying ChatCut is unavailable or asking the user to reconnect. Directly registering the Hosted MCP server above is allowed; do not install plugins or bootstrap unrelated local MCP surfaces or Desktop integrations from this skill.
 
@@ -229,7 +242,7 @@ First action for a new ChatCut task: use `list_projects`, `create_project`, `tar
 
 If a ChatCut project is already available from an editor URL, read the `projectId` from the `/editor/<projectId>` URL and pass it directly to project-scoped tools.
 
-If `chatcut` asks for authentication or project access, launch `sh "${CLAUDE_PLUGIN_ROOT}/skills/chatcut-plugin-basics-claude/login-chatcut.sh"`, complete the login flow, then retry with the exact `projectId` from the editor URL. Inspect `/tmp/chatcut-login.log` if login output is needed.
+If `chatcut` asks for authentication or project access, sign in as described in step 2 of **MCP setup and authentication**, then retry with the exact `projectId` from the editor URL.
 
 ### Open the visible editor
 
