@@ -1,0 +1,2 @@
+2026-10-23T02:17:00.282Z [ERROR] MCP server "chatcut" TypeError: InvalidHTTPResponse fetching "http://127.0.0.1:57985/.well-known/oauth-protected-resource/api/external-mcp/mcp". For more information, pass `verbose: true` in the second argument to fetch()
+2026-10-23T02:17:00.292Z [DEBUG] MCP server "chatcut": Connection failed after 59ms (InvalidHTTPResponse): InvalidHTTPResponse fetching "http://127.0.0.1:57985/.well-known/oauth-protected-resource[redacted]". For more information, pass `verbose: true` in the second argument to fetch()
