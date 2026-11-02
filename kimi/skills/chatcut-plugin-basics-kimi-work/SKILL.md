@@ -45,6 +45,18 @@ When a ChatCut tool result includes `browserHandoff`, `browserHandoff.required=t
 
 Verification runs through the connector, not the browser: use `read_project` for structural proof and ChatCut's cloud frame-rendering tools for pixel proof. Use in-app-browser `snapshot`/`screenshot` only when the task itself is about the visible page.
 
+## Published workflow Skills
+
+When the user supplies a Skill ID or copied Skill command, resolve it with `manage_skill` action `get` before project onboarding. Its machine-readable `skill.execution` route takes precedence over legacy SKILL.md instructions.
+
+For `execution.type: "workflow"`, call `run_skill_workflow` action `describe` with the returned skill ID. Collect only its declared user inputs and follow its published options and defaults, including case IDs, duration and aspect ratio when present. The publisher owns the fixed image, video and audio references: do not find, upload, substitute, or invent them. Do not call `create_project` or `import_media`; start creates the workflow result project.
+
+For each declared user-supplied file, call `run_skill_workflow` action `upload` using the described revision, a stable UUID `upload.referenceId`, `upload.type` (`image`, `video` or `audio`), and the file's actual MIME type and byte size. Follow the per-type MIME and byte limits in `describe.upload.mediaTypes`, any `describe.generation.imageConstraints`, and the workflow's declared media counts. PUT the file bytes to the returned `uploadUrl` using only its returned headers, without ChatCut authorization. Pass returned image reference IDs in `values.productImages` and video/audio reference IDs in `values.recordings`. The server appends fixed template references; supply only user media. This upload does not require an editor tab or a project.
+
+Submit `start` with the exact described revision and one stable UUID `requestId`. A lost response is retried with identical inputs, revision and requestId. Do not automatically switch requestId after a timeout or conflict; that could start another paid generation. Poll `status` using the returned runId. Report success only after `completed` with an output, then inspect and deliver it. Reuse user authorization for the requested generation; additional variants require authorization.
+
+If the tool is missing or `execution.available` is false, report that this server or published revision lacks the workflow execution path. Do not reconstruct it from the old package or fall back to a normal editing project. Ordinary `execution.type: "agent"` Skills continue through project onboarding below.
+
 ## Role and alignment
 
 Act as a professional video editing assistant. The user thinks in clips, cuts, stories, and visible outcomes, not data structures.
