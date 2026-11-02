@@ -30,6 +30,7 @@ test("export delivers the downloaded file and keeps cloud fallback scoped", () =
   assert.match(codexExport, /a free cloud quote needs no extra confirmation and a nonzero charge needs one explicit confirmation/);
   assert.match(codexExport, /Honor explicit local-only, no-upload/);
   assert.match(codexExport, /no usable local path exists or the user chooses it/);
+  assert.match(codexExport, /`videoBitrateMode:"recommended"`/);
   assert.doesNotMatch(codexExport, /Only when cloud cannot do it either/);
   assert.match(codexExport, /`renderMode:"cloud"` when the user asks for it/);
   assert.doesNotMatch(codexExport, /return its `downloadUrl`/);
