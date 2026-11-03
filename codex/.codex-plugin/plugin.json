@@ -1,7 +1,7 @@
 {
   "name": "chatcut",
-  "version": "1.10.27",
-  "description": "ChatCut Codex plugin for editable video editing and creation workflows from Codex.",
+  "version": "1.10.28",
+  "description": "Edit talking-head videos, add captions, and turn long videos into shorts as editable ChatCut projects from Codex.",
   "author": {
     "name": "ChatCut",
     "email": "dev@chatcut.io",
@@ -27,13 +27,20 @@
   "skills": "./skills/",
   "interface": {
     "displayName": "ChatCut",
-    "shortDescription": "Edit and create videos in ChatCut from Codex",
-    "longDescription": "Workflow skills and MCP server configuration for routing video editing and creation work to ChatCut: importing local or attached media, creating editable projects, editing timelines, adding captions/subtitles, transcribing and cleaning talking-head videos, adding B-roll or overlays, using generation tools for image/video/voice/sound/music/shader assets, exporting, and verifying editor-visible changes.",
+    "shortDescription": "Edit, caption & shorten videos",
+    "longDescription": "Turn raw footage into a finished video without leaving the chat. ChatCut edits on a real multi-track timeline, so every cut, caption, and effect stays adjustable in the ChatCut editor.\n\nWhat you can do:\n- Clean up talking-head videos: remove pauses, filler words, false starts, and repeated takes, then tighten the story.\n- Add captions and subtitles: styled, animated captions with keyword highlights, and caption translation.\n- Turn long videos into shorts: pick the strongest moments, reframe for vertical, and caption them for TikTok, Reels, or Shorts.\n- Polish the edit: B-roll and stock footage, motion graphics and title cards, music, voiceover, sound effects, and voice isolation.\n- Create new material: generate images, video clips, voiceovers, and music; translate and dub videos; sync multicam footage; make AI presenter videos.\n- Export an MP4 and check the result frame by frame before you share it.\n\nWorks with local files, attachments, and links. Projects are saved to your ChatCut account, so you can open them in the editor and keep refining by hand or by chat.",
     "developerName": "ChatCut",
     "category": "Creativity",
     "capabilities": ["Read", "Write"],
     "websiteURL": "https://chatcut.io",
-    "defaultPrompt": ["Help me connect to ChatCut Web"],
+    "supportURL": "https://chatcut.io/contact",
+    "privacyPolicyURL": "https://chatcut.io/privacy",
+    "termsOfServiceURL": "https://chatcut.io/terms",
+    "defaultPrompt": [
+      "Remove the pauses and filler words from this talking-head video",
+      "Add animated captions to this video and highlight the key words",
+      "Turn this long video into a 30-second vertical short with captions"
+    ],
     "brandColor": "#111827",
     "composerIcon": "./assets/logo-light.png",
     "logo": "./assets/logo-light.png"
