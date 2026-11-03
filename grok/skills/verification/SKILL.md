@@ -5,6 +5,10 @@ description: Hosted ChatCut plugin sessions only (the `chatcut` MCP server). If 
 
 # Verification
 
+For a video/reference breakdown or detailed frame analysis, use the bundled
+[visual-analysis skill](../visual-analysis/SKILL.md), then continue the checks
+below when verifying an edit.
+
 Use both structural and visual evidence when the requested result is visible:
 
 1. Re-read the affected scope with `read_project`, `preview_timeline`, `inspect_item`, `browse_assets`, or `inspect_asset` as appropriate. Use the latest response for ids, tracks, timing, and readiness.
