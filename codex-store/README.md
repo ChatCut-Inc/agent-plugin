@@ -17,6 +17,10 @@ must differ in the directory build:
   on the MCP URL. Public submission rejects MCP server headers, so the URL is
   the only channel marker that survives review. Codex keys stored sign-ins by
   server URL, so turning this on asks existing directory users to sign in once.
+- `includeMcpServer`: set to `false` only if the portal refuses an MCP server
+  on this skills-only entry. The package then ships skills alone, and the
+  direct-registration command in `chatcut-plugin-basics` still carries the
+  marked URL.
 - `screenshots`: optional `./assets/...` PNG paths, at most 4096 px per side
   and 5 MiB each.
 

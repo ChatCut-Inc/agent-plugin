@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { mkdtemp, readFile, rm } from "node:fs/promises";
+import { cp, mkdir, mkdtemp, readFile, rm, stat, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import test from "node:test";
@@ -32,6 +32,28 @@ test("the staged directory package passes every submission check", async () => {
     assert.equal(shipped.name, "chatcut-desktop");
   } finally {
     await rm(outDir, { recursive: true, force: true });
+  }
+});
+
+test("the skills-only fallback drops the MCP server but keeps the marked registration", async () => {
+  const repoRoot = await mkdtemp(join(tmpdir(), "chatcut-codex-store-repo-"));
+  const outDir = join(repoRoot, "dist");
+  try {
+    await cp(new URL("../codex/", import.meta.url), join(repoRoot, "codex"), { recursive: true });
+    await mkdir(join(repoRoot, "codex-store"));
+    await writeFile(
+      join(repoRoot, "codex-store/listing.json"),
+      JSON.stringify({ ...listing, includeMcpServer: false }),
+    );
+    const staged = await stageStorePackage({ repoRoot, outDir });
+    assert.deepEqual(staged.problems, []);
+    assert.equal(staged.manifest.mcpServers, undefined);
+    assert.ok(!staged.entries.includes(".mcp.json"));
+    await assert.rejects(stat(join(staged.stageDir, ".mcp.json")));
+    const skill = await readFile(join(staged.stageDir, "skills/chatcut-plugin-basics/SKILL.md"), "utf8");
+    assert.ok(skill.includes(`--url '${staged.serverUrl}' --oauth-resource`));
+  } finally {
+    await rm(repoRoot, { recursive: true, force: true });
   }
 });
 

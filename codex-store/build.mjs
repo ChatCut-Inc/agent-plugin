@@ -67,11 +67,21 @@ export function storeMcpUrl(baseUrl, listing) {
 }
 
 export function buildStoreManifest(manifest, listing) {
+  const { mcpServers, ...rest } = manifest;
   return {
-    ...manifest,
+    ...rest,
     name: listing.pluginName,
+    // Fallback for a portal that refuses MCP on the skills-only entry: the
+    // marked registration command in the skill then carries the channel alone.
+    ...(listing.includeMcpServer !== false && { mcpServers }),
     interface: { ...manifest.interface, screenshots: listing.screenshots },
   };
+}
+
+function packageEntries(listing) {
+  return PACKAGE_ENTRIES.filter(
+    (entry) => entry !== ".mcp.json" || listing.includeMcpServer !== false,
+  );
 }
 
 export function buildStoreMcpConfig(mcp, listing) {
@@ -242,12 +252,15 @@ export async function stageStorePackage({ repoRoot = REPO_ROOT, outDir }) {
     await readJson(join(sourceDir, ".codex-plugin", "plugin.json")),
     listing,
   );
-  const mcp = buildStoreMcpConfig(await readJson(join(sourceDir, ".mcp.json")), listing);
+  const mcp = manifest.mcpServers
+    ? buildStoreMcpConfig(await readJson(join(sourceDir, ".mcp.json")), listing)
+    : null;
+  const entries = packageEntries(listing);
   const stageDir = join(outDir, manifest.name);
 
   await rm(stageDir, { recursive: true, force: true });
   await mkdir(stageDir, { recursive: true });
-  for (const entry of PACKAGE_ENTRIES) {
+  for (const entry of entries) {
     await cp(join(sourceDir, entry), join(stageDir, entry), {
       recursive: true,
       dereference: true,
@@ -255,31 +268,31 @@ export async function stageStorePackage({ repoRoot = REPO_ROOT, outDir }) {
     });
   }
   await writeFile(join(stageDir, ".codex-plugin", "plugin.json"), `${JSON.stringify(manifest, null, 2)}\n`);
-  await writeFile(join(stageDir, ".mcp.json"), `${JSON.stringify(mcp, null, 2)}\n`);
+  if (mcp) await writeFile(join(stageDir, ".mcp.json"), `${JSON.stringify(mcp, null, 2)}\n`);
   const skillPath = join(stageDir, REGISTRATION_SKILL);
-  await writeFile(skillPath, markSkillRegistration(await readFile(skillPath, "utf8"), mcp.mcpServers.chatcut.url));
+  const serverUrl = storeMcpUrl(HOSTED_MCP_URL, listing);
+  await writeFile(skillPath, markSkillRegistration(await readFile(skillPath, "utf8"), serverUrl));
 
   const problems = await validateStorePackage({ manifest, mcp, root: stageDir });
-  return { listing, manifest, mcp, problems, stageDir };
+  return { entries, listing, manifest, mcp, problems, serverUrl, stageDir };
 }
 
 async function main(argv) {
   const outIndex = argv.indexOf("--out");
   const outDir = resolve(outIndex >= 0 ? argv[outIndex + 1] : join(REPO_ROOT, "dist", "codex-store"));
-  const { listing, manifest, mcp, problems, stageDir } = await stageStorePackage({ outDir });
+  const { entries, listing, manifest, problems, serverUrl, stageDir } = await stageStorePackage({ outDir });
   if (problems.length) {
     console.error(`Store package has ${problems.length} problem(s):\n- ${problems.join("\n- ")}`);
     process.exitCode = 1;
     return;
   }
-  const serverUrl = mcp.mcpServers.chatcut.url;
   console.log(`Staged ${manifest.name} ${manifest.version} for ${listing.dashboardPluginId} at ${stageDir}`);
-  console.log(`MCP URL: ${serverUrl} (Codex OAuth callback id ${codexOAuthCallbackId(serverUrl)})`);
+  console.log(`MCP URL: ${serverUrl} (Codex OAuth callback id ${codexOAuthCallbackId(serverUrl)})${manifest.mcpServers ? "" : "; MCP server omitted, skill registration only"}`);
   if (argv.includes("--no-zip")) return;
 
   const zipPath = join(outDir, `${manifest.name}-${manifest.version}.zip`);
   await rm(zipPath, { force: true });
-  execFileSync("zip", ["-X", "-q", "-r", zipPath, ...PACKAGE_ENTRIES, "-x", "*/.DS_Store"], { cwd: stageDir });
+  execFileSync("zip", ["-X", "-q", "-r", zipPath, ...entries, "-x", "*/.DS_Store"], { cwd: stageDir });
   const zip = await readFile(zipPath);
   console.log(`ZIP: ${zipPath} (${(await stat(zipPath)).size} bytes, sha256 ${createHash("sha256").update(zip).digest("hex")})`);
 }
