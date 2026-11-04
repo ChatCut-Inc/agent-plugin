@@ -1,6 +1,6 @@
 ---
 name: talking-head-guide
-description: Guide for editing speech-led videos where spoken delivery or conversation drives the cut — single-speaker talking-head / 口播, two- or multi-speaker interview / 访谈, video podcast, lecture, tutorial, course, and similar formats. Use for any non-trivial edit of those formats, including speech cleanup (剪口播 / 口播剪辑 / 去口癖 / clean up fillers / smooth speech), pause or repeated-take removal, motion graphics layered onto the footage (口播加 MG / 加动画), B-roll (加 B-roll / add B-roll), music, or captions. For motion graphics specifically, use this together with the active Motion Graphics skill/workflow available in the current ChatCut environment — this skill adds speech-specific guidance (rhythm-aware timing, frame-aware placement, subject/caption protection, placement verification).
+description: Guide for editing speech-led videos where spoken delivery or conversation drives the cut — single-speaker talking-head / 口播, two- or multi-speaker interview / 访谈, video podcast, lecture, tutorial, course, and similar formats. Load before analyzing, planning, or performing non-trivial edits of those formats, including speech cleanup (剪口播 / 口播剪辑 / 去口癖 / clean up fillers / smooth speech), pause or repeated-take removal, motion graphics layered onto the footage (口播加 MG / 加动画), B-roll (加 B-roll / add B-roll), music, or captions. For motion graphics specifically, use this together with the active Motion Graphics skill/workflow available in the current ChatCut environment — this skill adds speech-specific guidance (rhythm-aware timing, frame-aware placement, subject/caption protection, placement verification).
 ---
 
 # Speech-Led Video Editing (Talking Head, Interview, Podcast)
@@ -47,7 +47,7 @@ So: finalize A-roll editing before committing any visual, audio, or text layer. 
 
 Once the cut structure is final, run `smooth_audio` once as the last audio step — it micro-crossfades every hard audio cut and fades exposed edges so edits don't pop. Run it after `apply_script`/`clean_script` restructuring (reflow drops transitions); it's idempotent, so re-run it if the timeline changes again.
 
-**You must confirm the result with the user after each major step before starting the next**, unless the user has explicitly asked to run end-to-end without stopping. Key checkpoints when multiple treatments apply: after A-roll editing finalizes the speech timing; before MG generation (confirm style and direction, and, when it isn't obvious, whether it sits over the video as an overlay or takes the whole frame); after MG generation; same pattern for B-roll, music, and captions. **Don't bundle multiple checkpoints into one response — confirm each step separately.** An upstream mistake forces redoing everything downstream (e.g., MG placed against pre-cleanup timing wastes generation credits when the timeline shifts).
+**Checkpoints.** Unless the user asked to run end-to-end without stopping, stop for confirmation where later work depends on the result: after A-roll editing finalizes the speech timing; before MG generation (confirm style and direction, and, when it isn't obvious, whether it sits over the video as an overlay or takes the whole frame); and after each generated layer (MG, B-roll, music) before building on it. Take these one at a time. Reversible finishing edits such as captions or `smooth_audio` do not need a forced stop. An upstream mistake forces redoing everything downstream (e.g., MG placed against pre-cleanup timing wastes generation credits when the timeline shifts).
 
 ---
 
@@ -86,7 +86,7 @@ These principles apply to all A-roll tasks, not only cleanup.
 - **Be conservative when boundaries are uncertain.** If unsure whether a cut harms meaning, logic, or listening flow, keep it or make a smaller cut.
 - **Confirm complex changes first.** For complex restructuring, aggressive shortening, structural changes, or generated hooks, confirm target length, structure direction, and what to preserve with the user before editing.
 - **Explain content, never indices.** You MUST NOT explain edits to the user with internal addresses such as `[sN]`, `[cN]`, `[gap]`, word indices, clip ids, or segment ids. The user cannot see those addresses and will not understand what they mean. Use the actual spoken content, a short quote, or a plain-language description of the edit.
-- **Never name a screen position for a panel.** When you invite the user to review or fine-tune the result, call it "the Transcript panel" (in Chinese: "文字稿面板") — never a direction (left / right / side). The layout is rearrangeable and the panel does not sit in a fixed corner.
+- **Name the editing surface, not its screen position.** For recognized source-word corrections, guide the user to the Transcript panel (Chinese product term: "文字稿面板"). For caption display wording, including translations, select the relevant captions item and open its Content text editor for the intended language. Transcript edits source speech text; caption Content edits viewer-facing text. Use panel names rather than left / right / side / 左侧 / 右侧 because the layout is rearrangeable.
 
 ### Cleanup goals and decisions
 
@@ -236,8 +236,8 @@ Pause cleanup should default to compression, not zeroing out. Spoken video needs
 
 Default rules:
 
-- Obvious long pauses over 0.8-1s: usually compress to about 0.3s.
-- Between sentences: keep about 0.3-0.5s so listeners can hear natural phrasing.
+- When the user gives no duration, compress pauses longer than 0.25s to 0.25s.
+- Between sentences: keep about 0.25s so listeners can hear natural phrasing.
 - Around topic shifts, contrast, or emphasis: keep slightly longer pauses when needed; do not make the delivery too rushed.
 - Short breaths inside one sentence: if they are normal breathing, do not remove them.
 - Clear long pauses inside one sentence: compress them, but not so tightly that adjacent words sound glued together.
@@ -248,7 +248,7 @@ Default rules:
 
 Load only the reference for the branch the user selected. Do not preload references for unrequested treatments; default cleanup requires no reference.
 
-For A-roll editing scenarios other than cleanup — including highlight extraction, restructure, hook / short version, target-script / script alignment, or building versions, highlights, and excerpts — read `references/other-a-roll-editing-scenarios.md` completely before planning or editing that A-roll branch.
+For A-roll editing scenarios other than cleanup — including highlight extraction, restructure, hook / short version, target-script / script alignment, or building versions, highlights, and excerpts — read `references/other-a-roll-editing-scenarios.md` from this skill's base directory completely before planning or editing that A-roll branch.
 
 ### A-roll / transcript-based editing workflow
 
@@ -280,34 +280,34 @@ This section only adds talking-head timing, frame-composition, subject/caption p
 
 For talking-head MG work, treat the video as one edited piece, not as isolated graphics.
 
-When talking-head Motion Graphics is selected, including a plan-only or handoff-analysis request, load the available `create-motion-graphics` skill, then read `references/motion-graphics.md` completely before planning, generating, placing, or reviewing MG. This talking-head guide supplies the scene-specific editorial context but does not replace the active Motion Graphics Skill.
+When talking-head Motion Graphics is selected, including a plan-only or handoff-analysis request, first activate the Motion Graphics Skill available on the current surface: load `create-motion-graphics` when available for direct authoring; otherwise load `motion-graphic-gen` for delegated generation. Then read `references/motion-graphics.md` from this skill's base directory completely before planning, generating, placing, or reviewing MG. This talking-head guide supplies the scene-specific editorial context but does not replace the active Motion Graphics Skill.
 
 ---
 
 ## B-roll
 
-For B-roll, read `references/b-roll.md` completely before sourcing, choosing, placing, or reviewing it.
+For B-roll, read `references/b-roll.md` from this skill's base directory completely before sourcing, choosing, placing, or reviewing it.
 
 ---
 
 ## Multicam (multiple camera angles of the same take)
 
-For Multicam, read `references/multicam.md` completely before aligning or switching multiple camera angles of the same take.
+For Multicam, read `references/multicam.md` from this skill's base directory completely before aligning or switching multiple camera angles of the same take.
 
 ---
 
 ## Track roles (turn on auto-ducking)
 
-For Track roles, read `references/audio-and-music.md` completely before assigning audio roles or changing ducking behavior.
+For Track roles, read `references/audio-and-music.md` from this skill's base directory completely before assigning audio roles or changing ducking behavior.
 
 ---
 
 ## Background Music
 
-For Background Music, read `references/audio-and-music.md` completely before adding or fitting it.
+For Background Music, read `references/audio-and-music.md` from this skill's base directory completely before adding or fitting it.
 
 ---
 
 ## Captions
 
-For Captions, read `references/captions.md` completely before editing them.
+For Captions, read `references/captions.md` from this skill's base directory completely before editing them. Use `read_captions` / `edit_captions` for caption wording, grouping, emphasis, style, layout and translation; start a new look from the published preset catalog, including animated treatments. Source-transcript repair is not a prerequisite for caption tweaks.

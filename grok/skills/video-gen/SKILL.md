@@ -1,6 +1,6 @@
 ---
 name: video-gen
-description: AI video generation via Seedance, Kling, Gemini Omni, MiniMax H3, and MiniMax H3 Max. Use when the user wants to generate a video clip — text-to-video, image-to-video, first/last-frame transitions, reference-guided generation — or wants to modify / edit / extend an existing generated clip.
+description: AI video generation via Seedance, Gemini Omni, MiniMax H3, MiniMax H3 Max, Kling 3.0, and Kling 4.0. Use when the user wants to generate a video clip — text-to-video, image-to-video, first/last-frame transitions, reference-guided generation — or wants to modify / edit / extend an existing generated clip.
 ---
 
 # Video Gen
@@ -13,63 +13,53 @@ Any time the user wants to generate a video clip — text-to-video, image-to-vid
 
 ## Models
 
-| Model            | Reference                                                    | Strengths                                                                                                                                                                                                            |
-| ---------------- | ------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `seedance-2-5`   | [references/seedance25.md](references/seedance25.md)         | Default. 4-30s, up to 50 multimodal references, audio-only reference, timestamp control, and mp4/mov output. Strongest Seedance choice for new generation, edit, and extend.                                         |
-| `seedance2`      | [references/seedance2.md](references/seedance2.md)           | Seedance 2.0 full model. 4-15s, rich multimodal references, and up to 1080p output.                                                                                                                                  |
-| `seedance2fast`  | [references/seedance2.md](references/seedance2.md)           | Seedance 2.0 Fast — **same inputs and 4-15s range as `seedance2`, returns in minutes instead of ~ten, ~20% cheaper, capped at 720p**. Use when the user is iterating and turnaround matters more than peak fidelity. |
-| `seedance2mini`  | [references/seedance2.md](references/seedance2.md)           | Seedance 2.0 mini — **same inputs and 4-15s range as `seedance2`, ~50% cheaper, capped at 720p**. Use for cheap drafts and high-volume batches where the full model's fidelity isn't required.                       |
-| `kling`          | [references/kling.md](references/kling.md)                   | Camera-control language via prompt; strong on fine emotional / performance control for character shots. 1080p via `mode:"pro"`.                                                                                      |
-| `minimax-h3`     | [references/minimax-h3.md](references/minimax-h3.md)         | MiniMax H3. 4-15s, 768p/2k, first/last frames, and up to 9 image + 3 video + 3 audio references (12 total). Strong multimodal reference following.                                                                   |
-| `minimax-h3-max` | [references/minimax-h3-max.md](references/minimax-h3-max.md) | MiniMax H3 Max. 5-15s, 480p/768p, text or first/last-frame generation. No reference mode or 2K output.                                                                                                               |
-| `omni`           | [references/omni.md](references/omni.md)                     | Gemini Omni 1.1 Flash. Targeted edits/extensions via `continueFrom`, first/last frames, and cheap 360p drafts. 3-10s; 720p default, upscaled 1080p/4k.                                                               |
+| Model            | Reference                                                    | Strengths                                                                                                                                                                                                                                           |
+| ---------------- | ------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `seedance-2-5`   | [references/seedance25.md](references/seedance25.md)         | First choice. 4-30s, up to 50 multimodal references, audio-only reference, timestamp control, and mp4/mov output. Strongest Seedance choice for new generation, edit, and extend. Its 480p clips are drafts that can become a matching 1080p final. |
+| `seedance2`      | [references/seedance2.md](references/seedance2.md)           | Seedance 2.0 full model. 4-15s, rich multimodal references, and up to native 4K output (10-bit HEVC). An explicit ratio center-crops a first/last frame to that ratio.                                                                              |
+| `seedance2fast`  | [references/seedance2.md](references/seedance2.md)           | Seedance 2.0 Fast — **same inputs and 4-15s range as `seedance2`, returns in minutes instead of ~ten, ~20% cheaper, capped at 720p**. Use when the user is iterating and turnaround matters more than peak fidelity.                                |
+| `seedance2mini`  | [references/seedance2.md](references/seedance2.md)           | Seedance 2.0 mini — **same inputs and 4-15s range as `seedance2`, ~50% cheaper, capped at 720p**. Use for cheap test runs and high-volume batches where the full model's fidelity isn't required; a later full-model run will not reproduce it.     |
+| `minimax-h3`     | [references/minimax-h3.md](references/minimax-h3.md)         | MiniMax H3. 4-15s, 768p/2k, first/last frames, and up to 9 image + 3 video + 3 audio references (12 total). Strong multimodal reference following.                                                                                                  |
+| `minimax-h3-max` | [references/minimax-h3-max.md](references/minimax-h3-max.md) | MiniMax H3 Max, the faster H3 variant. 5-15s, 480p/768p, first/last frames or the same references as H3. No 2K output.                                                                                                                              |
+| `omni`           | [references/omni.md](references/omni.md)                     | Gemini Omni 1.1 Flash. Targeted edits/extensions via `continueFrom`, first/last frames, and cheap 360p drafts. 3-10s; 720p default, upscaled 1080p/4k.                                                                                              |
+| `kling`          | [references/kling.md](references/kling.md)                   | Kling 3.0. 3-15s, 720p/1080p, 16:9/9:16/1:1. First/last frames and reference images in one request (7 images in all). No video or audio references.                                                                                                 |
+| `kling-4`        | [references/kling-4.md](references/kling-4.md)               | Kling 4.0. Up to 30s in one clip, 720p/1080p, adds 21:9. Frames plus up to 10 images and 5 reference videos, addressed by name in the prompt (`@image_1`, `@video_1`).                                                                              |
 
 **IMPORTANT:** Before generating, READ the chosen model's reference for capabilities, input channels, modes, prompt structure, and model-specific behavior.
 
 ## Model Selection
 
-**For a new generation**, `seedance-2-5` is the **default**. Only switch when one of:
+**For a new generation**, `seedance-2-5` is the **first choice**. Only switch when one of:
 
-- **User explicitly named a model** ("用 Kling", "use Kling", "用 Omni", "用 mini", "/kling") — switch, no need to re-ask.
+- **User explicitly named an available model** ("用 Omni", "use H3", "用 mini", "用可灵") — switch, no need to re-ask. Kling or 可灵 without a version means `kling-4`; "Kling 3.0" means `kling`.
 - **User explicitly asks for MiniMax H3 or needs combined image/video/audio reference guidance with optional 2K output** — use `minimax-h3`.
-- **User explicitly asks for MiniMax H3 Max or wants its highest-fidelity text/frame generation without multimodal references** — use `minimax-h3-max`.
-- **Seedance clearly can't or won't do it well** — when you hit a known case where Seedance struggles, propose switching to `kling` and confirm before submitting.
-- **User explicitly asked for a fast / cheap draft they expect to revise** — propose `omni` (360p drafts, ≤10s, supports targeted edits) and confirm before submitting.
-- **User needs Seedance output at 1080p** — prefer `seedance-2-5`; it and full `seedance2` support 1080p.
+- **User explicitly asks for MiniMax H3 Max, or wants a faster or cheaper 480p MiniMax draft** — use `minimax-h3-max`.
+- **User wants a cheap preview before paying for the final** — on `seedance-2-5`, offer a 480p clip: every 2.5 480p clip is a draft priced like any 480p clip; after the user approves it, `fromDraft` renders the 1080p final with the same prompt, references, duration, ratio and audio. The final is 1080p only, drafts expire after 7 days, and the final is close to the draft but not frame-identical. To change the shot, make a new 480p clip. If the user only needs 720p, one normal 720p clip costs less than draft plus final. For targeted edits of an existing clip, `omni` 360p drafts remain an option.
+- **User needs Seedance output at 1080p** — prefer `seedance-2-5`; it and full `seedance2` support 1080p. For long or costly 1080p clips, mention the draft option with both prices in the confirmation; never switch to a 480p draft without the user choosing it.
+- **User asks for 4K** — use full `seedance2` with `resolution:"4k"`; it is the only native 4K model in ChatCut (`seedance-2-5` offers up to 1080p, `seedance2fast` and `seedance2mini` up to 720p). 4K is 10-bit HEVC, costs about 2x 1080p, and takes noticeably longer (several minutes for a short clip); say so in the confirmation. `omni` 4k is upscaled, not native detail. Do not switch models silently.
+- **User wants the next shot to start where a clip ends** — on Seedance, set `returnLastFrame:true` on the clip and pass the returned last-frame image (the provider's unwatermarked frame at the clip's resolution) as the next clip's `firstFrame`, without extracting a frame. Skip it for one-off clips.
 - **User wants Seedance's 2.0 inputs cheaply, or many clips at once, and is fine with 720p** — propose `seedance2mini` (4-15s, ~50% of the 2.0 full-model cost) and confirm before submitting.
 - **User is iterating on 2.0-style output and cares about turnaround** — propose `seedance2fast` (480p or 720p, 4-15s, ~80% of the 2.0 full-model cost, returns much sooner) and confirm before submitting.
 
 Otherwise stay on `seedance-2-5`.
 
-**For revising a clip that already exists**, the choice is made in Step 4 — not here. A revision request is not a reason to change the default for future fresh generations. Omni 1.1 replaces the previous Omni choice; keep the `omni` alias and do not invent a second legacy choice.
+**For revising a clip that already exists**, the choice is made in Step 4 — not here. A revision request is not a reason to change the first choice for future fresh generations. Omni 1.1 replaces the previous Omni choice; keep the `omni` alias and do not invent a second legacy choice.
 
-Access note: all eight models require ChatCut paid video-generation entitlement (subscription or paid credits). Never present another model as a free workaround for a subscription gate; offer free Motion Graphic animation instead when the user asks for a free path.
+Access note: video generation costs credits. For ordinary beta/production accounts, Seedance, Omni and Kling also require the payer to have an eligible paid subscription; a credit-pack purchase alone does not unlock those routes. MiniMax currently uses credit checks without that subscription feature gate. Do not describe MiniMax as free or switch models to bypass an access error. If the user asks for a free path, offer Motion Graphic animation.
+
+When a generation tool returns `FEATURE_NOT_INCLUDED` for a `generation.*` feature, use its payer and access details. If the project owner needs Pro, explain that the owner pays and must upgrade; the member's own Pro does not unlock the project. Do not give the member a personal upgrade link or send them to their own billing menu. They can find the owner in the project's existing members view when available. Otherwise share the returned upgrade link, or ChatCut’s avatar menu → Upgrade. Existing credits are preserved and generation still consumes credits after upgrading. This rejection does not charge for generation; existing agent conversation fees are separate, so do not claim the whole conversation was free. Preserve the exact original tool input and project, then stop. Do not automatically search for or substitute stock media; offer alternatives only if the user explicitly asks.
+
+When the user returns with “continue”, “继续”, “jixu”, or says they upgraded, recheck current payer eligibility and credits for the original input with `estimate_generation` when supported, otherwise the original tool’s precheck. If there is no separate precheck, one retry of the original tool lets its server check current access. If eligible, submit the original input once; if still blocked, explain the current blocker and stop. Do not ask the user to choose between the original generation and stock media again or state the old rejection as current status without checking. If a job was already accepted, track it instead of submitting again. Never switch generation tools, providers or services to bypass a gate.
 
 ## Tool Params
 
-| Param             | Values                                                                                                         | Default                           |
-| ----------------- | -------------------------------------------------------------------------------------------------------------- | --------------------------------- |
-| `prompt`          | video description (required)                                                                                   | —                                 |
-| `model`           | `seedance-2-5`, `seedance2`, `seedance2fast`, `seedance2mini`, `kling`, `minimax-h3`, `minimax-h3-max`, `omni` | seedance-2-5                      |
-| `durationSeconds` | seconds                                                                                                        | 5                                 |
-| `ratio`           | see model docs                                                                                                 | 16:9                              |
-| `resolution`      | model-specific; H3: 768p/2k; H3 Max: 480p/768p; Seedance: 480p/720p/1080p; Omni: 360p/720p/1080p/4k            | 720p (H3 models: 768p)            |
-| `outputFormat`    | `mp4`, `mov` (`seedance-2-5` only)                                                                             | mp4 (generate); mov (edit/extend) |
-| `taskMode`        | `generate`, `edit`, `extend` (`seedance-2-5` or `omni`)                                                        | generate                          |
-| `name`            | descriptive asset name (required)                                                                              | —                                 |
-| `firstFrame`      | project asset ref                                                                                              | —                                 |
-| `lastFrame`       | project asset ref                                                                                              | —                                 |
-| `continueFrom`    | video asset ref — **`omni` only**, source to edit/extend                                                       | —                                 |
-
-Model-specific params (e.g., Kling `mode`, Seedance `refImages` / `refVideos` / `refAudios`) — see the model's reference.
+Call `submit_video` with the model chosen above set explicitly. Its description and schema own the parameter names, allowed values, defaults and limits; per-model fields (e.g. Seedance references, Omni `continueFrom`) are in the model's reference.
 
 ## Input Resolution
 
-`firstFrame` / `lastFrame` / `refImages` / `refVideos` / `refAudios` all take a project asset reference. Prefer a full UUID or short prefix from `browse_assets`; `asset://<id>` and same-project asset URLs returned by asset tools are also accepted. Per-slot type: frame slots and `refImages` → image; `refVideos` → video; `refAudios` → audio.
+`firstFrame` / `lastFrame` / `refImages` / `refVideos` / `refAudios` accept project asset references or public HTTPS/`s3://` resource URLs. Prefer a full UUID or short prefix from `browse_assets` for existing assets; `asset://<id>` and same-project asset URLs returned by asset tools are also accepted. Per-slot type: frame slots and `refImages` → image; `refVideos` → video; `refAudios` → audio. `continueFrom` also accepts a public video resource.
 
-External URLs and base64 are not accepted. If the source is a public URL, download
-it into the host workspace, follow [asset-import](../asset-import/SKILL.md) using
-`import_media`, and pass the returned asset id.
+Pass public resources directly in the appropriate slot, including URLs resolved from skill/catalog references. ChatCut validates and measures them in managed generation storage without creating library assets. ChatCut downloads URL references up to 5 MiB for images and 50 MiB for video/audio; the model's own limits in its reference still apply. Do not download or import a resource merely for generation. Private S3 objects, base64 and workspace paths are not URL references.
 
 ## Workflow
 
@@ -120,16 +110,16 @@ For each dimension, check the user's words:
 
 ### Step 2 — Write the prompt
 
-See the chosen model's reference for prompt structure and param combinations (e.g., Seedance's 8-element structure and modes; Kling's prompt tips). Before submitting, check:
+See the chosen model's reference for prompt structure and param combinations (e.g., Seedance's 8-element structure and modes). Before submitting, check:
 
 - `name` is a **descriptive** asset name — descriptive enough for the user (and you in later turns) to recognize this asset in the project library. Avoid vague names like "Untitled" or "clip 1".
 - Param combination matches the user's intent — see the **Modes** section in the model's reference.
-- Generated video audio is not a tool parameter. Seedance and Kling are submitted with audio enabled by the backend.
+- Generated video audio is not a tool parameter. Seedance is submitted with audio enabled by the backend.
 - On validation failure, read the error and fix the inputs — **do not blindly retry the same invalid arguments**.
 
 ### Step 3 — Submit one, wait, confirm
 
-**Submit one generation job at a time.** Unless the user explicitly asked for multiple clips in parallel, do not submit the next clip until the current one completes and the user has reviewed it. Parallel submission hides problems: if the first shot has drift or wrong framing, the user would rather redo it once than have several misaligned shots to discard.
+**Submit one generation job at a time.** Unless the user asked for multiple clips in parallel, directly or by approving a plan that names them (such as several takes of one prompt), do not submit the next clip until the current one completes and the user has reviewed it. Parallel submission hides problems: if the first shot has drift or wrong framing, the user would rather redo it once than have several misaligned shots to discard.
 
 - `submit_video.ratio` controls the generated asset only; it does not change the project timeline canvas. If the user requested a final output aspect ratio (for example "9:16 vertical" or "16:9 landscape"), set the timeline canvas to the same ratio with `manage_timelines` action=update (e.g. ratio:"9:16") before placing the completed asset. If the user asked for no black bars / full-bleed, pass `fit:"cover"` when setting the canvas or updating/adding the visual item.
 - Do not use this skill for job management — use `track_progress` for an immediate status read and follow its later check-back guidance.
@@ -175,6 +165,7 @@ An **anchor** is a reference image or video pinned across every shot that shares
 Have reference awareness. When the user's request involves a recurring character / object / scene, think about what anchor to use **before** writing prompts:
 
 - **Check the project first.** What has the user already provided or approved? Uploaded images, previously generated and approved shots, or earlier project assets can all serve as anchors.
+- **Saved characters and products.** When the user names or attaches a character or product listed in `<assets>`, call `manage_character` / `manage_product` `action="get"` and pin its photo URLs as the anchor; a product's saved voice and video reference clips go in as `refAudios` / `refVideos` when the shot needs them. Do not ask the user to upload any of it again.
 - **Match the user's intent.** If the user pointed to a specific asset ("use this photo", "像上一段那样"), use that. If they described a character only in words, no anchor exists yet and one must be established.
 - **When in doubt, ask the user.** Don't guess which asset to pin, and don't silently generate a new anchor when the user may already have one in mind.
 
@@ -187,7 +178,7 @@ When no existing asset fits and one must be generated, propose it to the user fi
 - Pass the anchor in **every shot** that shares the character / object / style. The specific flag(s) to use depend on the model — see the model's ref.
 - Describe the anchor by appearance in the prompt, not by name: "The BLACK RACING CAR with chrome exhaust" constrains far more than "Fleetmaster". When role confusion is likely, add explicit negations: "The motorcycle does NOT transform."
 - Refer to the anchor with `@Image1` / `@Video1` in the prompt — not vague phrases like "the same car as before".
-- When a shot depends on a previous generation, check it with `track_progress` in a later turn until it is terminal, then use its `outputAssetId` as the anchor reference. `track_progress` is an immediate status read; `action=wait` is only a compatibility alias and does not block. Do not submit dependent shots in parallel.
+- When a shot depends on a previous generation, wait for it with `track_progress` `action=wait` and do what its result says (an automatic follow-up turn where supported, otherwise later check-backs) until it is terminal, then use its `outputAssetId` as the anchor reference. Neither action blocks. Do not submit dependent shots in parallel.
 
 ### Multi-character projects
 
@@ -223,7 +214,7 @@ Simple, one-off, or exploratory requests do not need anchors — generate direct
 ## Run
 
 ```ts
-// Text-to-video (Seedance 2.5 default)
+// Text-to-video (Seedance 2.5)
 submit_video({
   model: "seedance-2-5",
   prompt: "A cat walks across a sunny windowsill",
@@ -237,16 +228,9 @@ submit_video({
   firstFrame: "abc12345",
   name: "Living room animation",
 });
-
-// Kling text-to-video — only after Model Selection check
-submit_video({
-  model: "kling",
-  prompt: "A sports car drifts around a wet corner",
-  name: "Car drift shot",
-});
 ```
 
-After submission, return the `jobId` and end the turn by default. Call `track_progress` only when the user later asks for status or a dependent step needs the completed asset. Use `action=status`; it returns immediately, so follow its later check-back guidance and do not loop or expect `action=wait` to block.
+After submission, return the `jobId` and end the turn by default. Call `track_progress` only when the user asks for status (`action=status`) or a dependent step needs the completed asset (`action=wait`, then do what its result says). Both return immediately; do not loop.
 
 ## Config Mode
 

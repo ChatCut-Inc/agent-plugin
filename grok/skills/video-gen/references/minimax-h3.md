@@ -12,6 +12,9 @@ Read this reference before submitting MiniMax H3.
 - Reference limits: 9 images, 3 videos, and 3 audios, with at most 12 total
   reference files. Audio-only reference mode is supported. Reference
   video/audio clips must be 2-15s each and 15s total.
+- Media bounds (MiniMax's own; Seedance's differ): frame images, reference
+  images, and reference videos 256-5760 px per side with width/height 0.4-2.5;
+  reference videos 23.976-60 fps.
 
 ## Mutually exclusive modes
 

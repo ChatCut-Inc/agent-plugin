@@ -7,10 +7,13 @@ description: AI shader generator for WebGL video effects, transitions, masks, an
 
 Submit-only: creates a backend generation job, returns `jobId`. Use the `track_progress` tool for job lifecycle after submission.
 
-**Use the advertised `submit_shader` MCP tool for new shaders.** Manual authoring
-is only for editing existing asset code — never as a fallback when generation
-fails. If the tool is unavailable, report the limitation; this plugin does not
-ship a local shader-generation script.
+**This is the generated shader route.** Use `submit_shader` for new shaders and `edit_asset` for existing shader code. Internal direct-authoring models use `create-shaders` instead. Generation failure is reported/retried through the actual job tools.
+
+For caption tweaks, use `read_captions` / `edit_captions` and published presets,
+not shader generation. A requested custom caption renderer follows the
+`create-motion-graphics` workflow and creates no shader asset.
+
+If `submit_shader` is not advertised, report the limitation; this plugin does not ship a local shader-generation script.
 
 ## Catalog-first rule — try existing assets before generation
 
@@ -156,7 +159,7 @@ submit_shader({
 
 ## Strategy
 
-- Submit, then stop. Tell user the job was created.
+- Submit, then wait with `track_progress` when the requested result depends on completion; inspect the resulting asset before applying or reporting it ready.
 - Use the `track_progress` tool for status/wait after submission.
 - Generation always produces a library asset — never refuse because the timeline isn't ready.
 - **Apply is separate and optional.** Only apply when user explicitly asks ("加到视频", "apply", "用到第一段"). When ambiguous, default to library-only.
@@ -203,13 +206,11 @@ edit_item(json: '{"adds":[{"type":"transition","assetId":"<id>","outgoingItemId"
 
 ### Backend Validation
 
-When generating via `submit_shader`, the backend handles validation automatically
-(transpile, AST security, class structure, retry on failure).
+When generating via `submit_shader`, the backend handles validation automatically (transpile, AST security, class structure, retry on failure).
 
 ### Manual Code Verification
 
-**Use `submit_shader` for new shaders.** This section is only for modifying
-existing shader code that was already generated.
+For new shaders on this generated route, use `submit_shader`. This section covers modifying existing shader code. The direct-authoring route uses `create-shaders` and `create_shader_from_code` with its kind-specific processor contract.
 
 When writing shader code manually, read
 [design principles](references/design-principles.md) first. If the change

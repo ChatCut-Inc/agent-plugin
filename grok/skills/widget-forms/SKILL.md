@@ -33,6 +33,29 @@ For every other question, ask only the minimum blocking question. Use either Gro
 - `avatar_choice`: show names and concise returned descriptions as text. Tell the user that visual previews are available in ChatCut's Digital Humans library when previewing matters.
 - `voice_choice`: show names and concise returned traits as text. Tell the user to audition voices in the ChatCut editor or voice library before choosing when sound matters.
 
+## Widget requests from other workflows
+
+Workflow guides shared with ChatCut's own editor may ask for a `<widget>` form,
+a `<choices/>` list, or a named control. Grok Bot does not render those tags, so
+never emit them; keep the workflow's field ids, required fields, defaults and
+stop-and-wait points, and present each control this way:
+
+- `<choices/>` or any single-choice control: `single_choice` above.
+- A text field or `<form-textarea>`: ask in ordinary chat. For a long prefilled
+  value such as a transcript to review, show the complete text in numbered
+  consecutive chunks without omitting lines, then ask the user to approve it or
+  send corrections. Use the approved or corrected text exactly as the submitted
+  field value.
+- `<form-files>`: `audio_reference` above, accepting the file types the workflow
+  names.
+- `playable_single_choice` or another playable picker: `voice_choice` above.
+- `playable_preview` for a newly cloned voice: the cloned-voice handling under
+  Audio and video restrictions below.
+- `<form-visual>` or an avatar picker: `avatar_choice` above, unless the choice
+  is an MG reference or Design Style preset, which uses the visual-preview path.
+- `<clone-voice/>` and other editor actions: unavailable here; follow the
+  workflow's external-host branch instead.
+
 ## Audio and video restrictions
 
 Voice samples are auditioned in ChatCut rather than in chat. For a newly cloned voice, report that its preview is ready in ChatCut, provide the clean editor link supplied by the project workflow, and ask the user to reply with `Retry` or `Apply` after listening.
