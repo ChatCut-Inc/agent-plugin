@@ -1,5 +1,7 @@
 # Seedance 2.0
 
+If `submit_image` or `submit_video` are not loaded yet, load them with `ToolSearch` before calling them, so you use their real parameters instead of guessing.
+
 Read this document before generating with `model: "seedance2"`, `model: "seedance2fast"`, or `model: "seedance2mini"`. These Seedance 2.0 models remain fully supported alongside the new default `model: "seedance-2-5"`, which has a separate reference.
 
 ## Capabilities
@@ -38,10 +40,7 @@ Two categories:
 
 Limits: 9 ref images, 3 ref videos, 3 ref audio. Each file ≤200MB (video), <30MB (image), ≤15MB (audio).
 
-All frame/reference slots take a project **asset id** (UUID or short prefix from
-`browse_assets`), `asset://<id>`, or a same-project asset URL. External URLs are not
-accepted — download them into the host workspace, then follow
-[asset-import](../../asset-import/SKILL.md) using `import_media`.
+All frame/reference slots take a project **asset id** (UUID or short prefix from `browse_assets`), `asset://<id>`, or a same-project asset URL. External URLs are not accepted — download them into the sandbox workspace, then import the local files through `asset-import` + `push_asset`.
 
 ## Modes (inferred from params)
 

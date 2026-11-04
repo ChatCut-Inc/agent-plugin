@@ -38,3 +38,13 @@ For every other question, ask only the minimum blocking question. Use concise or
 Voice samples are auditioned in ChatCut rather than in chat. For a newly cloned voice, report that its preview is ready in ChatCut, provide the clean editor link supplied by the project workflow, and ask the user to reply with `Retry` or `Apply` after listening.
 
 Do not represent a project preview as an embedded video or popup. Project and timeline workflows must provide the clean ChatCut editor link; internal inspection tools may still be used for agent verification.
+
+## Semantic contract mapping
+
+This adapter implements the caller's host-neutral input contract; it does not decide which fields the workflow requires. Write visible text in the user's language, ask only for missing inputs, wait for the user's answer, and validate every blocking answer before continuing. Never emit raw `<widget>`, `<choices/>`, or `<visual-option>` tags, or call `ask_followup_questions` expecting a native form.
+
+- `playable_single_choice`: present localized text choices with stable values mapped internally; users audition samples through the clean ChatCut editor link. Preserve every caller-provided voice id, label, traits and preview association internally; do not print raw sample URLs or pretend chat audio is playable.
+- `playable_preview`: tell the user the caller-provided preview is ready in ChatCut and provide the clean editor link. This is display-only; collect the caller's branch decision separately after listening. Never emit raw audio HTML or expose the runtime media URL.
+- MG reference choices: map labels to exact reference ids and retain one localized `__other__` choice accepting a new preference or another batch, with no separate Show more option. Other returns to discovery, not style application. Return the selected reference id to the caller; never bind `apply_preset` directly to it. Resolve bundled images through `assets/widget-media/manifest.json` relative to the plugin root; absent previews use text, never guessed CDN paths.
+- Avatar choices: map each returned name to the exact `identityId`. Use names and returned descriptions in text; previews are available in ChatCut's Digital Humans library. Preserve `create_avatar` as a separate value returned to the caller, then request the attachment and use `asset-import`; it does not open a native dialog automatically.
+- Voice/clone actions: preserve `clone_voice`, `Retry`, `Apply`, and any other caller-provided stable values. A selection is not consent to cloning or a paid action; request the caller's full explicit authorization separately when required.

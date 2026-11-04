@@ -1,27 +1,16 @@
 ---
 name: asset-import
-description: Hosted ChatCut plugin sessions only (the `chatcut` MCP server). Import local or downloaded media, or relink missing media to an existing ChatCut asset. Use the editor loopback bridge when the editor and files are on the same machine; use the upload helper otherwise. Desktop sessions use their own built-in import tools.
+description: Import local or downloaded media, or relink missing media to an existing ChatCut asset, through the hosted Antigravity plugin. Use the editor loopback bridge when the editor and files are on the same machine; use the upload helper for imports otherwise. Desktop MCP sessions use their own built-in import tools.
 ---
 
 # Asset Import
 
 Check `browse_assets` first when a file may already be imported.
 
-Antigravity runs on the user's own computer with a local shell and files. First confirm that the host exposes
-readable bytes for the requested attachment; a chat attachment card alone does
-not establish a filesystem path. If bytes are unavailable, use the host's
-supported file handoff with the user's permission, without scanning unrelated
-files or bypassing a denied transfer.
-
-Use the same-machine editor import as the normal route when the ChatCut editor
-tab is open in a browser on the same computer and network namespace as the
-source files and shell. Keep the upload helper as the fallback when that route
-is unavailable. Follow the host's local-execution and file-transfer permissions.
-
 ## Same-machine editor import (preferred)
 
-1. Open the target project using `browserHandoff.url` or `editorUrl`. Keep exactly one editor tab for this project open, on the same machine/network namespace as your shell. A remote sandbox's localhost is not the user's localhost.
-2. Start the bundled server using the host's bundled Node runtime when available, otherwise Node 18+ from `PATH`, and the origin of the actual editor URL:
+1. Open the target project using the clean `editorUrl` (the user can open it, or the browser agent may open it when asked). Keep exactly one editor tab for this project open, on the same machine/network namespace as your shell. A remote sandbox's localhost is not the user's localhost.
+2. Start the bundled server using an available Node.js 18+ runtime, and the origin of the actual editor URL:
 
 ```bash
 "<bundled-or-global-node>" <this-skill-dir>/scripts/serve-local-media.mjs --origin <editor-origin> /path/to/source.mp4
@@ -53,34 +42,15 @@ Relink always reads the supplied file, even if the editor has cached bytes. The 
 
 For a remote sandbox, unavailable editor, or blocked browser connection:
 
-This route requires Node.js 18+, `ffmpeg`, and `ffprobe` on the computer running
-the helper. No media-tool binaries are bundled in this plugin. If these tools
-are unavailable, report the dependency and use the ChatCut editor upload flow;
-do not claim that Node alone is enough or install software silently.
-
-1. Download a public URL to a local file when needed.
-2. Call `import_media` with `{"action":"create_session"}`.
-3. Run this skill's `scripts/upload-media.mjs` once with the returned token and endpoint and at most four local files. Split larger sets into batches of four and create one session per batch.
+1. Call `import_media` with `{"action":"create_session"}`.
+2. Run the bundled helper in the foreground, using the returned token and endpoint and at most four paths:
 
 ```bash
-"<bundled-or-global-node>" <this-skill-dir>/scripts/upload-media.mjs --token <token> --endpoint <endpoint> /path/to/source-1.mp4 /path/to/source-2.wav
+"<bundled-or-global-node>" <this-skill-dir>/scripts/upload-media.mjs --token <token> --endpoint <endpoint> /path/to/source.mp4
 ```
 
-Resolve the helper relative to this skill; do not search the workspace. Run it in the foreground and read its final JSON from stdout. Do not detach it or invent status files. Do not replace it with handwritten `ffprobe`, `ffmpeg`, `curl`, metadata, transcode, or presigned-upload commands. MCP OAuth stays inside the MCP client; only the short-lived import token goes to the helper. Media bytes upload directly to storage and must not pass through the ChatCut backend.
+Resolve scripts relative to this skill. Do not replace the helper with handwritten upload/transcode commands. MCP OAuth stays inside the MCP client; only the short-lived import token goes to the helper. Larger batches need a fresh session per four files.
 
-Use each returned `imports[].result.assetId` for timeline work. Wait for
-`track_progress` target `transcription` before transcript or caption work. Wait
-for target `upload` only before byte-dependent work such as cloud export,
-`request_asset_download`, or remote frame inspection.
+The helper registers placeholders early but prints its final JSON after uploads complete. Read `imports[].result.assetId`. On an error with `retry`, obtain a fresh session and rerun the returned arguments to resume the same asset.
 
-If the helper returns an error with `retry`, create a fresh import session when requested and rerun exactly the returned arguments. If host policy denies transfer of the user's file, stop instead of trying a local-editing or alternate-upload workaround; tell the user the upload was denied and ask them to use the ChatCut editor upload UI or grant the required permission.
-
-## Download an existing source
-
-Follow the delivery contract returned by `request_asset_download`. A URL marked
-as a user-authenticated download belongs in the user's signed-in browser; Antigravity's
-local shell does not automatically share that browser session. An unauthenticated HTTP 401 from
-that URL is not evidence that the MCP connection expired. Do not extract browser
-cookies or substitute a raw storage URL. For agent inspection, use readable
-original bytes or the supported `inspect_asset` path. Only download directly when
-the tool explicitly returns an agent-readable signed URL.
+If host policy denies transfer, stop and ask the user to upload through the editor or grant permission. Do not work around the denial. Public URLs can be downloaded locally and then imported through the appropriate route above.

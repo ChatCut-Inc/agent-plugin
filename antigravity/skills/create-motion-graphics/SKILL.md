@@ -1,24 +1,138 @@
 ---
 name: create-motion-graphics
-description: "Use whenever Antigravity needs to add, create, hand-author, patch, or place Motion Graphic JSX assets in a ChatCut project. Covers direct inline JSX authoring, visual language, editable properties, asset binding, timeline placement, and verification."
+description: "Use when Antigravity uses the ChatCut plugin (chatcut MCP server) to add, create, hand-author, patch, or place Motion Graphic JSX assets. Covers reference browsing, direct inline JSX authoring, editable properties, asset binding, timeline placement, and composed verification."
 ---
+
+Before using this skill, read [the required continuation](references/motion-graphics-contract-and-verification.md) in full. It is part of this skill and contains mandatory workflow, tool-contract, and safety instructions; do not act from this entry file alone.
+
 
 # Create Motion Graphics
 
-Before using this skill, read [the required continuation](references/code-rendering-and-verification.md) in full. It is part of this skill and contains mandatory workflow, tool-contract, and safety instructions; do not act from this entry file alone.
+## Plugin host and project
 
-Use this skill when Antigravity needs a Motion Graphic asset authored or
-patched as inline JSX in ChatCut.
+Use the plugin-provided `chatcut` MCP server (tool namespace `chatcut_chatcut`) and the project ID from the user's editor URL or
+the plugin's project result. This plugin works with the Web editor, including
+local development URLs. Do not open ChatCut Desktop or use `chatcut_desktop`
+for a Web project. If `chatcut` tools are unavailable, report the connection
+failure; do not submit the task to the editor's native Agent as a substitute.
 
-Use `create_motion_graphic_from_code` for new JSX assets and `edit_asset` for
-existing MG JSX. Do not translate a direct-authoring request into a generation
-prompt or brief. If the direct-authoring tools are missing, stop and report
-that the ChatCut tool surface is out of date.
+## Find MG references before designing
 
-Pass Motion Graphic source inline through the ChatCut MCP tool. Do not stage
-code in the ChatCut repository, `ai-working/`, `/tmp`, a local HTTP server,
-generated code files, or guessed application paths when the tool accepts inline
-JSX directly.
+### Browse and confirm a visual direction
+
+For production, reuse an accepted project style or user-supplied brand/reference.
+Use `manage_design_style get` when its full spec is not already known. Routine
+text/placement edits need no new style selection or catalog rescan.
+
+When a new direction is needed or the user asks to browse alternatives, start
+with `browse_library` `references: {view: "style-overview"}`. Read ALL numbered
+contact sheets, following `nextOffset` until `complete`. They contain published,
+agent-enabled style representatives, including linked existing Design Styles.
+`list_presets` is only the legacy catalog subset; it cannot replace this visual
+overview. Retry a failed page; report an incomplete overview instead of silently
+skipping it.
+
+For speech-led video, understand the spoken content and inspect representative
+video frames before shortlisting styles. Reuse transcript and frame evidence
+already in context. Consider the topic, delivery tone, on-screen language, and
+the footage's color, subject framing and background alongside the style previews.
+
+When the visual direction is not yet agreed, shortlist up to 6 distinct fits
+for the current content and footage, and read their `hero` parts. Load the
+host's `widget-forms` skill and, only when the host can display images in chat,
+show actual `heroPreview.url` images with short names. Otherwise describe the
+visual differences in text and say image previews are unavailable here.
+Keep each text choice mapped to its reference ID; use one Other choice
+for preferences or another batch
+without repeating choices or adding a separate Show more option.
+Wait for the selection before applying a new style and producing the MG,
+unless the user has already chosen a direction or explicitly delegated the
+style choice. An Other answer is not acceptance.
+
+### Apply the selected style
+
+Read the selected representative's `summary`, `hero` and `members`. Follow its
+`designStyleAction` with `manage_design_style`:
+
+- `apply_preset`: use the returned `presetId` directly; do not clone or update
+  the preset merely to save reference metadata.
+- `apply`: reuse the returned `designStyleId` for an existing saved user style.
+- `create`: only an independent reference needs a new user-owned style. Define
+  and save its palette, fonts and reusable visual rules from the selected reference.
+  Reuse the reference's documented palette; if absent, derive a coherent palette
+  from its representative image. Save `designSpec.referenceSources: [{id: "<reference ID>"}]`
+  and the individual `heroPreview.url` in BOTH `thumbnailUrl` and
+  `designSpec.images: [{role: "style reference", url: "<heroPreview.url>"}]`.
+  Use `applyToProject: true`; preserve existing images when patching an array.
+
+After applying, call `get` for the fresh full spec and source IDs; do not carry
+over the previous style's cached rules. For a new style, verify that its palette,
+fonts, source, cover and reference image were saved. A source ID alone does not
+save an image.
+Reference images are visual evidence, not footage/backgrounds to embed or
+example copy to reproduce.
+
+Use `fontRecommendations["zh-Hans"]` / `.en` according to the actual on-screen
+text, including bilingual text and Latin numbers. Reuse an accepted font plan;
+an empty language group is unresolved. Match the reference's typographic character
+and heading/body hierarchy, and check glyph coverage and runtime availability.
+Save selected families/roles in `designSpec.fonts`, and language, weight, italic
+and required axes in `styleGuide`. A cross-style form example cannot replace
+this plan. Only when curating missing fonts or explicitly adapting typography,
+read [Font matching](references/font-matching.md); Chinese matching starts from
+a generated Chinese effect image, not English letterforms.
+
+### Match instances to the needed MG forms
+
+Use the spoken content and target frames to decide which MG forms are useful;
+let the reference previews refine those choices. Keep the confirmed visual
+language across the video, and find suitable instances for each needed form.
+Choose instances yourself unless the user asks to compare them. Different forms
+can use different instances; recurring components can reuse an inspected one.
+Follow `nextReferenceSearch` when returned:
+
+- With related members, browse `kind: "instance", styleId: "<representative UUID>"`
+  or read relevant member IDs.
+- If a needed form has no fitting member, search the WHOLE instance library by
+  content/form `query` or `facets.form`, omitting `styleId`, `facets.style` and
+  style-name terms, even if other forms already have same-style matches.
+- Compare the cover collage, then read selected IDs with `parts: ["summary", "hero"]`.
+  Add `motion` for animation and `code` for implementation. If a code-backed
+  reference returns `templateInspection`, use its read-only call for saved
+  property schema/defaults; JSX may read props without declaring their values.
+  `legacyTemplateRefs` are template IDs: `manage_template get` reads metadata,
+  and `list_assets` reads MG properties. Neither applies or copies a template.
+  `inspect_asset` is for current-project media/MGs, not catalog source IDs.
+
+Adapt the instance's composition, hierarchy, spacing and reveal structure to
+the fixed project fonts, palette, materials and actual shot. If the broader
+form search also has no fit, extend the style board and state that limitation.
+Batch relevant detail reads; finding one instance does not cover unrelated forms.
+Follow `pendingIds` for split responses; `known` may include only returned versions
+and parts still in context. Each motion sheet is ONE design at real timestamps;
+a montage is not one layout, and a static image does not establish animation.
+
+For a new/substantially redesigned talking-head overlay, read
+[Overlay composition](references/overlay-composition.md). Import only production
+files from `materials` that will appear in the result; use their project asset
+IDs. Review the MG composed with the target footage.
+
+### Use the references when authoring
+
+Read the selected instance's `code` when borrowing its implementation, or
+read linked template properties with `manage_template list_assets`. Use it
+as reference in the code workflow below while preserving the project style.
+
+Inspect selected images as well: a URL, ID or search result alone is not a
+viewed reference. Keep STYLE evidence for appearance
+and cross-style FORM evidence for structure. If a selected reference fails,
+retry or report the missing evidence rather than claiming it was inspected.
+
+Use this skill when a ChatCut plugin task requires a Motion Graphic asset authored or patched as inline JSX. The built-in ChatCut Agent has its own `motion-graphic-gen` workflow; do not switch to it from this plugin task.
+
+Antigravity plugin Motion Graphics are direct-authored. Use `create_motion_graphic_from_code` for new JSX assets and `edit_asset` for existing MG JSX. This surface does not provide `submit_motion_graphic`; do not translate the request into a Gemini prompt or generation brief. If the direct-authoring tools are missing, stop and report the unavailable ChatCut plugin tools.
+
+Pass Motion Graphic source inline through the `chatcut` MCP tools. Do not stage code in the ChatCut repository, `ai-working/`, `/tmp`, a local HTTP server, generated code files, or guessed application paths when the tool accepts inline JSX directly.
 
 ## Core Principles
 
@@ -41,80 +155,26 @@ Before writing JSX, identify only the information needed for this edit:
 
 Ask only for missing high-leverage inputs that would materially change the result.
 
-## Align With The User
+## Visual system and placement
 
-You are the junior designer; the user is the manager. Direction is the high-leverage choice — surfacing it before authoring is much cheaper than reauthoring after.
+Use the confirmed full Design Style and inspected references above. For a new
+custom direction, establish one composed result before batching; accepted
+directions and routine fixes need no renewed style confirmation.
 
-Style alignment gate:
+Choose each composition, position, size and reading time from the actual shot
+and speech span. Keep shared typography, palette, materials and motion, while
+adapting the reference's form to the content. A fixed left/right anchor or card
+container is appropriate only when the composition calls for it.
 
-Separate visual direction from batch permission. A user-named text/custom style can choose the direction, but it does not permit multiple MGs until the user has confirmed a representative MG. Batch authoring is permitted only by an active Design Style, a selected visual preset, or a previously accepted representative MG.
+Reuse an asset with per-item properties for an intentionally recurring component
+with the same information structure. New structures need their own instance
+reference and composition. Overlay bounds should tightly contain the graphic;
+use timeline dimensions only for a design that visibly spans the frame.
 
-- If there is no active Design Style and the user has not named a style, stop before authoring and ask the user to choose a direction.
-- Generic quality adjectives are goals, not a named visual style. If the user only says the MGs should feel clean, premium, modern, professional, polished, or similar, use visual preset thumbnails instead of inventing a direction.
-- Prefer catalog Design Style presets: call `manage_design_style` with `action: "list_presets"`, present 3-6 reasonable visual choices, and let the user pick or override.
-- Load `widget-forms`. Download the selected preset thumbnails to temporary local files, display them as ordinary chat image bubbles only when the host can display images in chat (otherwise describe the options in text), then show concise ordinary text choices with the exact preset ids mapped internally.
-- You may recommend one choice, but still show the choice set. The point is visual alignment, not a single best guess.
-- When it isn't obvious, also ask whether the MG sits over the video as an overlay or takes the whole frame.
-
-Before authoring, choose the branch:
-
-- One MG: use the active Design Style, accepted example, or user-named direction and proceed.
-- Multiple MGs with an active Design Style, selected visual preset, or previously accepted representative MG: proceed with a batch design map.
-- Multiple MGs with only a textual/custom direction, however clear: create exactly one representative MG, place it, render its composed frame, then stop for confirmation. Do not create a second MG asset or item before the user confirms.
-- Multiple MGs with only generic quality adjectives: use the visual preset picker first.
-
-When the task needs visual style alignment, check the active project Design Style first. If there is no active Design Style and the user has not given a clear style direction, use the style alignment gate above.
-
-Saved user design styles are a library, not project confirmation. If `manage_design_style list` shows saved styles but no active project Design Style, do not infer or choose one silently; use `list_presets` and visual alignment unless the user selects a saved style or asks you to use one.
-
-Catalog Design Style presets are available with image thumbnails. When no active Design Style or user style is set, first look at the available catalog candidates with `list_presets` and show 3-6 reasonable visual starting points using the image-bubble-plus-text flow from `widget-forms`. They do not need to match every detail of the user's request; preset thumbnails set useful visual expectations and can be adapted in authoring. Do not force catalog presets when none are reasonably close; use text directions only then.
-
-When using catalog presets, call `manage_design_style` with `action: "list_presets"`; pass `scenario` only when it is clear. Pick 6 matches using each preset's `description` as agent-facing matching guidance when there are enough reasonable matches; use fewer only when fewer presets genuinely fit. Never show the full catalog. Keep each exact returned preset id mapped internally to the matching live name and thumbnail. Download the thumbnails without rewriting their URLs, display the local images as chat image bubbles in choice order only when the host can display images in chat (otherwise describe the options in text), and then present concise ordinary text labels. Never invent ids or media, and do not mix custom non-preset directions into the same choice set. If a custom direction would help, describe it in prose after the choices. Frame the options as visual starting points: the user may reply with a label or describe a different direction. If the user asks to refresh, call `list_presets` again and show a different set of up to 6 reasonable matches. Do not repeat presets already shown in the current style-picking exchange; show fewer than 6 rather than repeat. Apply the user's pick with `action: "apply_preset"`. After applying a preset or saved style, call `manage_design_style` with `action: "get"` before authoring MG code; preset names and `list_presets` descriptions are picker guidance, not the full motion/design spec. Do not create or update a Design Style from an unconfirmed recommendation.
-
-The image bubbles plus style choices form a turn boundary. Stop after presenting them. Do not apply a preset, create MG assets, inspect more frames, or continue detailed MG planning from your own recommendation before the user's selection appears in chat.
-
-For a batch of related MGs in one scene or topic, ask once for a shared direction — don't invent a different aesthetic per item, and don't ask per MG.
-
-When the batch direction is textual or custom rather than a visual preset or active Design Style, the representative-MG gate above is a hard stop. A user-named text style skips only the preset picker; it does not confirm the visual language for multiple MGs. The representative MG validates visual language only; it does not define the form for every later MG.
-
-The only times to skip the style picker:
-
-- The user has already named a visual style, material, reference, or visual language ("做 editorial 杂志风的", "做个 80s 复古印刷", "magazine style 那种") — use it verbatim as the direction. For multiple MGs, this still enters the representative-MG branch until the user confirms the example.
-- The user has explicitly waved off alignment ("直接做" / "don't ask, just do it"): make your best guess, name it in chat, then continue with the normal authoring, frame-inspection, and consistency workflow.
-
-## Project Visual Language
-
-Use the active project Design Style, user-provided style, brand assets, or an accepted existing Motion Graphic as the visual language for hand-authored JSX. A visual language means shared palette, typography logic, motion tone, spacing, density, material treatment, and level of polish.
-
-When a Design Style is active, work from its full `designSpec` / `styleGuide`, not only its name or catalog summary. Treat explicit style rules for motion, typography, color, and material as implementation constraints.
-
-Treat Design Style structure, materials, and template notes as visual vocabulary, not default containers. Express the style through typography, marks, geometry, texture, motion, spacing, and materials; use a bounded reading surface only when bounded reading is the actual editorial mechanism.
-
-Do not create or update a project Design Style just because a one-off Motion Graphic needs styling. For multiple Motion Graphics in the same video, keep one coherent visual system unless the user asks for a deliberate contrast, and let each MG's content and editorial job determine its form.
-
-## Visual System And Placement
-
-Treat multiple MGs in the same video as one visual system. Shared style comes from palette, typography, motion tone, spacing, material, and polish.
-
-Before authoring a batch, make a compact design map for the planned MGs: viewer job, content, visual mechanism, how it carries meaning beyond text, speech span, settled frame, read time, size, composition relationship, internal motion beats, and whether its form is intentionally recurring.
-
-Let each MG's content and editorial job determine its form. Keep the same visual language while choosing the composition, size, placement, duration, and rhythm that fit that moment.
-
-Choose the visual mechanism before writing JSX. Decide how the graphic carries meaning beyond text, using the confirmed visual language and the content's viewer job. Name a wrapper as the form only when a bounded reading surface is truly the right mechanism.
-
-Text should rarely carry the whole graphic alone. Pair key words, stats, or claims with a tangible non-text visual role so the result is not just copy inside a wrapper.
-
-Common defaults must earn their place. Use a bounded reading surface only when bounded reading is the editorial mechanism; otherwise let the MG's form come from the frame relationship and viewer job.
-
-Reuse an MG asset only for an intentionally recurring component with the same viewer task, information structure, and visual form. Shared palette, typography, motion, or a bounded-surface treatment is visual language, not a reason to reuse the same asset.
-
-Placement and duration are part of the settled frame composition. Choose each MG's position, size, anchor, start, and end from the relationship between the speech span, inspected frame, reading time, and visual job. Do not use a fixed safe-zone as the default placement; repeated anchors are intentional only when the frame relationship and viewer task recur. If the graphic does not feel integrated with the moment it explains, change its form, timing, scale, or skip.
-
-Match the MG asset duration to the timeline span it is designed to occupy. Internal motion beats must complete inside the placed item duration; when the edit timing changes materially, update or recreate the MG instead of relying on a shorter timeline item to truncate a longer asset.
-
-In a batch, compare the composed settled frames side by side. The MGs should share a visual language, but repeated surfaces, anchors, or rhythms should point to a recurring viewer job; otherwise revise the form, placement, or timing before reporting done.
-
-Create the asset shape that fits the job at hand. For overlays, the asset box should tightly bound the visible graphic's local composition. Use timeline dimensions only when visible design intentionally spans the whole frame.
+Match asset duration and internal beats to the placed timeline span. If timing
+changes materially, update the MG instead of truncating unfinished animation.
+Review composed settled frames side by side for a batch, correcting collisions,
+readability and unintended repetition before reporting completion.
 
 ## Editable Properties
 
@@ -135,50 +195,35 @@ Motion Graphics must use fonts available to ChatCut's renderer so preview and lo
 
 When choosing or replacing a font, call `search_fonts` and use the returned canonical family name verbatim as the `fontFamily` value and matching `font` property `defaultValue`. Use Google Fonts or project custom fonts returned by the catalog. If a requested machine-specific font is not in the catalog, explain that consistent local rendering cannot be guaranteed, search for a supported alternative with a similar feel, and use it unless the user explicitly accepts font fallback.
 
-## Assets
+## Assets and composition
 
-Images and videos rendered inside Motion Graphics must already be registered as project assets or otherwise be passed through editable asset properties.
+One reference instance may describe a complete composition made from several timeline items. It does not imply one self-contained MG asset. Keep reference screenshots, production materials, and current-project footage distinct.
 
-- Do not hardcode media URLs in JSX.
-- Use `<Img>` and `<Video>` only with URLs read from `item.props`.
-- Guard empty image/video properties before rendering; an empty `src` can crash the runtime.
-- To swap a rendered asset for one timeline instance, update that instance's editable property values rather than changing the shared asset code.
+Default to separate items when the design combines ordinary media with graphics:
+
+- Reusable paper/texture/background: an image or video item behind the composition.
+- Current-project photo, product image, or footage: its own media item. The agent selects/replaces, crops, positions, and applies supported effects to it; the user is not expected to assemble the layers manually.
+- Typography, shapes, and animated decoration: transparent MG item(s). Split background decoration from foreground text when media must sit between them.
+
+Plan layer order, target media rectangle, start/duration, and entrance timing before authoring. State in the MG brief/code scope which layers already exist outside the MG, so the reference's photo or paper is not generated again. Apply black-and-white/color/grain to the intended media item rather than accidentally affecting foreground text. Verify effect support on the actual playback/export surface; splitting layers does not by itself prove Web/Desktop parity.
+
+1. Reuse assets from `browse_assets` in the **current project**. Import only production files needed in the output into My Assets. Load `asset-import` and use its `import_media` session/upload helper. Registering project media does not publish it to the public resource library.
+2. Place normal production media through `edit_item`, using the returned current-project asset IDs. The agent handles replacing example people, copy, and data with the current task's content. Do not use the reference's complete effect screenshot as a background.
+3. Embed media inside an MG only when its visual mechanism needs it, such as image-filled lettering or a tightly synchronized internal mask that available timeline tools cannot express. For this exception, bind `image` / `video` property defaults and overrides to **full current-project asset IDs**, never URLs, local paths, or reference-library IDs. Read via `item.props`, guard empty values, and let the runtime resolve the source. Declaring an image property does not import the file.
+4. Verify the **composed timeline** at entrance and settled frames, including media presence, cropping, effects, layer order, and timing. A standalone transparent MG preview intentionally omits separately placed photos/backgrounds; judge the complete design on the timeline. For intentionally embedded media, a correct thumbnail alone does not prove playback works; check import, ID binding, and byte readiness when it is missing.
+
+Library `hero` / `motion` images are study inputs and need no project import merely to be viewed. Missing production files must be reported or replaced with suitable available materials; never silently omit a required layer.
 
 ## Design Principles
 
-The active Antigravity agent is the designer for direct-authored Motion Graphics. Do not merely satisfy constraints or place text in a wrapper. Before writing JSX, design the settled frame as a specific visual object.
+Design the settled frame from the confirmed style and inspected instance, then
+animate into it. Use the reference's hierarchy and visual relationships to make
+the current content legible; do not add filler labels or a default card wrapper.
 
-Before writing code, decide:
-
-- **Purpose**: what the viewer should understand faster because this MG exists.
-- **Direction**: the specific visual language, not "clean", "modern", or "professional" alone.
-- **Memory**: the one visual idea, spatial move, or motion beat the viewer should remember after 3 seconds.
-- **Mechanism**: how typography, geometry, diagram, texture, image, or motion carries meaning beyond text.
-- **Craft**: how typography, color, motion, spatial composition, and material treatment follow the chosen direction.
-
-Before writing code, choose a clear aesthetic direction for this specific design. Commit to one direction and execute it with precision rather than defaulting to a generic look.
-
-Default quality bar: distinctive, production-grade, and intentional. When the user has not specified a style and asks you to proceed, choose a specific visual direction with a point of view. Do not fall back to safe, basic, or generic just because the style is unspecified.
-
-Restrained does not mean plain. Minimal or refined MGs still need a named design language, precise hierarchy, and one memorable visual decision.
-
-Treat the Design Style's motion language as a constraint, not just mood. If it says hard cut, no opacity, no translate, no glow, no easing, word-by-word, static bars, or sequential nodes, implement those literally; do not replace them with fades, springs, sweeps, glows, or drifting motion.
-
-Motion must earn its place. Do not add shine, sheen, light-sweep, scan-line, shimmer, glow, or glossy passes as default polish; use them only when the style or editorial job explicitly means scanning, loading, reflection, energy, or detection. Prefer typography, masks, stagger, data bars, and timing tied to the content.
-
-Material treatment belongs to the visual language. Do not add glass, blur, heavy shadows, gradients, grain, paper texture, glow, or other surface polish just to make the surface feel designed; use those materials only when the confirmed style or visual job calls for them.
-
-When the graphic includes text, create clear hierarchy. Use the Design Style's type system when it exists. When no type system is defined, make size, weight, spacing, and timing contrast visible at video scale.
-
-Design the most visible frame first, then animate into that layout. Choreograph by importance: the first moving element is the hierarchy leader. Vary direction, duration, easing feel, and stagger rhythm when the visual job changes.
-
-Anti-slop rules are a floor, not a ceiling. Avoid generic AI-generated aesthetics: purple/blue gradient backgrounds, fake glassmorphism everywhere, predictable feature-tile layouts, or cookie-cutter design that lacks context-specific character. Within one visual system, vary form, composition, and rhythm when the visual job changes; keep color and typography logic coherent enough that the MGs belong together.
-
-Do not default to card-shaped overlays. Unless a bounded reading surface is truly needed, avoid floating panels, tickets, notes, or rounded rectangles that simply hold text; they often feel detached from the footage and make the video look like UI rather than motion design.
-
-Use strong materials, texture, gradients, glow, depth, dense composition, or bold motion when they are part of the confirmed visual language or the editorial job. Do not avoid expressive design just because a generic version of the same effect would be bad.
-
-Do not default to centered, symmetrical layouts. Consider asymmetry, overlap, generous negative space, or controlled density, whichever fits the content. Unexpected spatial choices make motion graphics feel designed, not generated.
+Treat explicit type, material and motion rules as constraints. A hard-cut style
+should not acquire fades or springs; glass, grain, glow and other treatments
+belong only where the accepted visual language calls for them. Preserve a
+reference's expressive choices as well as its restraint.
 
 A character, illustration, or compound shape is one visual entity. When multiple parts must visually connect, attach, or align, render those parts inside a single `<svg>` with one shared coordinate space and named anchors. Independent hardcoded `left` / `top` across separate wrappers produces visible gaps.
 
@@ -212,3 +257,25 @@ const Component = ({ item }) => {
 };
 ```
 
+## Motion Graphic Code Contract
+
+Violations cause runtime crashes. Strict compliance required.
+
+1. **Syntax:** Pure JavaScript JSX. No TypeScript.
+2. **Imports:** No import statements. Globals are pre-injected: `React`, `spring`, `useCurrentFrame`, `useVideoConfig`, `interpolate`, `interpolateColors`, `Math`, `random`, `Easing`, `AbsoluteFill`, `Sequence`, `Series`, `Img`, `Video`, and `Audio`.
+3. **Use injected globals:** Hooks and components are available directly; do not reach through a namespace object.
+4. **Exports:** No `export default`. Define `const Component = ...`.
+5. **Timing:** No `Sequence` wrappers inside the component. Use flat frame-driven logic.
+6. **Logic:** No inline logic in JSX props. Pre-compute values in variables before `return`.
+7. **Helpers:** No undefined functions. Use `interpolateColors` plural. Define any helpers locally.
+8. **AbsoluteFill:** `AbsoluteFill` is a component, not a style object. Never spread it. It may be used for inner layers, but never as the root.
+9. **Root element:** The root must be `<div style={rootStyle}>`.
+10. **Assets:** `<Img>` and `<Video>` sources must read from image/video editable props. Never hardcode URLs. If no assets are provided, design with shapes, text, and CSS.
+11. **Hooks:** Get frame from `useCurrentFrame()`, not from `useVideoConfig()`.
+12. **Local box:** Component must accept `({ item })` props. The asset `width`/`height` are the MG's natural box around its visible local composition, not the timeline canvas; fill that box with `position:absolute; inset:0`. Timeline placement sets final screen size and position.
+13. **Layout control:** Use flexbox or grid for text blocks and structured content. Use SVG or absolute geometry when the design depends on spatial relationships, compound shapes, frame treatments, or drawn/animated marks. Allow text to wrap naturally unless the request requires single-line text.
+14. **Editable props:** Component must read editable values from `item.props`. Never add fallback values like `|| "Default"` or `?? false` after `props.key`; declared runtime properties already have values.
+15. **Property schema:** Declare matching editable properties. Include all visible text content and primary/accent colors.
+16. **Image/video props:** Store project asset IDs in media properties, read runtime values from `item.props`, and render `<Img>` / `<Video>` only when that value is truthy.
+17. **Background:** Default background is transparent. If a background surface is added, expose a `transparentBackground` boolean property.
+18. **Export cost:** Keep inline `<svg>` markup frame-invariant: animate the wrapper `<div>` (transform, opacity) instead of `<svg>` attributes, because the export redraws an SVG only when its markup changes. Prefer HTML/CSS shapes over SVGs that carry photos, and a `boxShadow` glow over a large blurred layer; both cost several times more per exported frame.

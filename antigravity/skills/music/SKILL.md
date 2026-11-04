@@ -1,9 +1,12 @@
 ---
 name: music
 description: Shared ChatCut entry point for newly generated music, soundtrack, theme music, 配乐, background music, an intro theme, a music bed, BGM, or vocal songs. If vocals are unspecified, ask whether the user wants a vocal song or instrumental music before choosing a generator. Use `submit_music` for either branch, with `generationType` selecting instrumental or song mode.
+user-invocable: true
 ---
 
 # Music
+
+If `submit_music` is not loaded yet, load it with `ToolSearch` before calling it, so you use its real parameters instead of guessing.
 
 Use `submit_music` to create a new instrumental background-music or vocal-song audio asset. For an explicit sung song, lyrics-to-song request, or vocal MV song, read [`references/song.md`](references/song.md) for the lyric workflow, then call `submit_music` with `generationType:"song"`. When a request only says music, soundtrack, theme music, or 配乐 and does not specify vocals, ask the user to choose vocals or instrumental first instead of assuming.
 

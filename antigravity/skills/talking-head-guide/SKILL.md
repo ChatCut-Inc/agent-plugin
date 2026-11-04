@@ -1,7 +1,11 @@
 ---
 name: talking-head-guide
-description: Guide for editing speech-led videos where spoken delivery or conversation drives the cut — single-speaker talking-head / 口播, two- or multi-speaker interview / 访谈, video podcast, lecture, tutorial, course, and similar formats. Use for any non-trivial edit of those formats, including speech cleanup (剪口播 / 口播剪辑 / 去口癖 / clean up fillers / smooth speech), pause or repeated-take removal, motion graphics layered onto the footage (口播加 MG / 加动画), B-roll (加 B-roll / add B-roll), music, or captions. For motion graphics specifically, use this together with the active Motion Graphics skill/workflow available in the current ChatCut environment — this skill adds speech-specific guidance (rhythm-aware timing, frame-aware placement, subject/caption protection, placement verification).
+description: Guide for editing speech-led videos where spoken delivery or conversation drives the cut — single-speaker talking-head / 口播, two- or multi-speaker interview / 访谈, video podcast, lecture, tutorial, course, and similar formats. Load before analyzing, planning, or performing non-trivial edits of those formats, including speech cleanup (剪口播 / 口播剪辑 / 去口癖 / clean up fillers / smooth speech), pause or repeated-take removal, motion graphics layered onto the footage (口播加 MG / 加动画), B-roll (加 B-roll / add B-roll), music, or captions. For motion graphics specifically, use this together with the active Motion Graphics skill/workflow available in the current ChatCut environment — this skill adds speech-specific guidance (rhythm-aware timing, frame-aware placement, subject/caption protection, placement verification).
+user-invocable: true
 ---
+
+Before using this skill, read [the required continuation](references/speech-editing-and-finishing.md) in full. It is part of this skill and contains mandatory workflow, tool-contract, and safety instructions; do not act from this entry file alone.
+
 
 # Speech-Led Video Editing (Talking Head, Interview, Podcast)
 
@@ -11,21 +15,20 @@ description: Guide for editing speech-led videos where spoken delivery or conver
 
 ### When source media is missing
 
-- **Conversation attachment or readable path:** follow `asset-import` when the current host makes the source readable to the agent.
-- **ChatCut editor upload:** continue from the registered project asset without importing it again.
+- **Antigravity:** First check the project's asset library. The user may provide the source in the conversation or upload it directly in the linked ChatCut editor. Use `asset-import` when an attachment or readable local path still needs import. Reuse editor-uploaded registered assets without importing them again.
 
-If the task creates, targets, or opens a ChatCut project for the user, satisfy any returned `browserHandoff.required=true` or equivalent live-project handoff before starting nontrivial edits and again before final delivery if the visible editor no longer matches the project.
+When creating, targeting, or opening a project for visible work, provide the clean `editorUrl` before nontrivial edits and again before final delivery if the visible project no longer matches. Antigravity's browser agent may open it when the user asks; do not require an internal browser handoff.
 
 Independent treatments that can be applied to speech-led videos. Pick the ones that match what the user wants — not all are needed every time.
 
-- **A-roll editing** (in Chinese: **语音剪辑**, including **去口癖、停顿、重复** for fillers, pauses, and repetitions) — transcript-based speech editing. Common operations include cleanup, highlight extraction, restructure, opening hook, and others as needed for the aligned outcome.
-- **Motion graphics overlay** (spell out **Motion Graphics** in English user-facing copy; do not abbreviate it to "MG". In Chinese, use the fixed product term **MG 动画**, not alternative terms such as "动效", "字幕条", or "动态字幕") — reinforce key information, structured content, and topic transitions with on-screen motion graphics
+- **A-roll editing** (Chinese product term: **语音剪辑**, including **去口癖、停顿、重复**) — transcript-based speech editing. Common operations include cleanup, highlight extraction, restructure, opening hook, and others as needed for the aligned outcome.
+- **Motion graphics overlay** (write the full name **Motion Graphics** in English user-facing copy, not "MG"; the fixed Chinese product term is **MG 动画**, not alternatives such as "动效", "字幕条", or "动态字幕") — reinforce key information, structured content, and topic transitions with on-screen motion graphics
 - **B-roll** (industry term — keep as "B-roll" in any language, do not translate) — cover jump cuts or visualize what's being said
-- **Background music** (in Chinese: **背景音乐**) — set mood and smooth micro-gaps
-- **Captions** (in Chinese: **字幕**) — on-screen text for accessibility
-- **AI Voice Isolation** (in Chinese: **AI 人声隔离**) — clean or isolate spoken human voice with DeepFilterNet3, picture untouched. See the `voice-isolation` skill.
+- **Background music** (Chinese product term: **背景音乐**) — set mood and smooth micro-gaps
+- **Captions** (Chinese product term: **字幕**) — on-screen text for accessibility
+- **AI Voice Isolation** (Chinese product term: **AI 人声隔离**) — clean or isolate spoken human voice with DeepFilterNet3, picture untouched. See the `voice-isolation` skill.
 
-> When the user's language is Chinese, **use the product terms in parentheses above exactly** in options and conversation copy. Do not retranslate them, as that would make them inconsistent with the rest of the product.
+> When the user's language is Chinese, **use the exact product terms in parentheses above** in widget options, choices options, and conversation copy. Do not retranslate them; that would conflict with terminology elsewhere in the product.
 
 ## What shapes the edit
 
@@ -35,7 +38,7 @@ Beyond picking treatments, a talking-head edit is shaped by several orthogonal v
 - **Which treatments to apply** — the treatments above are optional; don't assume all of them apply
 - **Pacing / tone** — tight / energetic / formal / casual; brand or voice preferences if stated. (For MG visual style, follow the active Motion Graphics skill/workflow.)
 
-When more than one of these variables is missing, load `widget-forms` and ask only the most important missing question in ordinary chat, then continue progressively; do not send a long checklist.
+When more than one of these variables is missing, ask concise related text questions after loading `widget-forms`, keeping stable choice ids internally. Do not emit native form or `<choices/>` tags.
 
 ## Order of execution
 
@@ -86,7 +89,7 @@ These principles apply to all A-roll tasks, not only cleanup.
 - **Be conservative when boundaries are uncertain.** If unsure whether a cut harms meaning, logic, or listening flow, keep it or make a smaller cut.
 - **Confirm complex changes first.** For complex restructuring, aggressive shortening, structural changes, or generated hooks, confirm target length, structure direction, and what to preserve with the user before editing.
 - **Explain content, never indices.** You MUST NOT explain edits to the user with internal addresses such as `[sN]`, `[cN]`, `[gap]`, word indices, clip ids, or segment ids. The user cannot see those addresses and will not understand what they mean. Use the actual spoken content, a short quote, or a plain-language description of the edit.
-- **Never name a screen position for a panel.** When you invite the user to review or fine-tune the result, call it "the Transcript panel" (in Chinese: "文字稿面板") — never a direction (left / right / side). The layout is rearrangeable and the panel does not sit in a fixed corner.
+- **Never name a screen position for a panel.** When you invite the user to review or fine-tune the result, call it "the Transcript panel" (Chinese product term: "文字稿面板") — never a direction (left / right / side / 左侧 / 右侧). The layout is rearrangeable and the panel does not sit in a fixed corner.
 
 ### Cleanup goals and decisions
 
@@ -248,66 +251,4 @@ Default rules:
 
 Load only the reference for the branch the user selected. Do not preload references for unrequested treatments; default cleanup requires no reference.
 
-For A-roll editing scenarios other than cleanup — including highlight extraction, restructure, hook / short version, target-script / script alignment, or building versions, highlights, and excerpts — read `references/other-a-roll-editing-scenarios.md` completely before planning or editing that A-roll branch.
-
-### A-roll / transcript-based editing workflow
-
-Use this flow for any A-roll task driven by transcript meaning.
-
-If the user asks to preview the whole requested edit before it is applied, do not run `clean_script` first because it writes immediately and has no preview parameter. Call `read_script({ showSilence: true })`, stage fixed-filler strikes, semantic edits, and pause edits together in `timeline.md`, then call `apply_script({ preview: true })`. Encode pause compression as `[silence=Xs→Ys]` with the Unicode `→`; a bare change to `[silence=Ys]` is not the cross-surface rewrite syntax and Web will not apply it as compression. When a struck filler has retained silence on both sides, deleting it joins those durations: a 250ms cap is their combined retained total, not 250ms per side. For example, left `0.48s→0.25s` plus an unchanged right `0.13s` yields `0.38s`; allocate the two sides to total `0.25s` instead of expecting the planner to infer a global cap. If preview validates and the request already authorizes application, immediately call `apply_script` again without preview; do not ask for another confirmation. If the user explicitly requested preview only, stop after the preview.
-
-For edits that may be applied immediately, use the following flow:
-
-1. Start with orientation. Call `read_script`, then read `timeline.md` once to understand the user's goal, the content structure, and whether fixed fillers or long pauses are present. If you will run `clean_script`, do not build the full semantic edit from this pre-clean read.
-2. Outside the preview-first path above, run the mechanical cleanup pass before semantic editing when fixed fillers or long pauses are present. Do not use this step for context-dependent fillers, retakes, repeated sentences, or anything that needs meaning.
-3. After `clean_script`, always read the refreshed clean `timeline.md` before semantic editing. Use this refreshed file as the source of truth; previously read text may be stale. Then edit with semantic judgment: choose the best retake, clean false starts, remove repeated or failed attempts, preserve useful setup and context, reorder content when needed, and keep the speech natural. Use the current filesystem tool schema: batch related exact replacements if `Edit` exposes an `edits` array; otherwise use its supported exact-replacement fields and check validation after each edit. Inline strikethrough removes spoken words; never remove unstruck source words or correct ASR in `timeline.md`.
-4. Validation runs after each filesystem edit. If diagnostics are returned, the changed `timeline.md` remains current: read it and fix forward with `Edit`. Only after validation passes, immediately apply the semantic edit with `apply_script` before starting another global pass.
-5. Read the regenerated clean result and check what the viewer will actually hear: broken logic, missing context, over-deletion, missed cleanup, wrong order, or pauses that feel too tight or too long. Fix clear problems only.
-
-`[sN]` rows are ASR segments, not semantic units. A complete sentence, idea, retake, or transition may span several `[sN]` rows, and one `[sN]` row may contain only part of a sentence. Before deciding what to delete or keep, mentally reconstruct the complete spoken sentence or idea across adjacent rows.
-
----
-
-## MG Overlay
-
-### Goal
-
-Motion graphics layered into A-roll reinforce what the speaker is conveying — deepening the audience's impression of the key points and helping them grasp content that's hard to land through speech alone. Complete A-roll editing first; MG timing is based on the post-edit timeline.
-
-This section only adds talking-head timing, frame-composition, subject/caption protection, and review constraints. For visual style alignment, MG creation or authoring, implementation constraints, editable properties, asset sizing, and verification, use the active Motion Graphics skill/workflow available in the current ChatCut environment.
-
-### MG workflow
-
-For talking-head MG work, treat the video as one edited piece, not as isolated graphics.
-
-When talking-head Motion Graphics is selected, including a plan-only or handoff-analysis request, load the available `create-motion-graphics` skill, then read `references/motion-graphics.md` completely before planning, generating, placing, or reviewing MG. This talking-head guide supplies the scene-specific editorial context but does not replace the active Motion Graphics Skill.
-
----
-
-## B-roll
-
-For B-roll, read `references/b-roll.md` completely before sourcing, choosing, placing, or reviewing it.
-
----
-
-## Multicam (multiple camera angles of the same take)
-
-For Multicam, read `references/multicam.md` completely before aligning or switching multiple camera angles of the same take.
-
----
-
-## Track roles (turn on auto-ducking)
-
-For Track roles, read `references/audio-and-music.md` completely before assigning audio roles or changing ducking behavior.
-
----
-
-## Background Music
-
-For Background Music, read `references/audio-and-music.md` completely before adding or fitting it.
-
----
-
-## Captions
-
-For Captions, read `references/captions.md` completely before editing them.
+For A-roll editing scenarios other than cleanup — including highlight extraction, restructure, hook / short version, target-script / script alignment, or building versions, highlights, and excerpts — read `references/other-a-roll-editing-scenarios.md` from this skill's base directory completely before planning or editing that A-roll branch.

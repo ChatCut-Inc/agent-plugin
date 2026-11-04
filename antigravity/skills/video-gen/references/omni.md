@@ -1,5 +1,7 @@
 # Gemini Omni 1.1 Flash (`model: "omni"`)
 
+If `submit_video` is not loaded yet, load it with `ToolSearch` before calling it, so you use its real parameters instead of guessing.
+
 Read before using Omni on `submit_video`. The existing `omni` choice now uses Vertex `gemini-omni-1.1-flash-preview`; do not send the Gemini API's different ID. Seedance 2.5 remains the default for fresh generation.
 
 ## When to choose it

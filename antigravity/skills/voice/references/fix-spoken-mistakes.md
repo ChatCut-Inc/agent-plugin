@@ -32,20 +32,18 @@ video, so do not decide the match yourself.
   which voice matches.
 - Before presenting those candidates, determine whether the current project
   contains a usable clean passage from this speaker. When it does, render the
-  saved-voice choice through `widget-forms` with stable field id
-  `speakerCloneId` and concise ordinary text choices for the
-  ready saved voices. Tell
-  the user to audition them in ChatCut if needed. Do not use the general-picker ids `voice`, `voiceId`,
+  saved-voice audition as `<form-visual id="speakerCloneId">` with only the
+  playable saved voices. Do not use the general-picker ids `voice`, `voiceId`,
   or `voiceRef`, and do not include a `clone_voice` action; those values belong
   to the ordinary picker and open the editor cloning dialog.
-- Immediately after that choice set, add one short localized sentence:
+- Immediately after that audition widget, add one short localized sentence:
   - Chinese: `如果这些都不是，直接告诉我；我可以用当前项目里这位说话人的清晰音频重新克隆，不需要重新录制或上传。`
   - English: `If none of these match, tell me; I can clone a new voice from this speaker's clear audio in the current project without another recording or upload.`
   - Spanish: `Si ninguna coincide, dímelo; puedo clonar una voz nueva usando el audio claro de esta persona en el proyecto, sin volver a grabar ni subir archivos.`
 - If the user says none match or asks to clone from the current project, follow
   the Voice Skill's Agent-driven cloning flow: run creation preflight, collect
-  the missing name, preview text, and explicit authorization in ordinary chat,
-  then clone from the resolved audio asset. Do not open the editor
+  the missing name, preview text, and explicit authorization in an Agent
+  widget, then clone from the resolved audio asset. Do not open the editor
   cloning dialog.
 - Use a ready voice only after that user confirmation.
 - If no voice is confirmed and a new clone is needed, first look for a clean,

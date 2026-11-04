@@ -1,5 +1,7 @@
 # Seedance 2.5
 
+If `submit_video` is not loaded yet, load it with `ToolSearch` before calling it, so you use its real parameters instead of guessing.
+
 Read this document before generating with `model: "seedance-2-5"`, the default for `submit_video`.
 
 ## Capabilities

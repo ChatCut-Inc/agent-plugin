@@ -1,24 +1,3 @@
-## Motion Graphic Code Contract
-
-Violations cause runtime crashes. Strict compliance required.
-
-1. **Syntax:** Pure JavaScript JSX. No TypeScript.
-2. **Imports:** No import statements. Globals are pre-injected: `React`, `spring`, `useCurrentFrame`, `useVideoConfig`, `interpolate`, `interpolateColors`, `Math`, `random`, `Easing`, `AbsoluteFill`, `Sequence`, `Series`, `Img`, `Video`, and `Audio`.
-3. **Use injected globals:** Hooks and components are available directly; do not reach through a namespace object.
-4. **Exports:** No `export default`. Define `const Component = ...`.
-5. **Timing:** No `Sequence` wrappers inside the component. Use flat frame-driven logic.
-6. **Logic:** No inline logic in JSX props. Pre-compute values in variables before `return`.
-7. **Helpers:** No undefined functions. Use `interpolateColors` plural. Define any helpers locally.
-8. **AbsoluteFill:** `AbsoluteFill` is a component, not a style object. Never spread it. It may be used for inner layers, but never as the root.
-9. **Root element:** The root must be `<div style={rootStyle}>`.
-10. **Assets:** `<Img>` and `<Video>` sources must read from image/video editable props. Never hardcode URLs. If no assets are provided, design with shapes, text, and CSS.
-11. **Hooks:** Get frame from `useCurrentFrame()`, not from `useVideoConfig()`.
-12. **Local box:** Component must accept `({ item })` props. The asset `width`/`height` are the MG's natural box around its visible local composition, not the timeline canvas; fill that box with `position:absolute; inset:0`. Timeline placement sets final screen size and position.
-13. **Layout control:** Use flexbox or grid for text blocks and structured content. Use SVG or absolute geometry when the design depends on spatial relationships, compound shapes, frame treatments, or drawn/animated marks. Allow text to wrap naturally unless the request requires single-line text.
-14. **Editable props:** Component must read editable values from `item.props`. Never add fallback values like `|| "Default"` or `?? false` after `props.key`; declared runtime properties already have values.
-15. **Property schema:** Declare matching editable properties. Include all visible text content and primary/accent colors.
-16. **Image/video props:** Guard empty URLs; only render `<Img>` or `<Video>` when the URL is truthy.
-17. **Background:** Default background is transparent. If a background surface is added, expose a `transparentBackground` boolean property.
 
 ## Renderer CSS Support
 
@@ -135,4 +114,5 @@ A successful tool call is not verification.
 - For visible changes, inspect a real composed frame using the normal ChatCut visual verification path.
 - For a batch, compare the composed settled frames side by side; verify that each visual job has a fitting form, repeated surfaces/anchors/rhythms are intentional, and each placement works for its own target frame.
 - If the result is wrong, classify the failure before retrying: invalid tool shape, invalid JSX, missing/incorrect property key, timeline placement, async asset readiness, or canvas/export safety.
+- An export contract error from `create_motion_graphic_from_code` or `edit_asset` lists styles the browser export cannot draw; rewrite them and retry. A legacy warning means `renderContract` was missing (see Renderer CSS Support).
 - Fix placement with timeline edits and bad rendering with JSX/property changes.

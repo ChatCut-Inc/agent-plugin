@@ -1,9 +1,12 @@
 ---
 name: product-help
-description: Answer current ChatCut product questions using the latest official Docs, Releases, and Changelog. Use for how ChatCut works; UI layout, buttons, and feature instructions; troubleshooting; feature or fix availability on Web, Desktop, or Agent Plugin and minimum version requirements; credits including costs, balance, usage history, validity, or recent charges; plans, subscriptions, renewals, ChatCut Pro, pricing, card or Alipay (支付宝) payments, and billing; Desktop downloads; Agent Plugin installation or updates for supported hosts, including Antigravity; and manual GUI guidance when an action cannot be completed directly. NOT for live project, asset, timeline, or item state; use the matching read tool instead.
+description: Answer current ChatCut product questions using the latest official Docs, Releases, and Changelog. Use for how ChatCut works; UI layout, buttons, and feature instructions; troubleshooting; feature or fix availability on Web, Desktop, or Agent Plugin and minimum version requirements; credits including costs, balance, usage history, validity, or recent charges; plans, subscriptions, renewals, ChatCut Pro, pricing, card or Alipay (支付宝) payments, and billing; Desktop downloads; Agent Plugin installation or updates for Codex, Claude Code and Antigravity; and manual GUI guidance when an action cannot be completed directly. NOT for live project, asset, timeline, or item state; use the matching read tool instead.
+user-invocable: false
 ---
 
 # ChatCut Product Help
+
+If `track_export` is not loaded yet, load it with `ToolSearch` before calling it, so you use its real parameters instead of guessing.
 
 For a ChatCut product question, the first substantive action is to search the
 exact topic within `https://chatcut.io/docs` and open the most relevant official
@@ -22,6 +25,9 @@ and decision rules, not a second copy of product facts.
   and the **Changelog** in addition to the owning product Docs page.
 - For a mixed question, use tools for live state and Docs for what that state means
   or what the user should do next.
+- For where an export runs, where its progress shows, and where the file goes,
+  use the export section below. It takes the place of the Docs lookup for those
+  facts.
 
 Treat this Skill only as stable routing guidance. Never answer a changeable
 product fact from remembered Skill content when current Docs can be checked. Do
@@ -92,6 +98,41 @@ surface hosting this agent and the surface the user is asking about.
   merely because a release also lists a Desktop version.
 - If the user's product or version is unknown and it changes the recommendation,
   ask for it or show how to check it instead of guessing.
+
+## Export location, progress, and stuck exports
+
+These are stable UI facts, not changeable product facts, so answer directly
+instead of routing to Docs first; still check `/docs/exporting` and
+`/docs/web-export-limits` for anything version- or plan-specific.
+
+- **Where to export:** the Export button in the editor's top toolbar, on both
+  Web and Desktop.
+- **Where progress shows:** an "Export queue" icon appears immediately to the
+  right of the Export button (Desktop calls it "Task queue" while a link
+  import is also active). It only renders once that specific browser tab (Web)
+  or app window (Desktop) has an export to show; a tab/window that has not
+  started or observed one shows no icon at all. If the user says the icon is
+  not there, that can be correct — do not assume it is a bug. Before guessing
+  at an unrelated cause (browser settings, hardware acceleration, downloads
+  being blocked), use a tool to check the real status (on Web, `track_export`
+  reads cloud renders and exports rendering in an open browser tab alike; on
+  Desktop, `track_progress` with `target="export"` reads the
+  video/audio/motion_graphic renders of the open project, including ones
+  started from the Export button, and takes the `taskId` `local_export`
+  returned to read one of them). A Web
+  browser export can only be read while the tab rendering it is open and
+  connected; when the tool says it cannot read one, tell the user to check the
+  editor tabs they have open for the project.
+- **What "queued" means:** a Web browser-local export queues per tab (capped
+  at a small number of concurrent/waiting exports in that tab); a cloud render
+  queues on the backend and is not tied to any tab. Desktop native exports run
+  in the desktop app itself. None of these need the export to be visible in
+  the UI to keep progressing.
+- **Where the finished file goes:** a Web export downloads through the
+  browser's normal download location automatically once it finishes — no
+  manual step. A Desktop `local_export` writes to the `outputPath` it
+  returned (the OS Videos/ChatCut folder by default, or wherever the user
+  chose to save).
 
 ## Answering and fallback rules
 

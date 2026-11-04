@@ -1,3 +1,5 @@
+If `search_stock_media` or `inspect_item` are not loaded yet, load them with `ToolSearch` before calling them, so you use their real parameters instead of guessing.
+
 ### Goal
 
 Enrich visual layers and cover jump cuts left by A-roll editing.
@@ -11,12 +13,7 @@ B-roll depends on having suitable footage and adds production effort — treat i
 
 ### Sources
 
-Footage can come from three places: clips already in the project library, stock
-via `search_stock_media` then downloading the selected result into the host
-workspace and importing it through [asset-import](../../asset-import/SKILL.md)
-with `import_media`, or AI generation through the `video-gen` skill. Follow the
-available model's current schema and access requirements. Pick based on the
-user's need; if unclear, align with the user upfront.
+Footage can come from three places: clips already in the project library, stock via `search_stock_media` then downloading the selected result into the sandbox and importing it through `asset-import` + `push_asset`, or AI generation via the `video-gen` skill (Seedance 2.0, ChatCut Pro only). Pick based on the user's need; if unclear, align with the user upfront.
 
 ### How to place
 

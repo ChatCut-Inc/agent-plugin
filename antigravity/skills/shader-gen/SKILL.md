@@ -1,16 +1,16 @@
 ---
 name: shader-gen
 description: AI shader generator for WebGL video effects, transitions, masks, and color grading (LUT / 调色 / 电影感 / film look). Use when the user wants a video effect (滤镜 / 特效), a transition (转场 / crossfade / wipe / cube / 3d), a mask (蒙版 / 遮罩 / reveal), a zoom / push-in (推近 / 推镜头), or a color grade — try the built-in effects (zoom, builtin LUTs) before generating a new shader.
+user-invocable: true
 ---
 
 # Shader Generator
 
+If `submit_shader` or `inspect_item` are not loaded yet, load them with `ToolSearch` before calling them, so you use their real parameters instead of guessing.
+
 Submit-only: creates a backend generation job, returns `jobId`. Use the `track_progress` tool for job lifecycle after submission.
 
-**Use the advertised `submit_shader` MCP tool for new shaders.** Manual authoring
-is only for editing existing asset code — never as a fallback when generation
-fails. If the tool is unavailable, report the limitation; this plugin does not
-ship a local shader-generation script.
+**Always use `generate.ts` for new shaders.** Manual authoring is only for editing existing asset code — never as a fallback when generation fails.
 
 ## Catalog-first rule — try existing assets before generation
 
@@ -90,7 +90,7 @@ Before generating anything, check two non-generation paths first:
 1. **Catalog entry** — use `browse_library` for built-in and project effects/transitions.
 2. **User-uploaded `.cube` LUT asset** that already exists in the project library — bind it instead of generating, see "Applying an Existing LUT Asset" below. It shows up in `browse_assets` as `type: effect` with a `lut`-typed entry in `editableProperties`.
 
-| User wants                                                           | `type`       |
+| User wants                                                           | `--type`     |
 | -------------------------------------------------------------------- | ------------ |
 | Video appearance (color, blur, glow, grain, distortion)              | `effect`     |
 | Color grade / look (teal-orange, cinematic, vintage, LUT-style)      | `effect`     |
@@ -127,7 +127,7 @@ After applying, confirm with `preview_timeline` that the effect is listed on the
 
 ## Usage
 
-Before calling `submit_shader`, restate the user's intent in one concrete sentence, then proceed immediately. After `track_progress` returns, state what was produced in one line — do NOT ask "Do you want to keep it or regenerate it?".
+Before calling `submit_shader`, restate the user's intent in one concrete sentence, then proceed immediately. After `track_progress` returns, state what was produced in one line — do NOT ask "Keep it or regenerate it?".
 
 ```ts
 submit_shader({
@@ -182,8 +182,7 @@ Returns `{ success, job: { jobId, status }, manage: { status, wait, watch } }`.
 
 ## Applying to Timeline
 
-Only when the user explicitly requests. Refresh the affected timeline with
-`preview_timeline` using `views:["timeline"]` and `tracks` when appropriate.
+Only when user explicitly requests. Refresh the affected timeline with `view:"timeline"`, passing `track` to narrow the read when appropriate.
 
 ### Effect
 
@@ -203,18 +202,13 @@ edit_item(json: '{"adds":[{"type":"transition","assetId":"<id>","outgoingItemId"
 
 ### Backend Validation
 
-When generating via `submit_shader`, the backend handles validation automatically
-(transpile, AST security, class structure, retry on failure).
+When generating via `generate.ts`, the backend handles validation automatically (transpile, AST security, class structure, retry on failure).
 
 ### Manual Code Verification
 
-**Use `submit_shader` for new shaders.** This section is only for modifying
-existing shader code that was already generated.
+**NEVER write shader code from scratch.** Always use `generate.ts` for new shaders. This section is ONLY for modifying existing shader code that was already generated.
 
-When writing shader code manually, read
-[design principles](references/design-principles.md) first. If the change
-touches editable properties, also read
-[property changes](references/property-changes.md).
+When writing shader code manually, read `references/design-principles.md` first. If the change touches editable properties, also read `references/property-changes.md`.
 
 Typical workflow:
 

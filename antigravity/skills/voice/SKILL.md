@@ -1,11 +1,15 @@
 ---
 name: voice
 description: Text-to-Speech (TTS), voice cloning, voiceover, narration placement/sync, and custom sound effects (SFX) generator. Use when the user wants generated speech from text, wants to clone a consented voice from uploaded reference audio, wants to correct a misspoken word or short phrase in recorded speech, wants to add/replace/align narration or voiceover for an existing video/timeline, wants to keep existing voiceover synced after visual retiming edits, needs voice audition/selection, or explicitly wants a newly generated/custom sound effect that is not available in the Sound Effects library.
+user-invocable: true
 ---
+
+Before using this skill, read [the required continuation](references/voice-workflows-consent-and-parameters.md) in full. It is part of this skill and contains mandatory workflow, tool-contract, and safety instructions; do not act from this entry file alone.
+
 
 # Voice & Sound Effects Generator
 
-Before using this skill, read [the required continuation](references/cloning-sound-effects-and-rules.md) in full. It is part of this skill and contains mandatory workflow, tool-contract, and safety instructions; do not act from this entry file alone.
+If `submit_voice`, `manage_voice`, `pull_asset`, or `submit_sound` are not loaded yet, load them with `ToolSearch` before calling them, so you use their real parameters instead of guessing.
 
 Generate voiceovers (TTS) and sound effects. For TTS, choose a concrete
 provider and voice before calling `submit_voice`.
@@ -19,7 +23,7 @@ provider and voice before calling `submit_voice`.
   other visual sequence
 - Keep existing narration/voiceover aligned after trimming, speeding up, slowing
   down, moving, reordering, or replacing the visuals it describes
-- Offer text descriptions of TTS voice choices when the user has not picked a concrete voice, and direct auditioning to ChatCut
+- Offer and audition TTS voice choices when the user has not picked a concrete voice
 - Clone the user's own or explicitly authorized voice from reference audio
 - Correct a real misspoken word or short phrase with the authorized speaker's
   cloned voice while preserving picture and downstream timing
@@ -86,7 +90,7 @@ delete actions. The current contracts are:
 
 Doubao, ElevenLabs, Fish Audio, their model names, and other provider identity
 are internal implementation details. Never expose or attribute them in
-user-facing replies, progress updates, voice recommendations, choice lists,
+user-facing replies, progress updates, voice recommendations, audition cards,
 clone instructions, success summaries, or errors. Use ChatCut product language
 instead:
 
@@ -110,7 +114,7 @@ capabilities)` tuple as atomic.
 - Use only fields in that entry's `capabilities.supportedControls`; never infer
   capability support from a remembered voice name or family.
 - Controls are not guarantees of a specific acting style. Use the returned
-  tags and returned summary to pick a naturally suitable voice, then use supported
+  tags and sample to pick a naturally suitable voice, then use supported
   controls for moderate delivery changes.
 - For entries that advertise `audioTags`, inline audio tags are available when
   the user asks for expressive delivery such as emotion, tone, nonverbal cues,
@@ -146,7 +150,7 @@ Fish Audio control support for cloned voices:
 - Place a cue immediately before the phrase or moment it should affect. Fish
   S2.1 accepts cues anywhere in the text, so multiple short cues can create
   local transitions, for example
-  `[calm] Don't worry just yet.[excited] The good news is that we've found a solution!` or
+  `[calm] 先别着急。[excited] 好消息是，我们已经找到解决办法了！` or
   `I thought it was over [gasp] but then the lights came back [relieved].`
 - Use cues sparingly and only when the requested delivery benefits from them.
   Prefer one clear instruction at a transition over stacking conflicting
@@ -161,21 +165,21 @@ Fish Audio control support for cloned voices:
 
 ```ts
 // English / multilingual via ElevenLabs
-submit_voice({
+mcp__skill__submit_voice({
   provider: "elevenlabs",
   text: "Hello world",
   voiceId: "peter",
 });
 
 // Chinese via Doubao
-submit_voice({
+mcp__skill__submit_voice({
   provider: "doubao",
   text: "你好世界",
   voiceId: "liuchang",
 });
 
 // With speed adjustment (Doubao only)
-submit_voice({
+mcp__skill__submit_voice({
   provider: "doubao",
   text: "这是一段稍快的中文旁白。",
   voiceId: "liuchang",
@@ -183,7 +187,7 @@ submit_voice({
 });
 
 // With expressive Doubao controls
-submit_voice({
+mcp__skill__submit_voice({
   provider: "doubao",
   text: "这次事故提醒我们，安全永远不能侥幸。",
   voiceId: "liuchang",
@@ -195,7 +199,7 @@ submit_voice({
 });
 
 // With ElevenLabs delivery controls
-submit_voice({
+mcp__skill__submit_voice({
   provider: "elevenlabs",
   text: "The launch changed how teams plan their daily work.",
   voiceId: "peter",
@@ -204,31 +208,51 @@ submit_voice({
 });
 
 // With local Fish Audio S2.1 delivery cues on a ready cloned voice
-submit_voice({
+mcp__skill__submit_voice({
   provider: "fish-audio",
   voiceId: "<confirmed custom voice id>",
-  text: "[calm] Don't worry just yet.[excited] The good news is that we've found a solution!",
+  text: "[calm] 先别着急。[excited] 好消息是，我们已经找到解决办法了！",
   name: "Expressive custom voiceover",
 });
 ```
 
+## Antigravity interaction
+
+Read `widget-forms` before any input or audition. In Antigravity, translate all native widget, playable-card and branch-choice instructions below to concise ordinary text choices with stable ids mapped internally. Audition through the clean ChatCut editor link, including new cloned-voice previews; never promise chat audio or print raw sample URLs. Keep the original live lookup, sample eligibility, stable voice ids, clone action, Retry/Apply decisions, full explicit consent and credit gates unchanged. Native editor dialog/tag examples below apply only inside ChatCut, not Antigravity.
+
 ## Voice Audition Before Generation
 
-### Use the published-plugin clone flow
+### Emit the native clone entry only as a final action
 
-Offer cloning as a concise ordinary text choice,
-then collect the source as a
-conversation attachment and follow the Agent-driven cloning flow below.
+`<clone-voice/>` is an executable editor action, not prose, code, or an
+internal process label. Never quote it, wrap it in backticks, describe it as
+the next step, or emit it in a progress update, pre-tool explanation, plan, or
+other intermediate assistant message.
 
-### Route cloning from the available reference
+Finish every required inspection and tool call first. If the native dialog is
+still the correct route afterward, follow the **dialog-entry sequence** under
+**Native ChatCut editor** below. That sequence must be the final user-facing
+assistant message for the run: do not call another tool, add anything after
+its completion reminder, or emit the tag again. A single Agent run may render
+at most one standalone native clone entry.
 
-Before asking for clone inputs, check whether the user has already supplied a
-readable audio attachment or explicitly identified an accessible audio-bearing
-ChatCut asset for this request, including a timeline audio or video item. If so,
-do not make the user choose the same source again. Resolve or derive its audio
-asset, run the creation preflight, collect only the missing name, preview text,
-and explicit authorization, then use the Agent-driven cloning flow below. If no
-usable reference exists, ask the user to attach one through the host.
+### Route cloning by host and available reference
+
+Decide the host path before loading `widget-forms` or asking for clone inputs:
+
+- In the native ChatCut editor, first check whether the user has already
+  supplied a readable audio attachment or explicitly identified an accessible
+  audio-bearing ChatCut asset for this cloning request, including a timeline
+  audio or video item. If so, do not make the user choose the same source again
+  and do not emit `<clone-voice/>`. Resolve or derive its audio asset, run the
+  creation preflight, collect only the missing name, preview text, and explicit
+  authorization, then use the Agent-driven cloning flow below.
+- In the native ChatCut editor, use the editor dialog only when a usable
+  reference has not already been supplied. Follow the native dialog path under
+  **Custom Voice Cloning** below.
+- In external Codex / Claude / Antigravity hosts, never emit `<clone-voice/>`; those hosts do
+  not render or dispatch the native editor action. Use the Agent-driven
+  attachment flow below.
 
 An arbitrary voice already present in the project is not consent or a cloning
 reference. Use the direct path only when the user supplied or identified the
@@ -237,158 +261,8 @@ required below.
 
 When the user explicitly chooses an audio-bearing timeline item, resolve it and
 its source range with `preview_timeline`. Reuse a 10-second-to-3-minute audio
-asset directly. For video, use a readable host-local original or obtain the
-source through the advertised `request_asset_download` tool and download its
-returned URL. Extract the chosen range as supported audio with an available
-ffmpeg, then follow [asset-import](../asset-import/SKILL.md) with `import_media`.
-If source download or local processing is unavailable, ask for a prepared audio
-reference. For any
+asset directly. For video, `pull_asset`, extract the chosen range as supported
+audio with ffmpeg, then load `asset-import` and `push_asset` the result. For any
 source over 3 minutes, use a clean 30–60-second excerpt; under 10 seconds, ask
-for a longer reference. Continue with the resulting audio asset id; the source
-choice is not authorization.
-
-### Choose the interaction from live state
-
-Treat the unified voice lookup as a mandatory gate. Whenever the user requests
-TTS without naming a concrete official or custom voice, and has not already
-explicitly chosen voice cloning:
-
-1. If `manage_voice` is not already visible, locate it from the current MCP tool
-   manifest without assuming a host-specific prefix.
-2. Call `manage_voice action="list" voiceType="all"` with the target narration
-   language, conversation locale, and any useful official-voice filters.
-3. Use the returned normalized `voices` list as the only candidate directory.
-   It already puts cloned voices before matching official voices.
-
-Do this before recommending or rendering any voice-selection UI. Never infer
-the user's saved or official voices from chat history or a static Skill file.
-
-An explicit request to clone a voice is already a concrete source choice. Do
-not call the combined list merely to choose between official and cloned voices
-in that case. First resolve whether the current request already supplies a
-usable reference; perform `manage_voice voiceType="custom"
-action="check-create-access"`, then follow the attachment and consent flow above.
-
-The Agent may infer useful tone, mood, delivery, or use-case suggestions from
-the narration text. Treat these as recommendation signals, not as the user's
-choice of voice source. A reasonable inference must never exclude a ready
-custom voice from the combined choice set below.
-
-Classify the request before rendering anything:
-
-- **Concrete custom voice:** when the user names a ready custom voice or chooses
-  the only named custom-voice pill, use that exact custom voice. When the user
-  chooses `Choose my cloned voice` and several are ready, show those ready
-  custom voices as concise ordinary text choices before continuing.
-- **Concrete official preset:** use or confirm that exact preset; do not reopen
-  the source-choice branch.
-- **Clone action selected:** only now enter the plugin cloning route
-  above in the very next reply. Do not wait for the user to ask again, tell
-  them to open a menu or panel, or leave the choice as an unhandled pill. Finish
-  any required inspection or preflight, then begin the attachment flow.
-- **At least one ready custom voice, but no concrete voice named:** show one
-  combined option set. Put ready custom voices first, add 2-4 suitable
-  official voices, and finish with `Clone another voice`. Tell the user that
-  auditioning is available in ChatCut's voice library.
-- **No ready custom voice and no voice preference:** infer a small, varied set
-  of 2-4 generally suitable official voices, show their names and returned
-  traits as concise ordinary text choices, and finish with `Clone my voice`.
-- **No ready custom voice and voice requirements available:** use explicit
-  requirements such as "middle-aged male", "warm female", or "professional"
-  first; otherwise reasonable traits inferred from the narration may guide the
-  recommendation. Show 2-4 matching official choices and one clone action
-  in the same option set.
-
-Localize the branch labels and adjust them to live state. Use these meanings:
-
-- Chinese:
-  - Named custom: `使用「<name>」`
-  - Custom list: `选择我的克隆音色`
-  - Curated catalog: `选择官方音色`
-  - First clone: `克隆我的音色`
-  - Additional clone: `克隆新音色`
-- English:
-  - Named custom: `Use “<name>”`
-  - Custom list: `Choose my cloned voice`
-  - Curated catalog: `Choose an official voice`
-  - First clone: `Clone my voice`
-  - Additional clone: `Clone another voice`
-- Spanish:
-  - Named custom: `Usar «<name>»`
-  - Custom list: `Elegir mi voz clonada`
-  - Curated catalog: `Elegir una voz oficial`
-  - First clone: `Clonar mi voz`
-  - Additional clone: `Clonar otra voz`
-
-Always expose one appropriate `clone_voice` choice during ordinary voice selection.
-It is a localized option at the end of the same choice set. Provider availability, plan, and
-quota govern what happens after the user chooses cloning, not whether the
-choice is visible. Offering the choice does not require consent; explicit
-permission and a supported reference are required only before the clone tool
-call. A scenario reference may intentionally use a narrower choice list without
-the clone action and explain its direct-from-project fallback in prose.
-
-Before recommending, rendering, or submitting a TTS voice option, use the
-current `manage_voice action="list" voiceType="all"` result. It is the live
-catalog shared with ChatCut Web, Desktop, and published plugins. Do not create
-voice options from memory, translated names, filenames, or broad descriptions.
-
-First determine two separate languages:
-
-- User conversation language: the language the user used to talk to you. Use
-  this for surrounding copy, option names, and summaries.
-- Target narration language: the language of the text being synthesized. Use
-  this only to choose provider and voice catalog.
-
-Load `widget-forms` before collecting input or rendering a choice. That skill
-owns Antigravity's text-choice, attachment, and no-audio-preview behavior. This skill
-owns the voice candidates, required fields, safety rules, and the asset ids
-passed to voice tools. Do not embed host-specific UI instructions here.
-
-"help me generate ... voice over in Chinese" is an English conversation asking
-for Chinese narration, so the choice-list copy stays in English while the
-voice candidates come from Doubao.
-
-For official voice selection:
-
-1. Call `manage_voice action="list" voiceType="all"` with the target narration
-   `language`, user conversation `locale`, and any explicit gender, age, tone,
-   or use-case requirements. If none were explicit, a concise inferred
-   tone/use-case query may guide the official shortlist. Present inferred traits
-   as a suggestion, not as a stated user preference. If nothing official
-   matches, broaden only optional filters and clearly describe the closest
-   supported choices; never drop returned ready custom voices because they
-   lack official catalog tags.
-2. Use returned ready custom voices first, followed by 2-4 returned official voices.
-3. Load `widget-forms` and present one required choice set using concise ordinary text choices. Give every
-   option its localized `name` and concise returned `summary`, while keeping the
-   exact `voiceId` or `customVoiceId` mapped internally. Do not render, download,
-   attach, or link `sampleUrl` or `previewUrl`. Tell the user to audition these
-   choices in ChatCut's voice library when sound matters.
-4. Always add one action option with stable value `clone_voice` as the final
-   option on every ordinary recommendation list. Label it
-   `Clone my voice` when no ready custom voice exists, or `Clone another voice`
-   when one does; localize it using the meanings above. A scenario-specific
-   reference may explicitly replace this ordinary list with a narrower one.
-5. Wait for the user to choose. If the answer maps to `clone_voice`, render the
-   cloning workflow on the next turn; do not start cloning from the selection
-   reply itself.
-6. For an official voice, call `submit_voice` with the selected tuple's
-   `provider` and `voiceId` verbatim.
-7. For an existing custom voice, call `manage_voice voiceType="custom"
-action="apply"` with its full mapped `customVoiceId`. When final speech is
-   requested, pass that same id to `submit_voice` as `voiceId` with
-   `provider: "fish-audio"`.
-
-For a custom-voice-only selection, include every relevant `ready` custom voice.
-Use the full `customVoiceId` as its stable value, the stored name as its display
-label, and `previewText` as its summary when present. Do not copy, download,
-rewrite, attach, link, or expose `previewUrl`. The user can audition saved voices
-inside ChatCut.
-
-Keep every option's type, submission id, display label, summary, and capabilities
-tied to the same `manage_voice` tuple. The target narration
-language filters official entries; the conversation language controls all
-visible copy. Keep the label-to-tuple map in context so a host that returns
-visible labels can still map the answer without another confirmation.
-
+for a longer reference. Continue with the resulting audio asset id without
+emitting `<clone-voice/>`; the source choice is not authorization.

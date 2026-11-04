@@ -10,10 +10,7 @@ Use both structural and visual evidence when the requested result is visible:
 1. Re-read the affected scope with `read_project`, `preview_timeline`, `inspect_item`, `browse_assets`, or `inspect_asset` as appropriate. Use the latest response for ids, tracks, timing, and readiness.
 2. Inspect composed timeline frames through the visual tool exposed by the current manifest. Successful rendering or mutation metadata is not visual proof until the returned pixels are inspected.
 
-Hosted viewer capture needs the target project open in a connected ChatCut editor
-tab. If the tool reports that no editor is available, open the clean editor URL
-or ask the user to open it, then retry the same frame. This connector does not
-silently render viewer frames in the cloud.
+Check your own work the cheapest way that answers the question: `preview_timeline` frames for the picture, a `format:"audio"` export to hear audio, and a local `480p` range export to watch motion. Never make a full-resolution or cloud export for a self-check.
 
 Use local source bytes for raw source understanding when the original path is available. Use `inspect_asset` when the original is not locally available. Source frames help select moments but do not prove timeline composition; use composed timeline frames for trims, layers, captions, effects, crops, transitions, and Motion Graphics.
 

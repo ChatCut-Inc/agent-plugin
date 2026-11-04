@@ -1,17 +1,20 @@
 ---
 name: video-translation
 description: Translate, dub, and localize speech in an existing video while optionally preserving speaker voices, generating translated captions, or synchronizing the speaker's lip movements. Use when the user asks for 视频译制、多语言配音、 把视频里的中文变成英文、让视频里的人说另一种语言、保留原音色、翻译声音、 口型同步、translated video, video dubbing, voice translation, or lip-synced localization, as well as traducción de video, doblaje de video, traducir un video, or sincronización labial. This Skill MUST be loaded before composing treatment choices for an ambiguous video-translation request in any language, including a turn that only asks the user to choose a treatment. Do not use when the user only wants subtitles translated, wants an SRT/VTT file, wants text or a script translated before generating a new avatar video, or wants ordinary TTS with a newly selected voice.
+user-invocable: true
 ---
 
 # Video Translation
+
+If `submit_video_translation` is not loaded yet, load it with `ToolSearch` before calling it, so you use its real parameters instead of guessing.
 
 Create a new localized video asset from an existing project video. Treat
 speech translation, dubbing, voice preservation, lip synchronization, captions,
 quality, authorization, generation, and verification as one workflow.
 
-Lip-synced translation starts with source-transcript review in ordinary chat.
-The recognized source wording is never treated as final until the user has
-approved it or supplied corrections. Audio-only
+Lip-synced translation starts with source-transcript review in an editable
+ChatCut Widget. The recognized source wording is never treated as final until
+the user has edited or approved that form and submitted it. Audio-only
 translation keeps the existing direct-submit flow and skips this review.
 
 ## When to Use
@@ -117,33 +120,60 @@ explicitly requested or confirmed.
    editable `timeline.md` cut as the translation source. **Do not substitute
    `inspect_asset` transcript ranges for `read_script`; the range result may be
    partial and is not the canonical complete source transcript.**
-5. **Present the source-text review for lip-sync only.** Load `widget-forms`,
-   but use ordinary chat rather than a form. Strip the library's `[sN]`
-   addresses and speaker-rendering rows while preserving exactly one recognized
-   transcript segment per line, in source order. Show the complete transcript
-   in clearly labeled text and ask the user either to approve it or send
-   corrections. For a long transcript, split it into numbered consecutive chat
-   chunks without omitting segments, then ask for approval only after the final
-   chunk. Keep the full segment-to-line mapping internally. Do not expose
-   segment ids, word indices, file syntax, or timestamps. Verify that the first
-   and last non-empty source segments are present before asking for approval.
-   **Stop and wait. Never submit a translation in the same turn that first
-   presents the transcript.**
+5. **Render the editable source-text review for lip-sync only.** Load the
+   `widget-forms` Skill and reuse the same `<form-textarea>` confirmation pattern
+   used by the Digital Human Skill. Strip the library's `[sN]` addresses and
+   speaker-rendering rows, but keep **exactly one recognized transcript segment
+   per line**, in source order. Put that complete text in the textarea's
+   `default`; use a localized label that asks the user to check and correct the
+   recognized original text. Do not expose segment ids, word indices, file
+   syntax, or timestamps.
 
-6. **Use the approved revision exactly.** Treat explicit approval of the shown
-   text, or the user's corrected text, as confirmation. Preserve its wording,
-   punctuation, order, and line breaks. Do not paraphrase it and do not ask the
-   user to confirm the same text again. If the user sends further corrections,
-   update the stored complete transcript and wait for explicit approval before
-   continuing. Keep those corrections applied rather than reverting to the
-   earlier recognized text.
+   Hard preflight before emitting the Widget:
+   - The field id is exactly `reviewedSourceTranscript`.
+   - The prefill attribute is exactly `default`, never `default-value`,
+     `defaultValue`, `value`, or `placeholder`.
+   - `default` contains the actual complete non-empty recognized transcript,
+     not a placeholder or an omitted value. If the transcript text has not been
+     read successfully, do not render the Widget; read the canonical library
+     document first.
+   - Preserve one recognized source segment per line. Verify that the first and
+     last non-empty source segments are both present before sending the form.
+   - In the embedded raw-tag route, apply the `widget-forms` XML attribute
+     escaping rule to the complete transcript before placing it in `default`.
+     Never put unescaped recognized text inside the tag.
+
+   Embedded ChatCut example (localize visible copy):
+
+   ```text
+   Please review the recognized source text and correct any mistakes:
+
+   <widget>
+     <form-textarea id="reviewedSourceTranscript" label="Please review and correct the source text" rows="12" required="true" default="<recognized source text; one segment per line>"/>
+   </widget>
+   ```
+
+   Follow `widget-forms` for the active host rather than emitting raw tags in a
+   host that does not support the embedded protocol. Do not add a separate
+   yes/no question or a handwritten submit button. **Stop here and wait. Never
+   submit a translation in the same turn that first presents the Widget.**
+
+6. **Use the submitted revision exactly.** The Widget submission is explicit
+   confirmation. Read the complete `reviewedSourceTranscript` textarea answer
+   from the user's next message and preserve its wording, punctuation, and
+   order exactly. Pass through the returned line breaks when present, but do
+   not reject or rewrite normal line-break edits made inside the textarea; the
+   tool realigns them to the source timing. Do not paraphrase the text and do
+   not ask the user to confirm the same text again. If the user replies outside
+   the Widget with further corrections, reopen the same editable Widget with
+   those corrections applied rather than reverting to a prose transcript.
 7. **Duration behavior.** By default the output may run slightly longer or
    shorter than the source so the translated speech keeps a natural pace. Pass
    `keepDuration: true` only when the user needs the exact original length
    (for example to swap it into an existing timeline slot), and mention that
    pacing may sound faster.
 8. **Submit** with `submit_video_translation` using `action: "submit"`. For lip-sync, pass
-   `reviewedSourceTranscript` as the exact complete approved text from
+   `reviewedSourceTranscript` as the exact complete textarea value returned in
    step 6; the tool combines those reviewed lines with the original segment
    timestamps and creates source subtitles. For `audioOnly: true`, omit
    `reviewedSourceTranscript` and preserve the pre-existing direct-submit path.
@@ -156,8 +186,8 @@ explicitly requested or confirmed.
 ## Constraints and cost
 
 - The whole source video is translated and billed by its full duration. To
-  localize only a section, follow [processing-source preparation](#prepare-the-processing-source)
-  to trim/export it into its own asset first, then translate the shorter asset.
+  localize only a section, trim/export that section into its own asset first,
+  then translate the shorter asset.
 - Optional translated captions: `enableCaption: true` burns subtitles into the
   output video.
 - ChatCut always requests preservation of the source resolution and bitrate.
@@ -175,7 +205,7 @@ explicitly requested or confirmed.
 - Multiple speakers are supported; pass `speakerCount` when the user states it.
 - For lip-sync, the editable review starts with one source segment per line so
   the submitted text can reuse the original word-level timing. Pass the complete
-  approved text directly to the tool; do not merge, split, reorder, or silently
+  Widget value directly to the tool; do not merge, split, reorder, or silently
   normalize it in the conversation layer. Do not invoke this review for
   `audioOnly: true`.
 - Indicative cost: ≈ 8 credits per minute of source video.
@@ -184,25 +214,3 @@ explicitly requested or confirmed.
   footage and its speakers when the material is clearly someone else's.
 - Never reveal or discuss the underlying provider; present this as ChatCut's
   AI video translation.
-
-## Prepare the processing source
-
-Whole-asset generation needs an actual asset containing only the requested source
-section. Resolve whether the user's range refers to source time or timeline time;
-map timeline ranges through item offsets and playback rate before preparing media.
-Use a readable host-local original or obtain it through `request_asset_download`
-and follow its returned delivery contract. A user-authenticated URL belongs in
-the signed-in browser, not an unauthenticated cloud shell. Trim the required
-source interval with available shell media tools such as ffmpeg, then follow
-[asset-import](../asset-import/SKILL.md) with `import_media`. If the input must
-include existing timeline edits, prepare a separate working timeline containing
-only that section, follow [export](../export/SKILL.md) with the advertised
-`submit_export` and `track_export` tools, then import the completed output only
-after it is readable by the host. A browser export downloads on the rendering
-computer and may not have a cloud URL; follow the export Skill's delivery rules
-and do not switch to cloud rendering without user intent. Preserve the original
-timeline. Report unavailable download, preparation, or export capabilities rather
-than calling tools from a different ChatCut surface.
-
-Verify the prepared asset's actual content and duration. Its times are relative
-to that asset; placement returns to the intended original timeline range.

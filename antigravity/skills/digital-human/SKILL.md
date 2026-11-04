@@ -1,11 +1,15 @@
 ---
 name: digital-human
 description: Create and manage script- or audio-driven AI avatar videos from an official or saved presenter, an imported portrait, or a representative still prepared from video. Use for 数字人、数字分身、虚拟人、照片开口说话、人像口播、改稿不重拍, AI avatar, AI avatar video, avatar video, talking avatar, talking photo, photo avatar, video avatar, AI presenter, virtual presenter, virtual spokesperson, digital human, or a person's digital twin, including choosing or creating the avatar and deciding its voice, script, aspect ratio, and output quality. Do not use for a static profile-picture avatar, game or 3D character creation, an industrial digital twin, ordinary B-roll, generic image-to-video, video translation, talking-head editing, lip-sync dubbing alone, or TTS-only requests.
+user-invocable: true
 ---
+
+Before using this skill, read [the required continuation](references/avatar-generation-safety-and-verification.md) in full. It is part of this skill and contains mandatory workflow, tool-contract, and safety instructions; do not act from this entry file alone.
+
 
 # Digital Human
 
-Before using this skill, read [the required continuation](references/provider-safety-and-verification.md) in full. It is part of this skill and contains mandatory workflow, tool-contract, and safety instructions; do not act from this entry file alone.
+If `manage_custom_voice`, `manage_avatar`, or `submit_avatar_video` are not loaded yet, load them with `ToolSearch` before calling them, so you use their real parameters instead of guessing.
 
 Create a reusable presenter identity or generate a lip-synced presenter video
 without exposing the underlying provider. Treat avatar selection, speech, script,
@@ -146,9 +150,8 @@ for the creation or cloning action that needs it.
 
 ### Load live capabilities and state when relevant
 
-Use the current MCP tool manifest to locate `manage_avatar` and
-`submit_avatar_video` if they are not already visible; do not assume a
-host-specific prefix. Call `manage_avatar` for live capabilities before
+Use `ToolSearch` to load `manage_avatar` and `submit_avatar_video` if they are not
+already visible. Call `manage_avatar` for live capabilities before
 offering creation or advanced options.
 
 If the user has neither selected an exact identity nor supplied a prospective
@@ -162,7 +165,7 @@ For the empty saved-avatar recommendation state, call the official catalog with
 `limit: 5`; do not page through the catalog or turn a full catalog page into one
 recommendation form.
 
-An avatar selected in ChatCut's Digital Humans library and returned in conversation context is
+An avatar attached from ChatCut's Digital Humans library or native visual picker is
 already an exact selection. Reuse its attached ChatCut `avatarId` as `identityId`
 across later confirmation and retry turns. An official attached identity is directly
 usable by `submit_avatar_video`; it does not need to be imported or rediscovered in
@@ -186,189 +189,89 @@ Respect an explicit user choice. Otherwise:
   source: continue the video-to-avatar creation flow. Do not enter the generic avatar
   picker and do not ask the user to choose among saved or official identities.
 - No ready saved avatar: show at most five suitable official avatars and include the
-  reserved **create** text choice in the same choice surface. This is a strict empty-state
+  reserved **create** card in the same choice surface. This is a strict empty-state
   contract: never render a sixth official recommendation, and never omit the
   creation option merely because official avatars are available.
-- Ready saved avatars exist: show them first (up to five total text choices), then the
-  reserved create text choice.
+- Ready saved avatars exist: show them first (up to five total cards), then the
+  reserved create card.
 - Exactly one ready saved avatar: offer it first and ask whether to use it.
 - Multiple ready saved avatars: prefer higher live usage count; when counts tie, prefer
   the newest creation. If usage metadata is absent, rank by newest creation only;
   never invent a frequency.
 
-Avatar identity selection uses concise ordinary text choices through the Widget Forms
-Skill, including when exactly one ready saved avatar exists. Avoid a redundant
-category question such as "use the saved avatar" versus "browse official avatars".
-Map each live identity using its exact `identityId` as the stable internal value and
-its returned `name` and description as visible text. Do not try to render avatar video
-or image previews in Antigravity and never expose their URLs. Tell the user that visual
-previews are available in ChatCut's Digital Humans library when appearance matters.
-When the user has ready saved avatars, place them before official recommendations.
+In embedded ChatCut, avatar identity selection is media-preview-only and is a strict exception to the generic
+single-branch `<choices/>` rule. Always use visual cards through the Widget Forms
+Skill, including when exactly one ready saved avatar exists. Never ask a text-only
+category question such as "use the saved avatar" versus "browse official avatars",
+and never use `<choices/>`, `<form-single>`, or label-only identity cards for avatar
+selection. For an avatar card in ChatCut's native widget — official or the user's own
+saved avatar — write only its exact `identityId` as `avatar-id`; the host resolves the
+current name, preview video or fallback image, aspect ratio, and submitted value from the live avatar
+identity even when the tool payload does not expose a preview URL. Never copy `value`,
+`name`, `media`, or `aspect-ratio` onto an `avatar-id` option. If the host cannot
+resolve preview media, omit that identity rather than falling back to text. Prefer
+the live preview video when available and use the preview image only as its poster
+or fallback. When
+the user has ready saved avatars, place their cards before official recommendations.
 Ask one most important missing question at a time and do not repeat answered questions.
 
-Keep the create action as a separate `create_avatar` value. In Antigravity it
-returns that value to the workflow; it does not open ChatCut's editor-native avatar
-dialog automatically.
+The raw tags and visual-card requirements below describe embedded ChatCut only. In Antigravity, the `widget-forms` host adapter takes priority: use concise text choices with stable `identityId` values mapped internally to returned names and descriptions, and direct the user to ChatCut's Digital Humans library for previews. Never emit raw ChatCut tags or promise chat avatar video. Preserve the separate `create_avatar` value; it returns to this workflow for a conversation attachment plus `asset-import`, rather than automatically opening a native dialog. This adapter changes presentation only; identity readiness, required inputs and consent checks remain mandatory.
 For a saved identity whose `list` row has no preview URLs, call `manage_avatar
 action=get` for that exact candidate before rendering it; use the selected ready
 revision's returned preview media and do not invent or copy media from another avatar.
 
-One reserved label-only option value starts the plugin creation flow. It has no media:
+One reserved label-only option value opens a native editor surface instead of
+submitting an answer. Write it with no `media`:
 
-- `create_avatar` — starts creation of a personal avatar. Keep its text label a short
-  "create your own avatar" phrase (e.g. Create your own avatar).
+- `create_avatar` — opens the native creation dialog where the user uploads a photo
+  and creates a personal avatar. Keep its card label a short "create your own
+  avatar" phrase (e.g. 创建专属数字人); do not mention uploading a photo — the
+  dialog explains that itself.
 
-The selection surface contains up to five avatar choices (saved first, then official)
-followed by the creation choice. Localize all visible labels. After the user selects
-`create_avatar`, ask them to attach one JPEG or PNG portrait in the conversation and
-ask only for the missing avatar name. Load `asset-import`, import the attachment, and
-pass the resulting ChatCut image asset id to `manage_avatar`.
+Clicking that card does not produce a form answer. When the user finishes in the
+native dialog, their chosen or newly created avatar is sent back automatically as
+this question's answer with the avatar attached; treat that reply as the avatar
+selection and do not re-ask.
+
+The selection shape is therefore one `<form-visual>` containing up to five avatar
+preview cards (saved first, then official) followed by the creation card. Localize
+the visible question and card label to the conversation language:
+
+```text
+<widget>
+  <form-visual id="avatar" question="Please choose an avatar" required="true">
+    <visual-option avatar-id="<saved-or-official-identity-id>"/>
+    <visual-option value="create_avatar" name="Create your own avatar"/>
+  </form-visual>
+</widget>
+```
 
 Creating an identity is separate from generating a video:
 
 1. Resolve the source or prompt and name.
 2. Obtain required consent.
 3. Create the identity through `manage_avatar`.
-4. Poll until it is ready or terminal.
+4. Wait until it is ready or terminal. Where `track_progress` offers
+   `target=avatar`, call `action=wait` with the `identityIds` and do what its
+   result says; otherwise re-read it with `manage_avatar action=get refresh=true`
+   in a later turn.
 5. Save it under **My avatars**. Do not auto-generate a video merely because avatar
    creation succeeded.
 
-Published plugin forms do not upload avatar source media. Ask the user to attach the
-portrait through the host, then use the Asset Import Skill and pass the returned
-ChatCut image asset id to `manage_avatar`. Validate that the attachment is a single
-JPEG or PNG portrait before continuing.
+When asking for a portrait in an embedded ChatCut Widget, always mark the upload as an avatar source so
+the host uses the same validation, JPEG normalization, private transport storage, and
+upload-readiness behavior as the native Digital Humans dialog:
 
-### Resolve speech only when the requested action needs it
+```text
+<widget>
+  <form-files id="avatar_source" label="Please upload a portrait photo"
+    accept="image/jpeg,image/png" purpose="avatar-source"
+    multiple="false" required="true"/>
+  <form-text id="avatar_name" label="Name this avatar" required="true"/>
+</widget>
+```
 
-For an official avatar, never silently use its paired voice and never immediately
-open the broader voice catalog. When the live result provides `defaultVoiceRef` and
-the user has not already made this choice, first ask one blocking text-only decision
-in the conversation language: whether to use this avatar's official built-in voice
-or choose another voice. Present that decision with concise ordinary text choices,
-then stop and wait.
-If the user accepts, resolve speech with that exact `defaultVoiceRef` and do not call
-`manage_avatar action=voices`. Call `action=voices` only after the user chooses
-another voice, or when the live identity has no `defaultVoiceRef`. Do not ask for
-language or script and then pre-emptively call `action=voices` in the same turn.
-
-For a saved or newly created avatar, reuse its saved voice binding when present and
-confirm it; otherwise offer available voices. When the user settles on a voice they
-want this avatar to keep, save it with `manage_avatar action=set-default-voice`;
-`list`/`get` then return it as the avatar's `defaultVoiceRef`.
-
-For voice discovery, audition, or cloning, follow the Voice Skill and reuse its live
-voice list, consent gate, and generated voice asset. Do not duplicate voice-cloning
-logic here.
-
-When an exact voice still needs to be selected, use the exact `voiceRef` returned by
-`manage_avatar` as the stable internal value. Load `widget-forms` and use concise ordinary text choices:
-
-- Present concise localized names and returned traits. Do not render, download, attach,
-  or link audio previews; explain that the user can audition them in ChatCut's voice
-  library before choosing.
-- When the user wants to audition voices, prefer up to five suitable available
-  official, preset, or custom voices. Render them as one option set. Always
-  append one action with stable value
-  `clone_voice`, localized to the conversation language. This clone option is
-  required on every recommended-voice surface.
-- An official avatar's paired default voice may still be used without listing the
-  broader official voice catalog. Never reuse the avatar image or video URL as a
-  voice preview.
-- When script text is also being confirmed, ask for the voice and script in two
-  short turns. Do not make the user type a voice name into the script field.
-
-If the source began as a user video, ask whether the user wants that video's voice.
-If yes, follow the Voice Skill's explicit voice-cloning authorization flow before
-using it. An attachment alone is not permission to clone. If no, continue with the
-normal voice picker.
-
-An existing project audio asset may drive the avatar directly. When audio is the
-speech source, do not invent or require text unless the user also wants a transcript
-or script review.
-
-### Resolve a script only for text-driven generation
-
-The script may be pasted by the user, derived from selected project material, or
-written collaboratively. When drafting:
-
-1. Ask only for missing intent such as audience, goal, tone, facts, and duration.
-2. Produce the complete proposed script.
-3. Let the user edit it or approve it explicitly.
-4. Submit exactly the confirmed content.
-
-Each explicit text segment must contain 1–5000 characters. Omit explicit segments
-for an ordinary script so the backend generates one continuous video up to 5000
-characters. Use explicit segments only when the user requests meaningful paragraph
-or shot boundaries. Longer text is split automatically and may create at most 10
-segments. Never summarize, translate, drop, duplicate, or reorder content to fit a
-limit. Preserve wording and
-punctuation; non-semantic line whitespace may be normalized automatically.
-
-Text-driven avatar generation is limited by the 5000-character segment boundary,
-not by an estimated audio duration. ChatCut TTS and cloned voices are rendered to
-audio before avatar-video submission. Long audio-backed text is prepared as smaller
-ordered segments, and each generated audio file is validated from its real duration.
-Existing project audio longer than 600 seconds is automatically split into ordered
-parts before submission. Pass the original asset once; never split it manually or
-submit one generation call per part. If a progress update is useful, say only that
-ChatCut is splitting the long audio while preserving the complete content and order.
-Do not add implementation details about where or how the work runs, and never expose
-hidden derived audio assets. Never shorten or summarize approved content to satisfy
-these limits.
-
-### Resolve output settings from intent and available defaults
-
-Preserve the selected avatar's original framing by default: omit `aspectRatio` and
-let the backend resolve it to `auto`. Never use the current project ratio as the
-avatar-video default. If the user explicitly asks for a different ratio, pass that
-request instead.
-
-For an official catalog avatar, resolve the default from the `hasBackground` field
-returned by `manage_avatar action="catalog"`:
-
-- `hasBackground: true` — pass `removeBackground: false` and preserve the original
-  scene.
-- `hasBackground: false` — pass `removeBackground: true` so the result is a
-  transparent WebM when transparency is supported.
-
-For a saved/custom avatar without catalog metadata, keep `removeBackground: false` as
-the default and preserve the source image background. Pass `removeBackground: true`
-only when the user explicitly asks for a transparent background or background removal.
-Do not turn this into a blocking question. Before submission, briefly tell the user
-whether the original scene will be preserved or the result will be transparent. An
-explicit user request overrides the catalog default. If transparency is unsupported,
-explain the limitation and keep the original background.
-
-Do not promise crop, background removal, motion control, transparency, resolution,
-or prompt-based identity creation until the live capability response confirms it.
-
-### Submit as soon as the required constraints are resolved
-
-Summarize the resolved avatar, voice or audio source, script state, aspect ratio, and
-resolution before the first generation when any choice remains consequential. Then
-call `submit_avatar_video` once.
-
-Treat long-script output as an ordered batch of avatar-video segments, not as one
-audio file or one opaque job. After submitting, tell the user that generation has
-started and end the turn. Never call `track_progress`, `manage_avatar action=get-batch`,
-or add a Bash sleep in the same turn merely to keep the turn open, including when a
-queued follow-up step will eventually need the completed asset. The project library
-shows the in-progress generation and receives the completed video assets in the
-background.
-
-Call `track_progress` in a later user turn only when the user asks for status or resumes
-a follow-up step that depends on the completed asset, such as placing it on the timeline
-or reviewing the result. When a job is still non-terminal, say that generation is still
-running without quoting its numeric progress: provider progress values are coarse
-internal stages, not user-facing completion estimates. Use `manage_avatar
-action=get-batch` when ordered segment and attempt state is needed. Keep the stable
-segment key and original order.
-
-For a failed segment, offer a targeted retry. Do not resubmit successful segments or
-the entire batch without the user's instruction. Use the management tool for supported
-segment regeneration, removal, reordering, attempt selection, and acceptance.
-
-Generated results become normal ChatCut video assets. Add them to the timeline only
-when the user requested placement or it is clearly part of the active editing task.
-Do not export unless asked.
-
+Do not use an unmarked generic `<form-files>` upload for avatar creation.
+Published plugin forms do not provide this native upload control. Ask the user to
+attach the portrait through their host, then use the Asset Import Skill and pass the
+returned ChatCut image asset id to `manage_avatar`.

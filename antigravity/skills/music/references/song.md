@@ -1,5 +1,7 @@
 # Vocal-song reference
 
+If `submit_music` is not loaded yet, load it with `ToolSearch` before calling it, so you use its real parameters instead of guessing.
+
 Use this reference after the user has explicitly chosen a sung song, vocals,
 lyrics-to-song, a theme song with words, or vocal music for an MV.
 

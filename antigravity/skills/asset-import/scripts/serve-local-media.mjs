@@ -1,12 +1,27 @@
 #!/usr/bin/env node
-// Loopback file server shared by hosted plugin import skills.
-// Serves only explicitly listed files to the selected ChatCut editor origin.
+// Loopback file server shared by the Claude and Codex import skills.
+// Serves ONLY the explicitly listed
+// files, only to the ChatCut editor origin, only on 127.0.0.1, and shuts
+// itself down after --ttl seconds (default 900) so no ambient file server
+// outlives the import.
+//
+// Usage:
+//   node serve-local-media.mjs [--port 43991] [--ttl 900] \
+//     [--origin <editor-origin>] /abs/path/a.mp4 /abs/path/b.mov
+// Use the origin from the actual editor/browserHandoff URL for beta, preview,
+// or production sessions.
+//
+// The imports array contains ready-to-call import_media arguments.
+// Browser local-network permission may still be required despite CORS/PNA headers.
+// Range requests are honoured so an interrupted editor download resumes
+// instead of starting over, and so the editor can read the file's index and
+// first frame for its import card while the copy is still running.
 
-import { randomUUID } from "node:crypto";
-import { createReadStream, statSync } from "node:fs";
 import { createServer } from "node:http";
 import { pipeline } from "node:stream";
+import { createReadStream, statSync } from "node:fs";
 import { basename, resolve } from "node:path";
+import { randomUUID } from "node:crypto";
 
 function usageExit(message) {
   if (message) console.error(message);
@@ -25,7 +40,7 @@ function numberArg(flag, raw) {
 }
 
 const args = process.argv.slice(2);
-let port = 0;
+let port = 0; // 0 = ephemeral
 let ttlSeconds = 900;
 let origin = "https://app.chatcut.io";
 const paths = [];
@@ -42,25 +57,24 @@ for (let i = 0; i < args.length; i++) {
   } else paths.push(resolve(args[i]));
 }
 if (paths.length === 0) usageExit();
-
 const files = new Map();
-for (const path of paths) {
-  let stat;
+for (const p of paths) {
+  let st;
   try {
-    stat = statSync(path);
+    st = statSync(p);
   } catch (error) {
     usageExit(
-      `cannot read file: ${path}${error instanceof Error ? ` (${error.message})` : ""}`,
+      `cannot read file: ${p}${error instanceof Error ? ` (${error.message})` : ""}`,
     );
   }
-  if (!stat.isFile()) usageExit(`not a file: ${path}`);
-  const name = basename(path);
+  if (!st.isFile()) usageExit(`not a file: ${p}`);
+  const name = basename(p);
   if (files.has(name)) {
     usageExit(
-      `duplicate basename "${name}" (${files.get(name).path} vs ${path}); rename one copy first`,
+      `duplicate basename "${name}" (${files.get(name).path} vs ${p}); rename one copy first`,
     );
   }
-  files.set(name, { assetId: randomUUID(), path, size: stat.size });
+  files.set(name, { path: p, size: st.size, assetId: randomUUID() });
 }
 
 // Older editor/MCP validators require a 20+ character URL path prefix.
@@ -70,17 +84,18 @@ const routePrefix = "chatcut-local-media-v1";
 // 1 MiB keeps the loopback socket fed on multi-GB originals.
 const READ_HIGH_WATER_MARK = 1024 * 1024;
 
-function setCorsHeaders(response) {
-  response.setHeader("Access-Control-Allow-Origin", origin);
-  response.setHeader("Access-Control-Allow-Methods", "GET, OPTIONS");
-  response.setHeader("Access-Control-Allow-Headers", "*");
-  response.setHeader("Access-Control-Allow-Private-Network", "true");
-  response.setHeader(
+function cors(res) {
+  res.setHeader("Access-Control-Allow-Origin", origin);
+  res.setHeader("Access-Control-Allow-Methods", "GET, OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "*");
+  // Chrome Private Network Access preflight for public->loopback fetches.
+  res.setHeader("Access-Control-Allow-Private-Network", "true");
+  res.setHeader(
     "Access-Control-Expose-Headers",
     "Accept-Ranges, Content-Length, Content-Range",
   );
-  response.setHeader("Accept-Ranges", "bytes");
-  response.setHeader("Cache-Control", "no-store");
+  res.setHeader("Accept-Ranges", "bytes");
+  res.setHeader("Cache-Control", "no-store");
 }
 
 // Only the open-ended "bytes=N-" form a resuming download sends is accepted;
@@ -92,31 +107,33 @@ function parseRangeStart(header, size) {
   return Number.isSafeInteger(start) && start < size ? start : undefined;
 }
 
-const server = createServer((request, response) => {
-  setCorsHeaders(response);
-  const requestOrigin = request.headers.origin;
-  if (requestOrigin && requestOrigin !== origin) {
-    response.writeHead(403);
-    response.end();
+const server = createServer((req, res) => {
+  cors(res);
+  // Browsers always send Origin on cross-origin fetches; reject anything
+  // that is not the editor origin. Origin-less requests from local clients
+  // are allowed. File access is limited to the explicit allowlist below.
+  const reqOrigin = req.headers.origin;
+  if (reqOrigin && reqOrigin !== origin) {
+    res.writeHead(403);
+    res.end();
     return;
   }
-  if (request.method === "OPTIONS") {
-    response.writeHead(204);
-    response.end();
+  if (req.method === "OPTIONS") {
+    res.writeHead(204);
+    res.end();
     return;
   }
-  if (request.method !== "GET") {
-    response.writeHead(405);
-    response.end();
+  if (req.method !== "GET") {
+    res.writeHead(405);
+    res.end();
     return;
   }
-
   let decodedPath;
   try {
-    decodedPath = decodeURIComponent(request.url ?? "/");
+    decodedPath = decodeURIComponent(req.url ?? "/");
   } catch {
-    response.writeHead(400);
-    response.end();
+    res.writeHead(400);
+    res.end();
     return;
   }
   const [, prefix, ...rest] = decodedPath.split("/");
@@ -129,24 +146,23 @@ const server = createServer((request, response) => {
       : undefined;
   const entry = files.get(name);
   if (!entry) {
-    response.writeHead(404);
-    response.end();
+    res.writeHead(404);
+    res.end();
     return;
   }
-
-  const rangeStart = parseRangeStart(request.headers.range, entry.size);
+  const rangeStart = parseRangeStart(req.headers.range, entry.size);
   if (rangeStart === undefined) {
-    response.writeHead(416, { "content-range": `bytes */${entry.size}` });
-    response.end();
+    res.writeHead(416, { "content-range": `bytes */${entry.size}` });
+    res.end();
     return;
   }
   const start = rangeStart ?? 0;
   // Any Range request gets 206, even from byte 0: a 200 tells range-probing
   // readers such as Mediabunny's UrlSource to stream the whole file.
   const ranged = rangeStart !== null;
-  response.writeHead(ranged ? 206 : 200, {
-    "content-length": entry.size - start,
+  res.writeHead(ranged ? 206 : 200, {
     "content-type": "application/octet-stream",
+    "content-length": entry.size - start,
     ...(ranged
       ? { "content-range": `bytes ${start}-${entry.size - 1}/${entry.size}` }
       : {}),
@@ -157,33 +173,29 @@ const server = createServer((request, response) => {
   });
   // pipeline, not pipe: a reader that cancels once it has the bytes it wanted
   // must close the file too.
-  pipeline(stream, response, () => {});
+  pipeline(stream, res, () => {});
 });
 
 server.listen(port, "127.0.0.1", () => {
-  const address = server.address();
-  const base = `http://127.0.0.1:${address.port}/${routePrefix}`;
-  console.log(
-    JSON.stringify({
-      files: Object.fromEntries(
-        [...files.keys()].map((name) => [
-          name,
-          `${base}/${encodeURIComponent(name)}`,
-        ]),
-      ),
-      imports: [...files].map(([filename, entry]) => ({
-        action: "from_editor",
-        assetId: entry.assetId,
-        filename,
-        sizeBytes: entry.size,
-        url: `${base}/${encodeURIComponent(filename)}`,
-      })),
-      origin,
-      port: address.port,
-      token: routePrefix, // Legacy field: a public URL prefix, not a credential.
-      ttlSeconds,
-    }),
-  );
+  const addr = server.address();
+  const base = `http://127.0.0.1:${addr.port}/${routePrefix}`;
+  const out = {
+    port: addr.port,
+    token: routePrefix, // Legacy field: a public URL prefix, not a credential.
+    origin,
+    ttlSeconds,
+    files: Object.fromEntries(
+      [...files.keys()].map((n) => [n, `${base}/${encodeURIComponent(n)}`]),
+    ),
+    imports: [...files].map(([filename, entry]) => ({
+      action: "from_editor",
+      assetId: entry.assetId,
+      filename,
+      sizeBytes: entry.size,
+      url: `${base}/${encodeURIComponent(filename)}`,
+    })),
+  };
+  console.log(JSON.stringify(out));
 });
 
 server.on("error", (error) => {
@@ -193,5 +205,6 @@ server.on("error", (error) => {
 
 setTimeout(() => {
   server.close(() => process.exit(0));
+  // Do not linger on open sockets past the TTL.
   setTimeout(() => process.exit(0), 2000).unref();
 }, ttlSeconds * 1000).unref();

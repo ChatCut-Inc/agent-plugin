@@ -1,5 +1,7 @@
 # Kling
 
+If `submit_video` is not loaded yet, load it with `ToolSearch` before calling it, so you use its real parameters instead of guessing.
+
 Read this document before generating videos with `model: "kling"` on `submit_video`.
 
 ## Model & task

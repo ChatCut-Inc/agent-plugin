@@ -5,27 +5,13 @@ description: Hosted ChatCut plugin sessions only (the `chatcut` MCP server). If 
 
 # Export
 
-Export only when the user asks for a render, download, or final standalone deliverable. A review checkpoint normally stays as an editable ChatCut timeline.
+Export only when the user asks for a render, download, or final standalone deliverable. A review checkpoint normally stays as an editable ChatCut timeline. To check your own work, use `preview_timeline` for the picture and a `format:"audio"` export to hear sound; never make a full-resolution export for a self-check (see `verification`).
 
-Use `submit_export` with the current tool schema. Confirm the target timeline, range, resolution, codec, and format from project state and user intent; do not guess a non-active timeline. Record every returned `renderId`.
+Use `submit_export` with the current tool schema. Confirm the target timeline, range, resolution, codec, and format from project state and user intent; do not guess a non-active timeline. Give each export a short, distinctive `name`. Record every returned `renderId` and `expectedFilename`.
 
-Video and audio default to `renderMode:"local"`: the connected ChatCut editor
-tab renders the timeline. Open the returned editor URL, activate the requested
-timeline, and keep that tab open through completion. If no capable editor is
-connected, resolve that error before retrying. There is no automatic cloud retry.
-Media already readable by that editor does not need another upload for this route.
-If the user explicitly chooses cloud, use that choice directly without requiring
-browser or Desktop setup first.
+Video and audio render locally by default: omit `renderMode`, and the connected ChatCut editor tab renders the timeline on the user's device. Open the project through the browser handoff in the plugin basics skill, activate the requested timeline, and keep that tab open until delivery finishes. If no capable editor is connected, resolve the reported browser or timeline issue and retry locally; there is no automatic cloud retry. Media the editor can already read needs no upload for a local export. If the user explicitly chooses cloud, follow Cloud Rendering without requiring browser or Desktop setup first.
 
-A server-side active-timeline result does not prove that an already-open browser
-tab switched timelines. Confirm the intended timeline in that tab, or ask the
-user to select it, and pass its explicit ID when submitting the export.
-
-Use `track_export` for browser and cloud export status; do not use
-generation/transcription `track_progress`. Pass the returned `renderId` for an
-accepted job. A `wait` call is a single status read; honor its check-back guidance.
-If submission timed out, follow Local Export Recovery before resubmitting to
-avoid duplicate jobs.
+Use `track_export` for browser and cloud export status; do not use generation/transcription `track_progress`. Pass the returned `renderId` for an accepted job. A `wait` call is a single status read; honor its check-back interval. If submission timed out or its acknowledgement is uncertain, follow Local Export Recovery before resubmitting so the same export does not start twice.
 
 ## Local Export Recovery
 
@@ -47,40 +33,26 @@ Use Desktop `track_progress` with `target:"export"` and `exportTaskIds` set to t
 
 ## Delivery
 
-Deliver according to the completed result:
+A completed browser export (`source:"browser"`) has no `downloadUrl`: the rendering tab hands the file to that browser's downloads. Completion does not prove the file was saved, so deliver it only after finding it.
 
-- `source:"browser"`: relay `statusMessage`, filename, and available metadata.
-  The rendering tab downloads the file on its computer or writes to the chosen
-  file. Browser exports download on the user's own computer. This result has no
-  `downloadUrl` or verified filesystem path. Attach a file only after the host
-  locates and reads it; otherwise link the editor and
-  explain where to check its Export queue.
-- A completed result with a `downloadUrl`: use the host's normal file/link
-  delivery. Download it only through a permitted host route when a local artifact
-  is needed. Do not invent a download URL for a browser export.
+1. Look in the user's downloads folder (usually `~/Downloads`) for `expectedFilename`, allowing a browser suffix such as ` (1)` before the extension. Without `expectedFilename`, look for the completed `track_export` entry's `name` (the submitted name plus `.mp4`, `.webm`, or `.mp3`) and take the newest match modified after you submitted. Search for that name only; do not list or read other files there. If you cannot read files on the user's computer, give the user the file name instead.
+2. Found: give the user the path and concise render metadata. In Antigravity, use its normal supported file/link delivery and provide the local path. If the user asked for a specific folder, copy the file there.
+3. Not found: follow the result's `deliveryGuidance` when present, asking the user for the one step that matches the browser that rendered it, then look again:
+   - Chrome: allow "Download multiple files" from the prompt in the address bar (once; the site stays allowed), then click **Download again** in the editor's Export queue.
+   - If the actual browser shows a save dialog, ask the user to complete it, then verify the saved file.
+   - Otherwise: ask where the browser saved the file.
 
-Queued or running exports are not delivered. Report any render warnings and
-their effect on the output.
+If reading the downloads folder needs the user's approval (a macOS privacy prompt or a host permission prompt), tell them you are looking there for the exported file. If the status says the export was written to a file the user picked, that file is the delivery. Do not skip these steps to switch to cloud, and never use cloud just to get a link or to check your own work.
+
+If the user cannot complete local delivery, follow Local Export Recovery above. Offer an available local alternative while keeping cloud directly available when the original request permits it; do not make every user try Desktop. A browser on a remote host downloads on that host, and a Desktop output path is on the Desktop computer. State the actual delivery location rather than claiming the user's device received the file.
+
+A completed result with a `downloadUrl` (cloud video/audio, subtitles, XML): use the host's normal file/link delivery. If the user asked for a specific local path, download it there yourself. In Antigravity, provide the verified local path and a file link when supported.
+
+Queued or running exports are not delivered. Report any warnings and their effect on the output.
 
 ## Other Formats
 
-For subtitle export, first use `manage_timelines` to confirm the agent's active
-timeline. If it differs from the requested timeline, use its `action:"switch"`
-with that target and read back the active state before submitting. The hosted
-subtitle path tested on 2026-10-16 reads captions from the agent's active timeline
-even when `submit_export.timelineId` names another timeline; switching only the
-browser tab does not resolve this. This is a compatibility guard, not a backend
-fix. Keep the explicit export timeline ID and check the actual subtitle file's
-text and timing before delivery. If captions are readable but export still
-reports none after alignment, report the failure instead of regenerating captions
-or constructing a replacement SRT and calling it a successful tool export.
-
-For NLE XML export, use the corresponding `submit_export` format and report
-warnings about unsupported or dropped elements. `fcp_xml` is legacy `xmeml`, not
-modern `.fcpxml`; do not promise a lossless project round trip or target-NLE
-compatibility without testing it. For transparent Motion Graphic delivery, use
-the dedicated MG export tool exposed by the current manifest and track the
-returned render ids.
+Subtitle and NLE XML exports use the corresponding `submit_export` format and can complete synchronously with a URL/path; report warnings about unsupported or dropped elements. An archive runs through the editor's bundle pipeline and may return no `renderId`; then check its progress in the editor rather than promising `track_export` support. For transparent Motion Graphic delivery, use the dedicated MG export tool exposed by the current manifest and track the returned render ids.
 
 ## Cloud Rendering
 

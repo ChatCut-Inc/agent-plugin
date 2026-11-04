@@ -21,12 +21,12 @@ Treat the active MCP tool schema and returned structured error as authoritative.
 
 ## Generation And Motion Graphics
 
-- Use only generation tools visible on the current host. External plugins direct-author Motion Graphics with `create_motion_graphic_from_code` when available; the built-in ChatCut Agent may expose `submit_motion_graphic`.
+- Use only generation tools visible on the current host. Codex, Claude Code and Antigravity plugins direct-author Motion Graphics with `create_motion_graphic_from_code`; the built-in ChatCut Agent may expose `submit_motion_graphic`.
 - Preserve the original provider or content-policy failure. Do not spend credits on repeated identical retries or silently switch models.
 
 ## Verification And Export
 
 - A successful mutation is not visual proof; load `verification` when the result must be seen.
-- Use `track_export` for render jobs. A failed local export is not by itself a reason to switch to cloud: fix the reported browser or timeline issue and retry locally. Use cloud only as a fallback the user agrees to. If a cloud render cannot read an asset, resolve remote readiness through `asset-import` only with user permission, or report the limitation.
+- Use `track_export` for render jobs. A failed local export is not by itself a reason to switch to cloud: fix the reported browser or timeline issue and retry locally. A blocked local export, or a completed one whose file is missing, follows the `export` fallback order: cloud only with the user's agreement, and ChatCut Desktop only when cloud cannot do it. If a cloud render cannot read an asset, resolve remote readiness through `asset-import` only with user permission, or report the limitation.
 
 On auth or project-access errors, verify the exact project id and that the editor and plugin use the same ChatCut account before attempting code or infrastructure debugging.
