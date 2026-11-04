@@ -7,7 +7,8 @@
   "plugins": [
     {
       "name": "chatcut",
-      "source": "grok"
+      "source": "grok",
+      "description": "AI video editing in ChatCut: cut footage, add captions, clean up talking-head videos, and export editable timelines."
     }
   ]
 }

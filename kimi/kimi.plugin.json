@@ -1,11 +1,11 @@
 {
   "$schema": "https://catalog.msh.team/misc/kimi.plugin.schema.json",
   "name": "chatcut-kimi-work",
-  "version": "1.10.17",
+  "version": "1.10.18",
   "description": "ChatCut plugin for Kimi Work: let the agent edit speech, create motion graphics and media, and deliver editable video projects in the live in-app editor.",
   "author": "ChatCut",
   "homepage": "https://chatcut.io",
-  "license": "GPL-3.0-only",
+  "license": "Apache-2.0",
   "keywords": [
     "chatcut",
     "video",
@@ -40,7 +40,8 @@
       "headers": {
         "x-chatcut-mcp-client": "kimi_work",
         "x-chatcut-mcp-surface": "embedded-preview",
-        "x-chatcut-plugin-version": "1.10.17"
+        "x-chatcut-plugin-version": "1.10.18",
+        "x-chatcut-install-source": "kimi_work_market"
       }
     }
   }

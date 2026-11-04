@@ -1,8 +1,16 @@
 # ChatCut Agent Plugins
 
-The ChatCut Agent Plugins connect Codex, Claude Code, Grok Bot, Cursor, and Kimi Work to ChatCut so you can edit ChatCut video projects with AI assistance.
+AI video editing for your agent. The ChatCut Agent Plugins connect Codex, Claude Code, Grok Bot, Cursor, and Kimi Work to ChatCut, so you can ask your agent to edit a video, add captions, clean up a talking-head recording, or recreate a viral video with your own footage, and get an editable timeline back.
 
-Use it to import media, change a project timeline, create motion graphics, generate assets, transcribe audio, add captions, export videos, and verify that edits are visible in the editor.
+Under the hood the plugins import media, change a project timeline, create motion graphics, generate assets, transcribe audio, add captions, export videos, and verify that edits are visible in the editor.
+
+## Install ChatCut Desktop (recommended)
+
+Ask your agent to read the complete [ChatCut Desktop setup guide](https://chatcut.io/desktop) using `curl -fsSL https://chatcut.io/desktop` (`curl.exe` on Windows), then install ChatCut and connect the current agent. The official macOS and Windows installers do not need Node.js or npm. Desktop owns its local tools and Skills. Run setup on a supported macOS or Windows computer with a graphical desktop. Linux and remote agents without access to that computer cannot install Desktop there; continue in a local agent on the supported computer.
+
+To recreate a reference video with your person or product while retaining its motion and timing, use Desktop’s bundled `video-gen` Skill and `submit_video_remake`. See the [video recreation guide](https://chatcut.io/viralvideocloner). Quotes use current account access and require approval before spending credits.
+
+The hosted packages below remain available for existing Web projects and explicit Web-only use. Web projects and original media remain separate and are not automatically migrated. Connecting Desktop to the same agent may disable or replace its conflicting hosted connection; do not promise that both connections stay active.
 
 ## What Is Included
 
@@ -15,6 +23,7 @@ Use it to import media, change a project timeline, create motion graphics, gener
 - `codex/.codex-plugin/plugin.json` - Codex plugin metadata.
 - `claude/.claude-plugin/plugin.json` - Claude Code plugin metadata.
 - `grok/.cursor-plugin/plugin.json` - Grok Bot and Cursor plugin metadata.
+- `gemini-extension.json` - Gemini CLI extension manifest (hosted MCP only; install with `gemini extensions install https://github.com/ChatCut-Inc/agent-plugin`).
 - `codex/.mcp.json` - Codex MCP server configuration.
 - `codex/skills/` - host adapters plus direct symlinks to canonical craft skills in `apps/agent/.claude/skills/`.
 - `claude/skills/` - Claude-specific adapters plus direct symlinks to the same canonical agent skills.
@@ -26,7 +35,7 @@ Use it to import media, change a project timeline, create motion graphics, gener
 - Codex with plugin support, Claude Code 2.x (CLI or desktop app), Grok Bot, Cursor, or Kimi Work.
 - Access to a ChatCut project you want to edit.
 
-## Authentication
+## Optional hosted Web plugin authentication
 
 The plugin connects to ChatCut through the hosted ChatCut MCP endpoint:
 
@@ -36,17 +45,17 @@ https://api.chatcut.io/api/external-mcp/mcp
 
 The host handles authentication when the plugin is installed or first used (`codex mcp login chatcut`, or `claude mcp login plugin:chatcut:chatcut` in Claude Code). Grok Bot and Cursor users complete the authorization flow from the host's Plugins screen. Follow the sign-in flow to connect your ChatCut account.
 
-Install instructions per host: [chatcut.io/chatgpt](https://chatcut.io/chatgpt) for Codex, [chatcut.io/claude](https://chatcut.io/claude) for Claude Code (agent-executable copy in [./docs/claude-code-install.md](./docs/claude-code-install.md)), and [./grok/README.md](./grok/README.md) for Grok Bot and Cursor.
+Install instructions per host: [Codex Web guide](https://chatcut.io/web-plugin/chatgpt) for Codex, [Claude Code Web guide](https://chatcut.io/web-plugin/claude) for Claude Code (agent-executable copy in [./docs/claude-code-web-install.md](./docs/claude-code-web-install.md)), and [./grok/README.md](./grok/README.md) for Grok Bot and Cursor.
 
 ## Example Prompts
 
-After installing and authenticating the plugin, try prompts like:
+After installing and authenticating the plugin, ask in your own words, for example:
 
-- `Import this video into my ChatCut project.`
+- `Cut this talking-head video tighter and add captions.`
+- `Add subtitles to my video and export a vertical version.`
 - `Add a simple motion graphic overlay.`
 - `Generate a voiceover and background music.`
-- `Transcribe this clip and add captions.`
-- `Export the current project.`
+- `帮我把这段口播剪干净，加上字幕。`
 
 ## Repository
 
@@ -59,3 +68,7 @@ https://github.com/ChatCut-Inc/agent-plugin.git
 ## Support
 
 For product information, visit [chatcut.io](https://chatcut.io).
+
+## License
+
+Apache-2.0; see [LICENSE](./LICENSE).
