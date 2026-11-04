@@ -1,0 +1,31 @@
+{
+  "$schema": "https://antigravity.google/schemas/v1/plugin.json",
+  "name": "chatcut",
+  "displayName": "ChatCut",
+  "version": "1.0.0",
+  "description": "AI video editing in ChatCut: cut footage, add captions and subtitles, clean up talking-head recordings, add motion graphics, and export editable timelines.",
+  "logo": "assets/logo.png",
+  "suggestedPrompts": [
+    "Cut this talking-head video tighter and add captions",
+    "Turn this interview into a 60-second vertical highlight",
+    "Add a simple motion graphic overlay to my ChatCut project"
+  ],
+  "author": {
+    "name": "ChatCut",
+    "email": "dev@chatcut.io",
+    "url": "https://chatcut.io"
+  },
+  "homepage": "https://chatcut.io",
+  "repository": "https://github.com/ChatCut-Inc/agent-plugin",
+  "license": "Apache-2.0",
+  "keywords": [
+    "chatcut",
+    "video",
+    "video-editing",
+    "captions",
+    "subtitles",
+    "transcription",
+    "motion-graphics",
+    "mcp"
+  ]
+}
