@@ -33,8 +33,14 @@ Before approval, obtain this repository from GitHub or use an existing local clo
 agy plugin install <path-to-clone>/antigravity
 ```
 
-<!-- verify GitHub subdirectory install -->
-GitHub URL installation: `<GitHub subdirectory install command — reviewer to verify>`.
+To install from GitHub without cloning, point at this subdirectory:
+
+```bash
+agy plugin install https://github.com/ChatCut-Inc/agent-plugin/tree/main/antigravity
+```
+
+Use the subdirectory URL. The repository root URL installs the Gemini CLI
+extension instead, which connects the MCP server without these skills.
 
 To sign in:
 
