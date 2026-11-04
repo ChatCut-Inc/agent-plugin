@@ -6,6 +6,9 @@ projects, import media, edit timelines, transcribe speech, add captions and moti
 graphics, generate media, and export finished work. Available tools and generation
 models depend on the connected ChatCut account and its current access.
 
+This is the Grok Bot listing. Cursor uses the separate `cursor/` listing in the
+same repository, with the same skills.
+
 Edits remain editable in the ChatCut timeline. The plugin does not replace a project with a locally flattened video unless the user explicitly requests a rendered deliverable.
 
 ## Requirements
@@ -75,7 +78,7 @@ for reconnecting an existing installation.
 ```text
 .cursor-plugin/plugin.json   Cursor-format manifest consumed by Grok Bot
 mcp.json                     Hosted ChatCut MCP connection
-skills/                      ChatCut workflow skills
+skills/                      ChatCut workflow skills, mirrored in ../cursor/skills
 assets/                      Plugin logo and widget media manifest
 LICENSE                      Apache License 2.0
 ```

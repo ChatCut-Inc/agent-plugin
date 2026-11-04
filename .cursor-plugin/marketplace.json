@@ -7,7 +7,21 @@
   "plugins": [
     {
       "name": "chatcut",
-      "source": "grok"
+      "source": "grok",
+      "description": "Create and edit ChatCut videos from Grok Bot.",
+      "minClientVersions": {
+        "cursor": "never"
+      }
+    },
+    {
+      "name": "chatcut-cursor",
+      "source": "cursor",
+      "description": "Create and edit ChatCut videos from Cursor.",
+      "minClientVersions": {
+        "grokbot": "never",
+        "sand": "never",
+        "sandMobile": "never"
+      }
     }
   ]
 }

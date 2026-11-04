@@ -1,0 +1,33 @@
+{
+  "name": "chatcut-cursor",
+  "displayName": "ChatCut",
+  "version": "1.10.19",
+  "description": "Let Cursor agents create and edit videos in ChatCut through natural-language requests, with editable timelines, captions, motion graphics, media generation, and export.",
+  "minClientVersions": {
+    "grokbot": "never",
+    "sand": "never",
+    "sandMobile": "never"
+  },
+  "author": {
+    "name": "ChatCut",
+    "email": "dev@chatcut.io"
+  },
+  "homepage": "https://chatcut.io",
+  "repository": "https://github.com/ChatCut-Inc/agent-plugin.git",
+  "license": "Apache-2.0",
+  "keywords": [
+    "chatcut",
+    "video",
+    "video-editing",
+    "editor",
+    "captions",
+    "subtitles",
+    "transcription",
+    "timeline",
+    "cursor",
+    "mcp"
+  ],
+  "logo": "assets/logo-light.png",
+  "skills": "skills/",
+  "mcpServers": "mcp.json"
+}
