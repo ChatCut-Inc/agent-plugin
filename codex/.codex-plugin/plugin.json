@@ -25,6 +25,11 @@
   ],
   "mcpServers": "./.mcp.json",
   "skills": "./skills/",
+  "extensions": {
+    "com.openai": {
+      "onboardingSkill": "./skills/get-started/SKILL.md"
+    }
+  },
   "interface": {
     "displayName": "ChatCut",
     "shortDescription": "Edit, animate & generate video",

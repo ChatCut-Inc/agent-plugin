@@ -6,8 +6,11 @@ and ChatGPT; dashboard identity `chatcut-desktop`, ID in `listing.json`).
 
 It deliberately holds no copy of the skills or listing text. Starter prompts,
 descriptions, and listing links live in `codex/.codex-plugin/plugin.json`, so
-git and directory installs show the same listing. `listing.json` holds only what
-must differ in the directory build:
+git and directory installs show the same listing. The same manifest sets
+`extensions["com.openai"].onboardingSkill` to `skills/get-started`, which Codex
+runs when the user chooses Set up after installing; keep its three starters
+identical to `interface.defaultPrompt` (a test checks this). `listing.json`
+holds only what must differ in the directory build:
 
 - `pluginName`: the dashboard identity. Do not change it to `chatcut`; ChatCut
   Desktop removes `chatcut@*` plugins when it connects to Codex.
@@ -42,7 +45,8 @@ node codex-store/build.mjs
 
 The script stages `dist/codex-store/chatcut-desktop/`, validates it against the
 directory limits (listing lengths, HTTPS listing URLs, three starter prompts,
-square PNG icons, no MCP headers, no apps or hooks), and writes
+square PNG icons, no MCP headers, no apps or hooks, an onboarding skill that is
+a packaged `SKILL.md` with a name and description), and writes
 `dist/codex-store/chatcut-desktop-<version>.zip`. Use `--no-zip` to stage only
 and `--out <dir>` to stage elsewhere. It exits non-zero on any problem.
 

@@ -60,6 +60,23 @@ test("the skills-only fallback drops the MCP server but keeps the marked registr
   }
 });
 
+test("setup runs a packaged onboarding skill that offers the listing's starter prompts", async () => {
+  const outDir = await mkdtemp(join(tmpdir(), "chatcut-codex-store-"));
+  try {
+    const staged = await stageStorePackage({ outDir });
+    const path = staged.manifest.extensions["com.openai"].onboardingSkill;
+    assert.equal(path, "./skills/get-started/SKILL.md");
+    assert.equal(staged.manifest.interface.onboardingSkill, undefined, "the field sits outside interface");
+    const skill = await readFile(join(staged.stageDir, path), "utf8");
+    assert.match(skill, /^---\nname: get-started\n/);
+    for (const prompt of manifest.interface.defaultPrompt) {
+      assert.ok(skill.includes(prompt), `onboarding skill should offer: ${prompt}`);
+    }
+  } finally {
+    await rm(outDir, { recursive: true, force: true });
+  }
+});
+
 test("the store build keeps the dashboard identity and the shared listing", () => {
   const store = buildStoreManifest(manifest, listing);
   assert.equal(store.name, listing.pluginName);
@@ -132,4 +149,12 @@ test("the validator rejects listings the directory would refuse", async () => {
   for (const pattern of expected) {
     assert.ok(problems.some((problem) => pattern.test(problem)), `missing ${pattern}: ${problems.join("; ")}`);
   }
+
+  const onboarding = (onboardingSkill) => ({ ...manifest, extensions: { "com.openai": { onboardingSkill } } });
+  const missing = await validateStorePackage({ manifest: onboarding("./skills/missing/SKILL.md"), mcp, root });
+  assert.ok(missing.some((problem) => /onboardingSkill .* missing/.test(problem)), missing.join("; "));
+  const outside = await validateStorePackage({ manifest: onboarding("./README.md"), mcp, root });
+  assert.ok(outside.some((problem) => /onboardingSkill must point to a SKILL\.md/.test(problem)), outside.join("; "));
+  const bare = await validateStorePackage({ manifest: onboarding("skills/get-started/SKILL.md"), mcp, root });
+  assert.ok(!bare.some((problem) => /onboardingSkill/.test(problem)), "Codex accepts the path without ./");
 });

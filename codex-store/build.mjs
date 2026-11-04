@@ -50,6 +50,10 @@ const LIMITS = {
   imageMinSide: 48,
   imageMaxSide: 4096,
 };
+// Codex's skill frontmatter limits (codex-rs/skills). The submission guide
+// requires the onboarding skill to be an included skill with both fields.
+const SKILL_LIMITS = { name: 64, description: 1024 };
+const ONBOARDING_FIELD = 'extensions["com.openai"].onboardingSkill';
 const LISTING_URL_FIELDS = [
   "websiteURL",
   "supportURL",
@@ -178,6 +182,31 @@ async function checkImage(field, path, root, problems) {
   }
 }
 
+async function checkOnboardingSkill(manifest, root, problems) {
+  const path = manifest.extensions?.["com.openai"]?.onboardingSkill;
+  if (path === undefined) return;
+  // Codex accepts the path with or without `./`; it must name a packaged skill.
+  const relative = typeof path === "string" ? path.replace(/^\.\//, "") : "";
+  const skillsRoot = typeof manifest.skills === "string" ? `${manifest.skills.replace(/^\.\//, "").replace(/\/$/, "")}/` : null;
+  if (!skillsRoot || !relative.startsWith(skillsRoot) || !relative.endsWith("/SKILL.md") || relative.split("/").includes("..")) {
+    problems.push(`${ONBOARDING_FIELD} must point to a SKILL.md under ${manifest.skills}`);
+    return;
+  }
+  let text;
+  try {
+    text = await readFile(join(root, relative), "utf8");
+  } catch {
+    problems.push(`${ONBOARDING_FIELD} ${path} is missing from the package`);
+    return;
+  }
+  const frontmatter = text.match(/^---\r?\n([\s\S]*?)\r?\n---/)?.[1] ?? "";
+  for (const [key, limit] of Object.entries(SKILL_LIMITS)) {
+    const value = frontmatter.match(new RegExp(`^${key}:\\s*(.*)$`, "m"))?.[1].trim().replace(/^"(.*)"$/, "$1");
+    if (!value) problems.push(`${ONBOARDING_FIELD} skill needs a ${key} in its frontmatter`);
+    else if ([...value].length > limit) problems.push(`${ONBOARDING_FIELD} skill ${key} exceeds ${limit} characters`);
+  }
+}
+
 /** Returns every submission problem found; an empty list means the package passes. */
 export async function validateStorePackage({ manifest, mcp, root }) {
   const problems = [];
@@ -189,6 +218,7 @@ export async function validateStorePackage({ manifest, mcp, root }) {
   if (!/^\d+\.\d+\.\d+$/.test(manifest.version ?? "")) problems.push("version must be semver");
   if ("apps" in manifest) problems.push("apps / .app.json cannot be submitted");
   if ("hooks" in manifest) problems.push("lifecycle hooks cannot be submitted");
+  await checkOnboardingSkill(manifest, root, problems);
 
   checkLength("displayName", ui.displayName, LIMITS.displayName, problems);
   checkLength("shortDescription", ui.shortDescription, LIMITS.shortDescription, problems);
