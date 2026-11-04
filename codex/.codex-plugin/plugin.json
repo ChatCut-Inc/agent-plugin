@@ -1,7 +1,7 @@
 {
   "name": "chatcut",
   "version": "1.10.29",
-  "description": "Clean up talking-head videos and add captions, motion graphics, and voiceovers as editable ChatCut projects from Codex.",
+  "description": "Edit and package talking-head videos, create motion graphics, and generate images, video clips, voiceovers and music as editable ChatCut projects from Codex.",
   "author": {
     "name": "ChatCut",
     "email": "dev@chatcut.io",
@@ -27,8 +27,8 @@
   "skills": "./skills/",
   "interface": {
     "displayName": "ChatCut",
-    "shortDescription": "Edit, caption & animate videos",
-    "longDescription": "Turn raw footage into a finished video without leaving the chat. ChatCut edits on a real multi-track timeline, so every cut, caption, and effect stays adjustable in the ChatCut editor.\n\nWhat you can do:\n- Clean up talking-head videos: remove pauses, filler words, false starts, and repeated takes, then add styled, animated captions with keyword highlights.\n- Add motion graphics: animated titles, key-point callouts, lower thirds, and end cards built for your footage.\n- Add a voiceover: draft a narration script and lay an AI voice track under your cuts, with music and sound effects.\n- Turn long videos into shorts: pick the strongest moments, reframe for vertical, and caption them for TikTok, Reels, or Shorts.\n- Polish the edit: B-roll and stock footage, voice isolation, and caption translation.\n- Create new material: generate images and video clips, translate and dub videos, sync multicam footage, and make AI presenter videos.\n- Export an MP4 and check the result frame by frame before you share it.\n\nWorks with local files, attachments, and links. Projects are saved to your ChatCut account, so you can open them in the editor and keep refining by hand or by chat.",
+    "shortDescription": "Edit, animate & generate video",
+    "longDescription": "Turn raw footage into a finished video without leaving the chat. ChatCut works on a real multi-track timeline, so every cut, caption, graphic and generated clip stays editable in the ChatCut editor.\n\nTalking-head editing and packaging\n- Remove pauses, filler words, false starts and repeated takes.\n- Add styled, animated captions with keyword highlights, plus B-roll, music and sound effects.\n- Reframe for vertical and cut long videos into shorts for TikTok, Reels or Shorts.\n\nMotion graphics\n- Animated titles, key-point callouts, lower thirds, charts and end cards, designed for your footage and editable afterwards.\n\nAI asset generation\n- Generate images, video clips, voiceovers, music and sound effects, and place them straight on your timeline.\n- Translate and dub videos, and create AI presenter videos.\n\nExport an MP4 and check the result frame by frame before you share it. Works with local files, attachments and links. Projects are saved to your ChatCut account, so you can keep refining them in the editor by hand or by chat.",
     "developerName": "ChatCut",
     "category": "Creativity",
     "capabilities": ["Read", "Write"],
@@ -39,7 +39,7 @@
     "defaultPrompt": [
       "Cut the pauses and filler words from this talking-head video, then add animated captions",
       "Add motion graphics to this video: an animated title, key-point callouts, and an end card",
-      "Write a voiceover script for this video and add an AI narration track that fits the cuts"
+      "Write a voiceover script for this video and generate an AI narration track that fits the cuts"
     ],
     "brandColor": "#111827",
     "composerIcon": "./assets/logo-light.png",
