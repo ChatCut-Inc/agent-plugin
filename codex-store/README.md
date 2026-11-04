@@ -14,13 +14,19 @@ must differ in the directory build:
 - `installSource`: the backend `install_source` value for directory installs,
   registered in the ChatCut repo's `docs/development/analytics/install-source.md`.
 - `markChannelInMcpUrl`: puts `chatcutInstallSource` and `chatcutMcpSurface`
-  on the MCP URL. Public submission rejects MCP server headers, so the URL is
-  the only channel marker that survives review. Codex keys stored sign-ins by
-  server URL, so turning this on asks existing directory users to sign in once.
+  on the plugin's own MCP URL. Public submission rejects MCP server headers, so
+  the URL is the only channel marker that survives review. Keep it `false`:
+  Codex keys stored sign-ins by the exact server URL and starts plugin MCP
+  sign-in only on a fresh install, so after the update existing directory users
+  whose server comes from the plugin would see "not logged in" and lose ChatCut
+  tools until they run `codex mcp login chatcut`.
+- `markChannelInRegistration`: puts the same parameters on the
+  direct-registration command in `chatcut-plugin-basics`. That command always
+  signs in fresh, so it costs nothing and still counts users who register the
+  server by hand from this package.
 - `includeMcpServer`: set to `false` only if the portal refuses an MCP server
   on this skills-only entry. The package then ships skills alone, and the
-  direct-registration command in `chatcut-plugin-basics` still carries the
-  marked URL.
+  direct-registration command still follows `markChannelInRegistration`.
 - `screenshots`: optional `./assets/...` PNG paths, at most 4096 px per side
   and 5 MiB each.
 

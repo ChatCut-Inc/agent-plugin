@@ -10,6 +10,7 @@ import {
   codexOAuthCallbackId,
   markSkillRegistration,
   stageStorePackage,
+  storeRegistrationUrl,
   validateStorePackage,
 } from "../codex-store/build.mjs";
 
@@ -26,8 +27,10 @@ test("the staged directory package passes every submission check", async () => {
   try {
     const staged = await stageStorePackage({ outDir });
     assert.deepEqual(staged.problems, []);
+    assert.equal(staged.mcp.mcpServers.chatcut.url, hostedUrl, "existing sign-ins stay valid");
+    assert.notEqual(staged.registrationUrl, hostedUrl);
     const skill = await readFile(join(staged.stageDir, "skills/chatcut-plugin-basics/SKILL.md"), "utf8");
-    assert.ok(skill.includes(`--url '${staged.mcp.mcpServers.chatcut.url}' --oauth-resource`));
+    assert.ok(skill.includes(`--url '${staged.registrationUrl}' --oauth-resource`));
     const shipped = JSON.parse(await readFile(join(staged.stageDir, ".codex-plugin/plugin.json"), "utf8"));
     assert.equal(shipped.name, "chatcut-desktop");
   } finally {
@@ -51,7 +54,7 @@ test("the skills-only fallback drops the MCP server but keeps the marked registr
     assert.ok(!staged.entries.includes(".mcp.json"));
     await assert.rejects(stat(join(staged.stageDir, ".mcp.json")));
     const skill = await readFile(join(staged.stageDir, "skills/chatcut-plugin-basics/SKILL.md"), "utf8");
-    assert.ok(skill.includes(`--url '${staged.serverUrl}' --oauth-resource`));
+    assert.ok(skill.includes(`--url '${staged.registrationUrl}' --oauth-resource`));
   } finally {
     await rm(repoRoot, { recursive: true, force: true });
   }
@@ -67,20 +70,29 @@ test("the store build keeps the dashboard identity and the shared listing", () =
   assert.equal(manifest.name, "chatcut", "git installs keep their plugin id");
 });
 
-test("directory installs send no headers and carry a stable channel in the URL", () => {
+test("directory installs send no headers and keep the signed-in MCP URL", () => {
   const server = buildStoreMcpConfig(mcp, listing).mcpServers.chatcut;
   assert.equal(server.http_headers, undefined);
   assert.equal(server.oauth_resource, hostedUrl);
-  const url = new URL(server.url);
+  // Codex keys sign-ins by exact URL and signs plugin servers in only on a
+  // fresh install, so a changed URL would strand users after the update.
+  assert.equal(server.url, hostedUrl);
+  assert.equal(listing.markChannelInMcpUrl, false);
+});
+
+test("manual registrations carry a stable channel in the URL", () => {
+  assert.equal(listing.markChannelInRegistration, true);
+  const url = new URL(storeRegistrationUrl(hostedUrl, listing));
   assert.equal(url.origin + url.pathname, hostedUrl);
   assert.equal(url.searchParams.get("chatcutInstallSource"), listing.installSource);
   assert.equal(url.searchParams.get("chatcutMcpSurface"), "codex");
-  // Codex keys sign-ins by URL, so a per-release value would log users out.
+  // A per-release value would force a new sign-in on every version.
   assert.equal(url.searchParams.get("chatcutPluginVersion"), null);
   assert.match(listing.installSource, /^[a-z][a-z0-9_]{1,47}$/);
 
-  const unmarked = buildStoreMcpConfig(mcp, { ...listing, markChannelInMcpUrl: false });
-  assert.equal(unmarked.mcpServers.chatcut.url, hostedUrl);
+  assert.equal(storeRegistrationUrl(hostedUrl, { ...listing, markChannelInRegistration: false }), hostedUrl);
+  const marked = buildStoreMcpConfig(mcp, { ...listing, markChannelInMcpUrl: true }).mcpServers.chatcut;
+  assert.equal(marked.url, storeRegistrationUrl(hostedUrl, listing));
 });
 
 test("the callback id matches the one production Codex installs register", () => {

@@ -11,12 +11,16 @@
 //   dashboard's plugin identity, and Desktop removes `chatcut@*` plugins when it
 //   connects to Codex, so the store entry must not be renamed to `chatcut`.
 // - The MCP server has no headers: public submission rejects nonempty server
-//   headers. The install channel and host surface travel as URL parameters the
-//   backend already reads (`chatcutInstallSource`, `chatcutMcpSurface`).
-//   Codex keys stored OAuth tokens by server URL, so only stable values go in
-//   the URL; a version parameter would sign every user out on each release.
-// - The direct-registration command in `chatcut-plugin-basics` carries the same
-//   URL, so users who end up registering the server by hand keep the channel.
+//   headers. The install channel and host surface can travel only as URL
+//   parameters the backend already reads (`chatcutInstallSource`,
+//   `chatcutMcpSurface`). Codex keys stored OAuth tokens by the exact server
+//   URL and starts plugin MCP sign-in only on a fresh install, not when an
+//   update arrives, so marking the plugin's own server URL
+//   (`markChannelInMcpUrl`) would leave existing users without tools until they
+//   run `codex mcp login`. A version parameter would do that on every release.
+// - The direct-registration command in `chatcut-plugin-basics` can carry the
+//   marked URL (`markChannelInRegistration`): that path always signs in fresh,
+//   so users who register the server by hand keep the channel at no cost.
 
 import { createHash } from "node:crypto";
 import { execFileSync } from "node:child_process";
@@ -58,12 +62,19 @@ const SETUP_WORDING = /\b(install|connect)/i;
 const COMMERCE_WORDING =
   /\b(free|trial|discount|subscription|credits?|pricing|upgrade)\b/i;
 
-export function storeMcpUrl(baseUrl, listing) {
-  if (!listing.markChannelInMcpUrl) return baseUrl;
+function channelMcpUrl(baseUrl, listing) {
   const url = new URL(baseUrl);
   url.searchParams.set("chatcutInstallSource", listing.installSource);
   url.searchParams.set("chatcutMcpSurface", "codex");
   return url.href;
+}
+
+export function storeMcpUrl(baseUrl, listing) {
+  return listing.markChannelInMcpUrl ? channelMcpUrl(baseUrl, listing) : baseUrl;
+}
+
+export function storeRegistrationUrl(baseUrl, listing) {
+  return listing.markChannelInRegistration ? channelMcpUrl(baseUrl, listing) : baseUrl;
 }
 
 export function buildStoreManifest(manifest, listing) {
@@ -271,16 +282,17 @@ export async function stageStorePackage({ repoRoot = REPO_ROOT, outDir }) {
   if (mcp) await writeFile(join(stageDir, ".mcp.json"), `${JSON.stringify(mcp, null, 2)}\n`);
   const skillPath = join(stageDir, REGISTRATION_SKILL);
   const serverUrl = storeMcpUrl(HOSTED_MCP_URL, listing);
-  await writeFile(skillPath, markSkillRegistration(await readFile(skillPath, "utf8"), serverUrl));
+  const registrationUrl = storeRegistrationUrl(HOSTED_MCP_URL, listing);
+  await writeFile(skillPath, markSkillRegistration(await readFile(skillPath, "utf8"), registrationUrl));
 
   const problems = await validateStorePackage({ manifest, mcp, root: stageDir });
-  return { entries, listing, manifest, mcp, problems, serverUrl, stageDir };
+  return { entries, listing, manifest, mcp, problems, registrationUrl, serverUrl, stageDir };
 }
 
 async function main(argv) {
   const outIndex = argv.indexOf("--out");
   const outDir = resolve(outIndex >= 0 ? argv[outIndex + 1] : join(REPO_ROOT, "dist", "codex-store"));
-  const { entries, listing, manifest, problems, serverUrl, stageDir } = await stageStorePackage({ outDir });
+  const { entries, listing, manifest, problems, registrationUrl, serverUrl, stageDir } = await stageStorePackage({ outDir });
   if (problems.length) {
     console.error(`Store package has ${problems.length} problem(s):\n- ${problems.join("\n- ")}`);
     process.exitCode = 1;
@@ -288,6 +300,7 @@ async function main(argv) {
   }
   console.log(`Staged ${manifest.name} ${manifest.version} for ${listing.dashboardPluginId} at ${stageDir}`);
   console.log(`MCP URL: ${serverUrl} (Codex OAuth callback id ${codexOAuthCallbackId(serverUrl)})${manifest.mcpServers ? "" : "; MCP server omitted, skill registration only"}`);
+  console.log(`Skill registration URL: ${registrationUrl} (Codex OAuth callback id ${codexOAuthCallbackId(registrationUrl)})`);
   if (argv.includes("--no-zip")) return;
 
   const zipPath = join(outDir, `${manifest.name}-${manifest.version}.zip`);
