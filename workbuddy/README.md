@@ -53,6 +53,6 @@ The ZIP has `.codebuddy-plugin/plugin.json` at its root. To rebuild it as submit
 
 ## License
 
-The package manifest declares `GPL-3.0-only`. The package has no separate license file.
+Apache-2.0, like the rest of this repository. See the repository [LICENSE](../LICENSE).
 
 Support: [chatcut.io](https://chatcut.io).

@@ -13,7 +13,7 @@
   },
   "homepage": "https://chatcut.io",
   "repository": "https://github.com/ChatCut-Inc/agent-plugin",
-  "license": "GPL-3.0-only",
+  "license": "Apache-2.0",
   "category": "content-creation",
   "tags": [
     "video-editing",

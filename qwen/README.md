@@ -52,6 +52,6 @@ This folder matches the submitted 2.0.4 ZIP except that the Chinese `README.md` 
 
 ## License
 
-This kit ships its own `LICENSE` (GNU General Public License v3), and its manifest declares `GPL-3.0-only`. The repository's root [LICENSE](../LICENSE) is Apache-2.0.
+Apache-2.0, like the rest of this repository. See [LICENSE](./LICENSE).
 
 Support: [chatcut.io](https://chatcut.io).
