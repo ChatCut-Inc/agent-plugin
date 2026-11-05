@@ -181,4 +181,3 @@ A Design Style is the project's visual identity: colors, fonts, style guidance, 
 When work spans several related visual outputs, align on or follow one coherent design style before batch production so the project reads as one family. Do not lock in a design style from an unconfirmed guess.
 
 Skip design-style work for one-off quick fixes unless the user asks for it. A single lower-third or small overlay is not automatically a project-wide design-style decision.
-
