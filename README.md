@@ -21,6 +21,8 @@ The hosted packages below remain available for existing Web projects and explici
 - `kimi/` - the Kimi Work plugin package, with mandatory basics, core craft skills, and in-app browser adapters; see [its package and migration guide](./kimi/README.md).
 - `chatcut-desktop-codex-plugin/` - the store-facing, skill-only package that
   helps Codex install and connect the signed ChatCut Desktop app.
+- `codex-store/` - builds the OpenAI plugin directory ZIP from `codex/`; see
+  [its README](./codex-store/README.md).
 - `codex/.codex-plugin/plugin.json` - Codex plugin metadata.
 - `claude/.claude-plugin/plugin.json` - Claude Code plugin metadata.
 - `grok/.cursor-plugin/plugin.json` and `cursor/.cursor-plugin/plugin.json` - Grok Bot and Cursor plugin metadata, both listed in `.cursor-plugin/marketplace.json`.
