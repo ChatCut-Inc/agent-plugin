@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { cp, mkdir, mkdtemp, readFile, rm, stat, writeFile } from "node:fs/promises";
+import { cp, mkdir, mkdtemp, readdir, readFile, rm, stat, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import test from "node:test";
@@ -33,6 +33,8 @@ test("the staged directory package passes every submission check", async () => {
     assert.ok(skill.includes(`--url '${staged.registrationUrl}' --oauth-resource`));
     const shipped = JSON.parse(await readFile(join(staged.stageDir, ".codex-plugin/plugin.json"), "utf8"));
     assert.equal(shipped.name, "chatcut-desktop");
+    const entries = await readdir(staged.stageDir, { recursive: true, withFileTypes: true });
+    assert.ok(entries.every((entry) => !entry.isSymbolicLink()), "standalone packages materialize shared files");
   } finally {
     await rm(outDir, { recursive: true, force: true });
   }

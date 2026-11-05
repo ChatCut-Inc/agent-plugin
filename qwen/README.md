@@ -30,7 +30,7 @@ skills/                            17 Skills
 assets/                            Icon, logo and widget media manifest
 README_ZH.md, README_EN.md         The kit's original Chinese and English READMEs
 SOURCE.md                          Provenance notes
-LICENSE                            GNU General Public License v3
+LICENSE                            Apache License 2.0 (shared repository license)
 ```
 
 Skills: `talking-head-guide`, `create-motion-graphics`, `app-promo-guide`, `asset-import`, `chatcut-plugin-basics`, `digital-human`, `export`, `known-errors`, `music`, `product-help`, `shader-gen`, `transcription`, `verification`, `video-gen`, `video-translation`, `voice` and `widget-forms`. According to `SOURCE.md`, the editing catalog and the upload helper come from the official Codex plugin (baseline 1.10.12), with Qwen Work adapters for authentication, editor handoff, questions, inline Script editing, asset import and package-relative paths.
