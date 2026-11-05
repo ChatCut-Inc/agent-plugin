@@ -277,7 +277,7 @@ This section only adds talking-head timing, frame-composition, subject/caption p
 
 For talking-head MG work, treat the video as one edited piece, not as isolated graphics.
 
-When talking-head Motion Graphics is selected, including a plan-only or handoff-analysis request, first activate the `create-motion-graphics` Skill from this plugin. Then read `references/motion-graphics.md` from this skill's base directory completely before planning, generating, placing, or reviewing MG. This talking-head guide supplies the scene-specific editorial context but does not replace the active Motion Graphics Skill.
+When talking-head Motion Graphics is selected, including a plan-only or handoff-analysis request, first activate the `create-motion-graphics` Skill from this plugin. Then read `references/motion-graphics.md` from this skill's base directory completely before planning, creating, placing, or reviewing MG. This talking-head guide supplies the scene-specific editorial context but does not replace the active Motion Graphics Skill.
 
 ---
 

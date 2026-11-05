@@ -99,7 +99,7 @@ Choose background from the form:
 
 - Use `Background: transparent` for talking-head overlays: lower-thirds, side treatments, quote treatments, compact diagrams, and other graphics that sit over A-roll. A transparent root may still contain internal semi-transparent or solid panels.
 - Use `Background: opaque` when the MG is its own visual surface: full-screen opening titles, strong chapter beats, full-screen information layouts, and full-screen emphasis moments.
-- For full-screen opaque MGs, do not add a separate `solid` item underneath as a color matte. The MG owns the frame; change its `bgColor` / `transparentBackground` properties instead. Do not create temporary solid fallbacks; if you encounter an old transparent-MG-plus-solid fallback while replacing it with an opaque generated MG, delete both fallback pieces, not only the old MG.
+- For full-screen opaque MGs, do not add a separate `solid` item underneath as a color matte. The MG owns the frame; change its `bgColor` / `transparentBackground` properties instead. Do not create temporary solid fallbacks; if you encounter an old transparent-MG-plus-solid fallback while replacing it with an opaque MG, delete both fallback pieces, not only the old MG.
 
 Default to a transparent overlay unless a full-screen beat is intended — guessing full-screen/opaque silently is what covers the speaker's face or blanks the frame.
 
