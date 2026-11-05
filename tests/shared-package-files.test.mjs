@@ -6,7 +6,7 @@ import { fileURLToPath } from "node:url";
 import test from "node:test";
 
 const root = fileURLToPath(new URL("../", import.meta.url));
-const packages = ["codex", "claude", "grok", "cursor", "kimi", "antigravity", "qwen", "workbuddy", "doubao", "chatcut-desktop-codex-plugin"];
+const packages = ["codex", "claude", "grok", "cursor", "kimi", "antigravity", "antigravity-desktop", "qwen", "workbuddy", "doubao", "chatcut-desktop-codex-plugin"];
 
 async function physicalFiles(directory) {
   const files = [];
@@ -48,11 +48,13 @@ test("identical package files share a canonical file instead of regular copies",
 });
 
 test("Antigravity entry skills fit the host's 24,000-byte limit", async () => {
-  for (const name of await readdir(join(root, "antigravity/skills"))) {
-    const path = join(root, "antigravity/skills", name, "SKILL.md");
-    const text = await readFile(path);
-    assert.ok(text.length <= 24_000, `${name}: ${text.length} bytes`);
-    assert.match(text.toString(), /^---\r?\nname: .+\r?\ndescription: /);
+  for (const folder of ["antigravity", "antigravity-desktop"]) {
+    for (const name of await readdir(join(root, folder, "skills"))) {
+      const path = join(root, folder, "skills", name, "SKILL.md");
+      const text = await readFile(path);
+      assert.ok(text.length <= 24_000, `${folder}/${name}: ${text.length} bytes`);
+      assert.match(text.toString(), /^---\r?\nname: .+\r?\ndescription: /);
+    }
   }
 });
 
