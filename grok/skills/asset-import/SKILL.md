@@ -11,7 +11,10 @@ Grok Bot normally runs on a cloud computer. First confirm that the host exposes
 readable bytes for the requested attachment; a chat attachment card alone does
 not establish a filesystem path. If bytes are unavailable, use the host's
 supported file handoff with the user's permission, without scanning unrelated
-files or bypassing a denied transfer.
+files or bypassing a denied transfer. When the media stays on the user's phone
+or never reaches the cloud computer, call `import_media` with
+`{"action":"create_session"}` and give the user its `userUploadFallback.url`:
+it opens a browser upload page for this project, including on a phone.
 
 A ChatCut tab on the user's laptop cannot reach the cloud computer's loopback
 server. Use the upload-helper route unless the editor browser and source files
@@ -55,8 +58,9 @@ For a remote sandbox, unavailable editor, or blocked browser connection:
 
 This route requires Node.js 18+, `ffmpeg`, and `ffprobe` on the computer running
 the helper. No media-tool binaries are bundled in this plugin. If these tools
-are unavailable, report the dependency and use the ChatCut editor upload flow;
-do not claim that Node alone is enough or install software silently.
+are unavailable, report the dependency and give the user the
+`userUploadFallback.url` returned by `create_session` (step 2) to upload in
+their browser; do not claim that Node alone is enough or install software silently.
 
 1. Download a public URL to a local file when needed.
 2. Call `import_media` with `{"action":"create_session"}`.
@@ -73,7 +77,7 @@ Use each returned `imports[].result.assetId` for timeline work. Wait for
 for target `upload` only before byte-dependent work such as cloud export,
 `request_asset_download`, or remote frame inspection.
 
-If the helper returns an error with `retry`, create a fresh import session when requested and rerun exactly the returned arguments. If host policy denies transfer of the user's file, stop instead of trying a local-editing or alternate-upload workaround; tell the user the upload was denied and ask them to use the ChatCut editor upload UI or grant the required permission.
+If the helper returns an error with `retry`, create a fresh import session when requested and rerun exactly the returned arguments. If host policy denies transfer of the user's file, stop instead of trying a local-editing or alternate-upload workaround; tell the user the upload was denied and ask them to upload through the session's `userUploadFallback.url` or the ChatCut editor upload UI, or to grant the required permission.
 
 ## Download an existing source
 

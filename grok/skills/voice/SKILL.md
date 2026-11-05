@@ -3,739 +3,247 @@ name: voice
 description: Text-to-Speech (TTS), voice cloning, voiceover, narration placement/sync, and custom sound effects (SFX) generator. Use when the user wants generated speech from text, wants to clone a consented voice from uploaded reference audio, wants to correct a misspoken word or short phrase in recorded speech, wants to add/replace/align narration or voiceover for an existing video/timeline, wants to keep existing voiceover synced after visual retiming edits, needs voice audition/selection, or explicitly wants a newly generated/custom sound effect that is not available in the Sound Effects library.
 ---
 
-# Voice & Sound Effects Generator
+# Voice & Sound Effects
 
-Generate voiceovers (TTS) and sound effects. For TTS, choose a concrete
-provider and voice before calling `submit_voice`.
+`manage_voice` is the single entry for the voice catalog and the user's cloned
+voices. `submit_voice` creates TTS audio assets. `submit_sound` creates custom
+sound effects.
 
-## When to Use
+## Read the matching reference first
 
-- Generate voiceover/narration from text
-- Create text-to-speech audio for videos
-- Add, replace, or redo narration/voiceover for an existing video, timeline,
-  screen recording, slide animation, product demo, B-roll edit, MG explainer, or
-  other visual sequence
-- Keep existing narration/voiceover aligned after trimming, speeding up, slowing
-  down, moving, reordering, or replacing the visuals it describes
-- Offer text descriptions of TTS voice choices when the user has not picked a concrete voice, and direct auditioning to ChatCut
-- Clone the user's own or explicitly authorized voice from reference audio
-- Correct a real misspoken word or short phrase with the authorized speaker's
-  cloned voice while preserving picture and downstream timing
-- Generate custom sound effects from text descriptions only after checking the Sound Effects library first
+These are required reads, not suggestions. Read the whole file before the
+first tool call or question of that branch.
 
-## TTS (Text-to-Speech)
+- A word or short phrase was actually misspoken in recorded speech: read
+  [references/fix-spoken-mistakes.md](references/fix-spoken-mistakes.md). If
+  the recording is correct and only the transcript is wrong, fix the transcript
+  instead. A full rewrite or new voiceover uses the normal path.
+- Narration, voiceover, dubbing, or replacement speech for an existing visual
+  target (video, timeline, screen recording, slides, demo, B-roll, MG), even if
+  the user never says "sync"; or changing visuals while keeping existing
+  narration aligned: read [references/video-sync.md](references/video-sync.md)
+  before drafting narration, generating TTS, or placing audio. Skip it only for
+  a standalone audio asset with no visual target.
+- Cloning from a reference the user already supplied or identified for this
+  request (attachment, project asset, timeline item), or any cloning in an
+  external host such as Codex, Claude, or Grok Bot: read
+  [references/cloning.md](references/cloning.md).
+- The user asks for expressive delivery (emotion, tone, energy, pauses, pacing,
+  emphasis, whispering, laughter, accent, singing): read
+  [references/delivery-controls.md](references/delivery-controls.md) before
+  writing the final text or choosing controls.
 
-If the user wants to correct a word or short phrase that was actually spoken
-incorrectly in existing recorded speech, read
-[references/fix-spoken-mistakes.md](references/fix-spoken-mistakes.md) before
-editing or generating. That workflow preserves the picture and protects later
-timing while replacing only the faulty sound. Do not use synthesized speech
-when the recording is already correct and only its transcript is wrong; fix
-the transcript instead. Use the ordinary narration path for a full rewrite or
-complete new voiceover.
+When a generation tool returns `FEATURE_NOT_INCLUDED` for a `generation.*` feature, use its payer and access details. If the project owner needs Pro, explain that the owner pays and must upgrade; the member's own Pro does not unlock the project. Do not give the member a personal upgrade link or send them to their own billing menu. They can find the owner in the project's existing members view when available. Otherwise share the returned upgrade link, or ChatCut’s avatar menu → Upgrade. Existing credits are preserved and generation still consumes credits after upgrading. This rejection does not charge for generation; existing agent conversation fees are separate, so do not claim the whole conversation was free. Preserve the exact original tool input and project, then stop. Do not automatically search for or substitute stock media; offer alternatives only if the user explicitly asks.
 
-If the current request has an existing visual target and the user wants
-narration, voiceover, dubbing, or replacement speech for that target, read
-[references/video-sync.md](references/video-sync.md) before drafting new
-narration, using existing narration text to generate TTS, or placing audio. Do
-this even when the user did not explicitly say "sync" or "match the visuals";
-the existence of a visual target means narration timing and meaning may need to
-follow on-screen content. Use the normal standalone TTS path only when there is
-no visual target or the user just wants an audio asset from text.
+When the user returns with “continue”, “继续”, “jixu”, or says they upgraded, recheck current payer eligibility and credits for the original input with `estimate_generation` when supported, otherwise the original tool’s precheck. If there is no separate precheck, one retry of the original tool lets its server check current access. If eligible, submit the original input once; if still blocked, explain the current blocker and stop. Do not ask the user to choose between the original generation and stock media again or state the old rejection as current status without checking. If a job was already accepted, track it instead of submitting again. Never switch generation tools, providers or services to bypass a gate.
 
-Also read [references/video-sync.md](references/video-sync.md) when the timeline
-already has narration/voiceover and the user asks to change the visuals while
-keeping that voiceover aligned. This is a sync maintenance task even if no new
-TTS is needed.
+## TTS
 
-Use `manage_voice` as the single catalog and management entry, and
-`submit_voice` for final TTS. `manage_voice action="list" voiceType="all"`
-returns official and cloned candidates in one normalized list. Only
-`voiceType="custom"` supports create-access, apply, clone, preview, rename, or
-delete actions. The current contracts are:
+1. Reuse a concrete voice selected by exact ID/reference or an exact unique saved name. Ask when names are duplicated or selection is unresolved; otherwise use the audition path below. Every option comes
+   from `manage_voice action="list" voiceType="all"` for the current request,
+   with the target narration `language` and the conversation `locale`. Never
+   build options from memory, translated names, filenames, or broad traits.
+2. Submit with the chosen entry's `voiceRef` alone; never add `provider` or
+   `voiceId` to it. Submit only entries whose `supportedUses` includes `tts`;
+   a cloned voice without it needs current plan access. The legacy
+   `provider` + `voiceId` pair is only for a voice the host attached with those
+   values; follow that attachment's hidden context.
+3. `submit_voice` only creates an audio asset. Placing, replacing, trimming,
+   and aligning it on the timeline is a separate step with timeline tools.
+4. Keep standalone narration in one `submit_voice` call when it fits the
+   selected model's per-request limit. For ElevenLabs, v2/v4 allow 10,000
+   characters and v3 allows 5,000. If the script exceeds the limit, split at
+   sentence boundaries without dropping or rewriting text, keep the same
+   voice/model, and deliver a continuous narration when requested. Also split
+   when the user asks for separate clips or a visual workflow needs them.
+5. Use only the controls in the chosen entry's
+   `capabilities.supportedControls`; never infer support from a voice name or
+   family. A cloned voice's empty list still takes delivery cues written in its
+   text, so it stays a candidate for expressive requests. Never claim stable
+   age, regional accent, pronunciation dictionary, or exact duration control.
+   For ElevenLabs, `supportedControls` is a union: check the selected model in
+   `capabilities.controls.models`. Audio tags require an explicitly selected
+   `eleven_v3` or `eleven_v4`; the default v2 does not interpret them. Never
+   send `speed` with v4 or v4 Turbo.
 
-- `provider` is required. Use `doubao` for Chinese-optimized narration and
-  `elevenlabs` for English or multilingual narration, or `fish-audio` for a
-  ready ChatCut custom voice.
-- `voiceId` is required and provider-specific. Do not mix catalogs.
-- `submit_voice` creates an audio asset only. Timeline placement, replacement,
-  trimming, and alignment happen later with timeline tools.
-- For long narration, multiple `submit_voice` calls can be useful: split at
-  natural pauses, sentence groups, or script beat boundaries when the workflow
-  benefits from separately timed or placed voice clips, such as storyboard beats,
-  scene-level ad segments, or a user request for separate assets.
-- For Doubao, `speedRatio`, `loudnessRatio`, `pitch`, `emotion`,
-  `emotionScale`, `performancePrompt`, and `explicitDialect` are supported
-  knobs, but not every voice supports every expressive control. Use the
-  selected official entry returned by `manage_voice action="list"` as the
-  authority.
-- For ElevenLabs, `modelId`, `speed`, and `stability` are the supported voice
-  knobs. For `eleven_v3`, inline audio tags are available for expressive
-  delivery such as emotion, tone, nonverbal cues, accent hints, pauses, or
-  local pacing.
-- For `fish-audio`, pass the ready voice's ChatCut `customVoiceId` as
-  `voiceId`. `submit_voice` performs the authoritative Pro/readiness check,
-  creates a generation job, and consumes standard TTS credits after success.
-  Never pass or request the provider's internal Fish model id. The current
-  Fish S2.1 model supports inline square-bracket cues in `text` for local
-  emotion, delivery, and paralinguistic control.
+Keep the default `eleven_multilingual_v2` when it supports the request. Pass
+language codes such as `vi`, `th`, `zh-CN`, or `ja-JP` to discovery, and read
+`modelGuidance`. Catalog language tags and sample language are not model
+language guarantees. v2 does not speak Vietnamese or Thai; explicitly select
+v3 or v4 for those languages. Do not silently switch every request to v4.
+When speed matters, keep a speed-capable model that also supports the target
+language; do not substitute v2 for a language it cannot speak. Keep `locale`
+for display names, independent from narration language.
+
+Japanese narration (including a Chinese conversation asking for Japanese): list
+with `language="ja"` (never `other`) and `locale` set to the conversation
+language. Audition with the returned Japanese sample; `sampleLanguage` tells
+which language a sample actually speaks, so never relabel a Chinese or English
+sample as Japanese. Cloned voices keep their own sample language. For a chosen
+Doubao official voice, add `explicitLanguage:"ja"` when submitting. Keep returned
+voice names.
 
 ### Keep voice providers private
 
-Doubao, ElevenLabs, Fish Audio, their model names, and other provider identity
-are internal implementation details. Never expose or attribute them in
-user-facing replies, progress updates, voice recommendations, choice lists,
-clone instructions, success summaries, or errors. Use ChatCut product language
-instead:
+Doubao, ElevenLabs, Fish Audio, their model names, provider voice ids, and
+provider URLs are internal. Never show or hint at them in replies, progress
+updates, recommendations, cards, clone instructions, summaries, or errors. Say
+`official voices` / `官方音色` and `cloned voices` / `克隆音色` / `My Voices` /
+`我的音色`, or use the voice's saved name. When an error mentions a provider,
+keep its actionable meaning and drop the provider details. Provider values
+belong only in tool arguments and in reading tool results.
 
-- Call curated catalog voices `official voices` / `官方音色`.
-- Call saved custom voices `cloned voices` / `克隆音色`, `My Voices` /
-  `我的音色`, or use the voice's user-visible saved name.
-- Describe status and failures at the ChatCut feature level. If a tool or
-  provider error contains a provider name, model name, provider voice id, or
-  provider URL, preserve the actionable meaning but remove those details
-  before replying.
+## Choosing a voice
 
-Provider names and provider-specific ids remain valid only in internal tool
-arguments, tool-result interpretation, and these implementation instructions.
-Do not copy them from tool output into visible UI metadata or prose.
+When TTS is requested without a concrete official or custom voice, and the
+user has not chosen cloning, call `manage_voice action="list" voiceType="all"`
+before recommending or rendering anything. It already lists ready cloned voices before matching official ones.
+Never infer the user's voices from chat history or from this file.
 
-Official voice controls come from `manage_voice action="list"`:
+Classify the request:
 
-- Call it for the target narration language and the user's visible locale.
-  Treat each returned `(provider, voiceId, name, summary, sampleUrl,
-capabilities)` tuple as atomic.
-- Use only fields in that entry's `capabilities.supportedControls`; never infer
-  capability support from a remembered voice name or family.
-- Controls are not guarantees of a specific acting style. Use the returned
-  tags and returned summary to pick a naturally suitable voice, then use supported
-  controls for moderate delivery changes.
-- For entries that advertise `audioTags`, inline audio tags are available when
-  the user asks for expressive delivery such as emotion, tone, nonverbal cues,
-  accent hints, or local pacing. Official examples fit these useful TTS
-  categories:
-- Emotion/tone tags include `[happy]`, `[sad]`, `[angry]`, `[excited]`,
-  `[curious]`, `[sarcastic]`, `[crying]`, `[annoyed]`, `[appalled]`,
-  `[thoughtful]`, `[surprised]`, and `[mischievously]`; vocal delivery and
-  nonverbal cue tags such as `[whispers]`, `[laughs]`, `[sighs]`, `[exhales]`,
-  `[inhales deeply]`, `[clears throat]`, `[snorts]`, `[swallows]`,
-  `[wheezing]`, and `[coughs]`;
-  pacing/pause/local speed tags such as `[slowly]`, `[pause]`,
-  `[short pause]`, `[long pause]`, `[rushed]`, and `[drawn out]`; and
-  accent/special-performance tags such as
-  `[strong X accent]`, for example `[strong French accent]`, plus `[sings]`,
-  `[singing]`, `[woo]`, and `[pirate voice]`. Official examples are
-  non-exhaustive; similar auditory tags can be tried when the user explicitly
-  asks for that delivery and the tag describes how the voice should sound, not
-  a visual action. Write tags directly in `text`, close to the short phrase
-  they should affect. Treat tags as local guidance, not paragraph-wide controls.
-- For pauses and pacing, use punctuation, text structure,
-  shorter generated segments, or local audio tags such as `[short pause]` and
-  `[slowly]` when needed.
+- **Concrete voice:** the user named or attached a voice, or picked the only
+  named custom-voice option. Use it. If they chose their cloned voices and
+  several are ready, show only those ready voices as playable choices. For a
+  named official voice, use or confirm it; do not reopen the source choice.
+- **Own voice** ("my own voice", "my cloned voice", or a workflow that clones
+  when none is ready): audition only ready cloned voices plus the clone card,
+  or go straight to cloning when none is ready. Offer official voices only if
+  the user declines cloning or asks. Cloned narration is synthesized from text
+  and can speak languages the speaker never recorded, so a narration language
+  the user cannot speak is a reason to use their cloned voice, never to switch.
+- **Cloning chosen** (explicit request, or the clone option was picked): do not
+  list voices just to compare sources. Start the cloning route below in the
+  very next reply; do not wait for the user to ask again or send them to a
+  menu.
+- **No concrete voice:** render one combined playable picker:
+  1. every ready cloned voice that has a real `previewUrl`, first, whatever
+     the narration language or requested traits;
+  2. 2-4 suitable official voices, matched on explicit requirements ("middle-
+     aged male", "warm", "professional") or, failing those, on traits inferred
+     from the script, presented as a suggestion rather than the user's stated
+     preference. If nothing matches every explicit requirement, list again
+     without the optional filters and present the results as the closest
+     choices;
+  3. one clone action card last: `Clone another voice` when a ready cloned
+     voice exists, otherwise `Clone my voice`, in the conversation language.
 
-Fish Audio control support for cloned voices:
+  Never drop a ready playable cloned voice because of its sample language,
+  missing catalog tags, empty `supportedControls`, or an explicit or inferred
+  trait; cloned voices narrate any language. Do not ask a text-only
+  saved-versus-official question, do not use `<choices/>`, and never add a
+  standalone `<clone-voice/>` next to the clone card. A reference file may
+  deliberately replace this ordinary picker with a narrower one.
 
-- The current `fish-audio` route uses Fish S2.1. Put concise natural-language
-  cues in square brackets directly in `submit_voice.text`, for example
-  `[happy]`, `[calm]`, `[angry]`, `[excited]`, `[whisper]`, `[laugh]`,
-  `[sigh]`, `[gasp]`, `[pause]`, `[emphasis]`, `[inhale]`, or `[exhale]`.
-  S2.1 is not limited to a fixed tag list, so a specific auditory description
-  such as `[whispers sweetly]` or `[laughing nervously]` is also valid.
-- Place a cue immediately before the phrase or moment it should affect. Fish
-  S2.1 accepts cues anywhere in the text, so multiple short cues can create
-  local transitions, for example
-  `[calm] Don't worry just yet.[excited] The good news is that we've found a solution!` or
-  `I thought it was over [gasp] but then the lights came back [relieved].`
-- Use cues sparingly and only when the requested delivery benefits from them.
-  Prefer one clear instruction at a transition over stacking conflicting
-  directions. Treat the result as model guidance rather than a deterministic
-  editing boundary, and split into separate `submit_voice` calls when exact
-  clip-level timing or independent retries matter.
-- Do not use Fish S1's legacy `(parenthesis)` emotion syntax on this route, and
-  do not add a separate `emotion` argument: the S2.1 cue belongs inside
-  `text`. Keep the default voice-cloning preview line untagged. Do not add cues
-  to a custom preview on the user's behalf, but preserve cues the user
-  intentionally includes within the 100-character preview limit.
+Render the picker with `widget-forms` as one required `playable_single_choice`.
+Each option comes from one returned entry: localized name, summary, and the
+returned preview URL exactly as given (never rebuild, re-host, or prepend a
+base URL). Omit a ready cloned voice without a preview. The native picker shows
+only the first five playable cards. Write all visible copy in the conversation
+language, starting with one short, natural sentence that invites the user to
+listen and pick, as in the example below. The narration language only chooses
+the catalog, so an English request for Chinese narration gets English copy and
+Chinese-capable voices.
+Keep a label-to-entry map (including each `voiceRef`) in context so a submitted
+label maps back without another confirmation.
 
-```ts
-// English / multilingual via ElevenLabs
-submit_voice({
-  provider: "elevenlabs",
-  text: "Hello world",
-  voiceId: "peter",
-});
+Native ChatCut shape:
 
-// Chinese via Doubao
-submit_voice({
-  provider: "doubao",
-  text: "你好世界",
-  voiceId: "liuchang",
-});
-
-// With speed adjustment (Doubao only)
-submit_voice({
-  provider: "doubao",
-  text: "这是一段稍快的中文旁白。",
-  voiceId: "liuchang",
-  speedRatio: 1.5,
-});
-
-// With expressive Doubao controls
-submit_voice({
-  provider: "doubao",
-  text: "这次事故提醒我们，安全永远不能侥幸。",
-  voiceId: "liuchang",
-  emotion: "sad",
-  emotionScale: 3,
-  performancePrompt: "痛心但克制，语速稍慢，像新闻专题旁白",
-  pitch: -1,
-  speedRatio: 0.92,
-});
-
-// With ElevenLabs delivery controls
-submit_voice({
-  provider: "elevenlabs",
-  text: "The launch changed how teams plan their daily work.",
-  voiceId: "peter",
-  speed: 0.95,
-  stability: 0.4,
-});
-
-// With local Fish Audio S2.1 delivery cues on a ready cloned voice
-submit_voice({
-  provider: "fish-audio",
-  voiceId: "<confirmed custom voice id>",
-  text: "[calm] Don't worry just yet.[excited] The good news is that we've found a solution!",
-  name: "Expressive custom voiceover",
-});
+```text
+试听一下，选好音色我就开始生成。
+<widget>
+  <form-visual id="voiceId" label="请选择并试听音色" media-kind="audio" required="true">
+    <visual-option value="<customVoiceId or voiceId>" name="<returned name>" summary="<returned summary>" media="<returned preview URL>" media-kind="audio"/>
+    <visual-option value="clone_voice" name="克隆我的音色"/>
+  </form-visual>
+</widget>
 ```
 
-## Voice Audition Before Generation
-
-### Use the published-plugin clone flow
-
-Offer cloning as a native option card or an ordinary text choice,
-then collect the source as a
-conversation attachment and follow the Agent-driven cloning flow below.
-
-### Route cloning from the available reference
-
-Before asking for clone inputs, check whether the user has already supplied a
-readable audio attachment or explicitly identified an accessible audio-bearing
-ChatCut asset for this request, including a timeline audio or video item. If so,
-do not make the user choose the same source again. Resolve or derive its audio
-asset, run the creation preflight, collect only the missing name, preview text,
-and explicit authorization, then use the Agent-driven cloning flow below. If no
-usable reference exists, ask the user to attach one through the host.
-
-An arbitrary voice already present in the project is not consent or a cloning
-reference. Use the direct path only when the user supplied or identified the
-audio for the current cloning request and later gives the full authorization
-required below.
-
-When the user explicitly chooses an audio-bearing timeline item, resolve it and
-its source range with `preview_timeline`. Reuse a 10-second-to-3-minute audio
-asset directly. For video, use a readable host-local original or obtain the
-source through the advertised `request_asset_download` tool and download its
-returned URL. Extract the chosen range as supported audio with an available
-ffmpeg, then follow [asset-import](../asset-import/SKILL.md) with `import_media`.
-If source download or local processing is unavailable, ask for a prepared audio
-reference. For any
-source over 3 minutes, use a clean 30–60-second excerpt; under 10 seconds, ask
-for a longer reference. Continue with the resulting audio asset id; the source
-choice is not authorization.
-
-### Choose the interaction from live state
-
-Treat the unified voice lookup as a mandatory gate. Whenever the user requests
-TTS without naming a concrete official or custom voice, and has not already
-explicitly chosen voice cloning:
-
-1. If `manage_voice` is not already visible, locate it from the current MCP tool
-   manifest without assuming a host-specific prefix.
-2. Call `manage_voice action="list" voiceType="all"` with the target narration
-   language, conversation locale, and any useful official-voice filters.
-3. Use the returned normalized `voices` list as the only candidate directory.
-   It already puts cloned voices before matching official voices.
-
-Do this before recommending or rendering any voice-selection UI. Never infer
-the user's saved or official voices from chat history or a static Skill file.
-
-An explicit request to clone a voice is already a concrete source choice. Do
-not call the combined list merely to choose between official and cloned voices
-in that case. First resolve whether the current request already supplies a
-usable reference; perform `manage_voice voiceType="custom"
-action="check-create-access"`, then follow the attachment and consent flow above.
-
-The Agent may infer useful tone, mood, delivery, or use-case suggestions from
-the narration text. Treat these as recommendation signals, not as the user's
-choice of voice source. A reasonable inference must never exclude a ready
-custom voice from the combined choice set below.
-
-Classify the request before rendering anything:
-
-- **Concrete custom voice:** when the user names a ready custom voice or chooses
-  the only named custom-voice pill, use that exact custom voice. When the user
-  chooses `Choose my cloned voice` and several are ready, show those ready
-  custom voices as native option cards or ordinary text choices before continuing.
-- **Concrete official preset:** use or confirm that exact preset; do not reopen
-  the source-choice branch.
-- **Clone action selected:** only now enter the plugin cloning route
-  above in the very next reply. Do not wait for the user to ask again, tell
-  them to open a menu or panel, or leave the choice as an unhandled pill. Finish
-  any required inspection or preflight, then begin the attachment flow.
-- **At least one ready custom voice, but no concrete voice named:** show one
-  combined option set. Put ready custom voices first, add 2-4 suitable
-  official voices, and finish with `Clone another voice`. Tell the user that
-  auditioning is available in ChatCut's voice library.
-- **No ready custom voice and no voice preference:** infer a small, varied set
-  of 2-4 generally suitable official voices, show their names and returned
-  traits as native option cards or ordinary text choices, and finish with `Clone my voice`.
-- **No ready custom voice and voice requirements available:** use explicit
-  requirements such as "middle-aged male", "warm female", or "professional"
-  first; otherwise reasonable traits inferred from the narration may guide the
-  recommendation. Show 2-4 matching official choices and one clone action
-  in the same option set.
-
-Localize the branch labels and adjust them to live state. Use these meanings:
-
-- Chinese:
-  - Named custom: `使用「<name>」`
-  - Custom list: `选择我的克隆音色`
-  - Curated catalog: `选择官方音色`
-  - First clone: `克隆我的音色`
-  - Additional clone: `克隆新音色`
-- English:
-  - Named custom: `Use “<name>”`
-  - Custom list: `Choose my cloned voice`
-  - Curated catalog: `Choose an official voice`
-  - First clone: `Clone my voice`
-  - Additional clone: `Clone another voice`
-- Spanish:
-  - Named custom: `Usar «<name>»`
-  - Custom list: `Elegir mi voz clonada`
-  - Curated catalog: `Elegir una voz oficial`
-  - First clone: `Clonar mi voz`
-  - Additional clone: `Clonar otra voz`
-
-Always expose one appropriate `clone_voice` choice during ordinary voice selection.
-It is a localized option at the end of the same choice set. Provider availability, plan, and
-quota govern what happens after the user chooses cloning, not whether the
-choice is visible. Offering the choice does not require consent; explicit
-permission and a supported reference are required only before the clone tool
-call. A scenario reference may intentionally use a narrower choice list without
-the clone action and explain its direct-from-project fallback in prose.
-
-Before recommending, rendering, or submitting a TTS voice option, use the
-current `manage_voice action="list" voiceType="all"` result. It is the live
-catalog shared with ChatCut Web, Desktop, and published plugins. Do not create
-voice options from memory, translated names, filenames, or broad descriptions.
-
-First determine two separate languages:
-
-- User conversation language: the language the user used to talk to you. Use
-  this for surrounding copy, option names, and summaries.
-- Target narration language: the language of the text being synthesized. Use
-  this only to choose provider and voice catalog.
-
-Load `widget-forms` before collecting input or rendering a choice. That skill
-owns Grok Bot's text-choice, attachment, and no-audio-preview behavior. This skill
-owns the voice candidates, required fields, safety rules, and the asset ids
-passed to voice tools. Do not embed host-specific UI instructions here.
-
-"help me generate ... voice over in Chinese" is an English conversation asking
-for Chinese narration, so the choice-list copy stays in English while the
-voice candidates come from Doubao.
-
-For official voice selection:
-
-1. Call `manage_voice action="list" voiceType="all"` with the target narration
-   `language`, user conversation `locale`, and any explicit gender, age, tone,
-   or use-case requirements. If none were explicit, a concise inferred
-   tone/use-case query may guide the official shortlist. Present inferred traits
-   as a suggestion, not as a stated user preference. If nothing official
-   matches, broaden only optional filters and clearly describe the closest
-   supported choices; never drop returned ready custom voices because they
-   lack official catalog tags.
-2. Use returned ready custom voices first, followed by 2-4 returned official voices.
-3. Load `widget-forms` and present one required choice set using native option
-   cards or ordinary text choices. Give every
-   option its localized `name` and concise returned `summary`, while keeping the
-   exact `voiceId` or `customVoiceId` mapped internally. Do not render, download,
-   attach, or link `sampleUrl` or `previewUrl`. Tell the user to audition these
-   choices in ChatCut's voice library when sound matters.
-4. Always add one action option with stable value `clone_voice` as the final
-   option on every ordinary recommendation list. Label it
-   `Clone my voice` when no ready custom voice exists, or `Clone another voice`
-   when one does; localize it using the meanings above. A scenario-specific
-   reference may explicitly replace this ordinary list with a narrower one.
-5. Wait for the user to choose. If the answer maps to `clone_voice`, render the
-   cloning workflow on the next turn; do not start cloning from the selection
-   reply itself.
-6. For an official voice, call `submit_voice` with the selected tuple's
-   `provider` and `voiceId` verbatim.
-7. For an existing custom voice, call `manage_voice voiceType="custom"
-action="apply"` with its full mapped `customVoiceId`. When final speech is
-   requested, pass that same id to `submit_voice` as `voiceId` with
-   `provider: "fish-audio"`.
-
-For a custom-voice-only selection, include every relevant `ready` custom voice.
-Use the full `customVoiceId` as its stable value, the stored name as its display
-label, and `previewText` as its summary when present. Do not copy, download,
-rewrite, attach, link, or expose `previewUrl`. The user can audition saved voices
-inside ChatCut.
-
-Keep every option's type, submission id, display label, summary, and capabilities
-tied to the same `manage_voice` tuple. The target narration
-language filters official entries; the conversation language controls all
-visible copy. Keep the label-to-tuple map in context so a host that returns
-visible labels can still map the answer without another confirmation.
-
-## Custom Voice Cloning
-
-Voice cloning is a separate consented flow. Proactively offering it during
-voice selection is required and is not the same as starting a clone. Never
-clone a third party's voice merely because a clip is present in the project.
-
-### Agent-driven cloning from an available reference
-
-Use this flow in either of these cases:
-
-- the host already has a readable attachment or accessible ChatCut audio asset
-  that the user supplied for this cloning request; or
-- the host collects the reference as a new conversation attachment.
-
-Never call the clone action until the user submits explicit permission. ChatCut
-durably archives every submitted clone-source recording in its own user-file
-storage before Fish Audio registration. This source is retained for future
-provider migration even if the project asset is later deleted; never ask a
-user to re-record or reselect an already accessible reference merely to create
-the voice.
-
-After the user chooses `clone_voice` or otherwise explicitly asks to clone from
-an already available reference, resolve any reference already supplied for this
-cloning request before asking for another upload. Do not use
-`providerAvailable:false` to block intake; the provider integration may be
-enabled after the choice was rendered, and the clone action is the
-authoritative availability check. Use entitlement and slot fields to explain
-an upgrade or a full quota before asking for unnecessary inputs when the
-account cannot create another clone. If the clone action itself returns
-`CUSTOM_VOICE_PROVIDER_NOT_CONFIGURED`, explain that cloning is temporarily
-unavailable and keep the requested name and imported reference asset in context
-so the flow can be retried later.
-
-Before asking for a name, recording, upload, or consent, call `manage_voice
-voiceType="custom" action="check-create-access"` and treat that fresh result as
-the authoritative creation preflight. Do not use `list` alone as an entitlement
-check: `check-create-access` deliberately emits the runtime's feature-gated
-upgrade card for an ineligible free account.
-
-- Free account with `freeTrialAvailable:false`: do not collect another
-  reference. Explain that the Free custom-voice slot is occupied and that the
-  user must delete the existing voice or upgrade to create another. Use the
-  feature-gated upgrade card returned by the runtime. Do not
-  invent a purchase URL or continue cloning behind it.
-- Pro account with `activeVoiceCount >= voiceSlotLimit`: do not collect another
-  reference. Say exactly how many voices are active and that the current plan
-  limit has been reached, then offer two conversational actions: upgrade the
-  plan through the runtime's upgrade card, or close/continue with an existing
-  voice. Do not call `clone` until the user has upgraded or freed a slot.
-- Otherwise continue with the intake below. A stale preflight never overrides
-  the clone endpoint: if `clone` still returns `FEATURE_NOT_INCLUDED` or
-  `CUSTOM_VOICE_QUOTA_EXCEEDED`, follow the same recovery path and do not retry
-  automatically.
-
-1. Explain that the reference audio will be securely processed to create a
-   reusable cloned voice. Do not identify the underlying provider.
-2. Require a name, explicit authorization/risk confirmation, preview text, and
-   one valid reference audio. When the user already supplied the reference,
-   reuse it and ask only for the other missing fields. The user must confirm
-   that the speaker is the user or the user has permission, and that the voice
-   will not be used for impersonation, fraud, or unlawful activity. Uploaded
-   audio is language-detected by ChatCut, so do not ask the user to choose its
-   language. The stable ChatCut formats are AAC, FLAC, M4A, MP3, OGG, WAV, and
-   WebM. Require 10 seconds to 3 minutes; recommend 30-60 seconds of clean solo
-   speech without music, reverb, or background noise.
-3. Load `widget-forms` and request only the missing parts of this host-neutral
-   intake contract:
-   - `voice_name`: `short_text`, required.
-   - `voice_reference`: `audio_reference`, exactly one required recording or
-     attachment only when no usable reference has already been resolved.
-   - `preview_text`: `short_text`, editable and no more than 100 Unicode
-     characters. Prefill the localized default below, but let the user replace
-     it with any text they want to hear in the cloned-voice preview.
-   - `voice_consent`: `explicit_consent`, required and initially unselected.
-     Ask the adapter to keep the missing fields in one intake when its host
-     supports media fields. If the host collects conversation attachments
-     separately, follow the adapter's attachment flow and do not treat attaching
-     a file as consent. Do not re-ask a field the user has already supplied
-     clearly in the current cloning request.
-
-Authorization and the use commitment are a hard continuation gate. After the
-intake returns, independently verify that the user affirmatively submitted the
-exact localized authorization option above. Until that confirmation is
-present, stop: do not import the attached reference, do not call
-`manage_voice voiceType="custom" action="clone"` or `action="preview"`, and do
-not claim that cloning has started. A supplied name, an attachment, a generic “yes”, a
-previous unrelated approval, or other completed fields are
-not authorization. If authorization is missing or ambiguous, ask only for the
-full authorization confirmation again and wait for the user's answer.
-
-Normalize the submitted result before cloning:
-
-```ts
-{
-  voiceName: "<submitted name>",
-  sourceAssetId: "<ChatCut audio assetId>",
-  previewText: "<submitted preview text or localized default>",
-  confirmedConsent: true,
-}
-```
-
-Localize all visible copy to the user's conversation language. For the
-authorization checkbox, use the same product copy as the Create Voice
-dialog rather than paraphrasing it:
-
-- Chinese: `我确认拥有该音色或已获得克隆授权，并承诺不将其用于冒充他人、欺诈或其他违法用途。`
-- English: `I confirm that I own this voice or have permission to clone it, and will not use it for impersonation, fraud, or unlawful purposes.`
-- Spanish: `Confirmo que esta voz me pertenece o que tengo permiso para clonarla, y que no la utilizaré para suplantar identidades, cometer fraude ni otros fines ilícitos.`
-
-Use ChatCut's detected language tag rather than asking the user to identify the
-language manually.
-
-The intake must resolve to a ChatCut audio `assetId`. If the host returns a
-readable attachment instead, load `asset-import`, import it into the targeted
-project, and use the returned audio `assetId`. Never pass a local path,
-attachment URL, or raw bytes to `manage_voice`. If no readable audio is
-available, stop and ask for it. Use the user's submitted `preview_text` after
-trimming surrounding whitespace. If it is blank, use the localized default:
-
-- Chinese: `这是你的克隆音色，希望你喜欢这个效果。`
-- English: `This is your cloned voice. Hope you like it.`
-- Spanish: `Tu voz clonada. Espero que te guste.`
-
-Choose the default by the user's conversation language. The final preview text
-must contain 1-100 Unicode characters. If the submitted value is longer, ask
-the user to shorten it before cloning; do not silently truncate it or replace
-it with the default. Preserve the user's wording rather than rewriting it from
-conversation context.
-
-Then call:
-
-```ts
-manage_voice({
-  voiceType: "custom",
-  action: "clone",
-  sourceAssetId: "<uploaded audio asset id>",
-  name: "<submitted voice name>",
-  confirmedConsent: true,
-  previewText: "<submitted preview text or localized default>",
-});
-```
-
-The tool waits for both cloning and preview generation. After it returns a ready
-voice and `previewUrl`, do not render, download, attach, link, or expose that audio
-in Grok Bot. Tell the user that the cloned-voice preview is ready in ChatCut, provide
-the clean editor link from the project workflow, and ask them to listen there.
-
-Then ask for one text decision: `Retry` / `重试` / `Reintentar`, or `Apply` /
-`应用` / `Aplicar`. Keep the full `customVoiceId`, submitted name, submitted
-`previewText`, and `previewUrl` mapped internally while waiting.
-
-- `Retry` means collect a replacement recording or upload for this same voice;
-  do not consume another slot and do not discard the previous ready voice until
-  replacement succeeds. If the current tool surface cannot replace the source
-  in place, explain that limitation instead of creating a second voice.
-- `Apply` means select the cloned voice for the current AI draft/request. Call
-  `manage_voice voiceType="custom" action="apply"` with the selected
-  `customVoiceId`. This action performs the authoritative Pro/readiness check without generating
-  audio or consuming credits. On success, retain the custom voice id as the
-  selected voice and continue the conversation; only call `submit_voice` with
-  `provider: "fish-audio"` when the user actually asks to generate final speech.
-  If it returns `FEATURE_NOT_INCLUDED`, do not present the voice as applied and
-  do not synthesize. Explain that the free clone can be previewed but applying
-  it for generated narration requires Pro; the runtime's feature-gated upgrade
-  card is the Agent equivalent of the editor paywall.
-
-The free plan can attempt one clone and listen to its preview, but cannot use a
-cloned voice for final TTS. Pro custom-voice slots equal
-`floor(monthly plan credits / 100)`; a ready or processing voice occupies one
-slot. Slot access does not include free generation: final cloned-voice TTS uses
-the normal voice-generation credits, deducted only after generation succeeds.
-The backend is authoritative for all three rules.
-
-When the user asks to generate final speech with a cloned voice, call
-`submit_voice` with the ChatCut custom voice id:
-
-```ts
-submit_voice({
-  provider: "fish-audio",
-  voiceId: "<confirmed custom voice id>",
-  text: "<final narration text>",
-  name: "Custom voiceover",
-});
-```
-
-If the tool returns `FEATURE_NOT_INCLUDED` / `feature_not_included`, tell the
-user that one custom-voice preview slot is available on Free but final cloned
-voice TTS requires Pro. Do not retry, switch voices, or submit the provider id
-through another tool to bypass the gate. The runtime emits the standard pricing
-upgrade card for this blocker; invite the user to upgrade and retry afterward.
-For a paid account, phrase this as: it has created `activeVoiceCount` voices and
-has reached the current subscription plan limit of `voiceSlotLimit`; offer an
-upgrade action and a close/continue action. Do not route a quota error through
-the free-account paywall copy.
-
-## Sound Effects
-
-For ordinary editing sound effects (SFX), do **not** generate first. Use the
-built-in Sound Effects library before spending credits:
-
-1. Call `browse_library` with `category:"sound-effects"` and a query such as
-   `"whoosh"`, `"camera shutter"`, `"notification"`, `"censor beep"`, or
-   `"record scratch"`.
-2. Inspect the returned `library:sound:<id>`.
-3. Place it with `edit_item`, using `fromFrame` as the sound's
-   anchor/editorial moment frame:
-
-```ts
-browse_library({
-  category: "sound-effects",
-  query: "short whoosh transition",
-});
-
-edit_item({
-  adds: [
-    {
-      type: "audio",
-      assetId: "library:sound:whoosh-short",
-      fromFrame: 120,
-      trackId: "A1",
-    },
-  ],
-});
-```
-
-Only generate sound effects from text descriptions with `submit_sound` when:
-
-- The user explicitly asks for a generated/original/custom sound.
-- The requested sound is too specific for the existing Sound Effects library.
-- `browse_library({ category:"sound-effects", query })` returns no suitable
-  match.
-
-```ts
-// Custom/generated sound effect after the library has no suitable match
-submit_sound({ prompt: "A dog barking in the distance" });
-
-// With custom duration (0.5-22 seconds)
-submit_sound({
-  prompt: "Thunder and heavy rain",
-  durationSeconds: 15,
-});
-
-// High prompt adherence
-submit_sound({
-  prompt: "Sci-fi laser gun firing",
-  promptInfluence: 0.8,
-});
-```
-
-**Tips for better results:**
-
-- Be specific: "A dog barking loudly" vs just "dog"
-- Include context: "Footsteps on wooden floor in an empty room"
-- Specify style: "Cinematic whoosh" or "8-bit game sound"
-
-## Parameters
-
-### TTS
-
-| Field        | Description                             | Notes           |
-| ------------ | --------------------------------------- | --------------- |
-| `provider`   | `doubao`, `elevenlabs`, or `fish-audio` | Required        |
-| `text`       | Text to synthesize                      | Required        |
-| `voiceId`    | Curated id, or ChatCut custom voice id  | Required        |
-| `speedRatio` | Speech speed                            | Doubao only     |
-| `modelId`    | ElevenLabs model id                     | ElevenLabs only |
-| `stability`  | ElevenLabs stability                    | ElevenLabs only |
-| `speed`      | ElevenLabs speech speed                 | ElevenLabs only |
-| `name`       | Asset name                              | Optional        |
-
-### Custom voices
-
-| Action                | Required fields                                            | Result                                                |
-| --------------------- | ---------------------------------------------------------- | ----------------------------------------------------- |
-| `list`                | none                                                       | Entitlement, slot count, existing voices              |
-| `check-create-access` | none                                                       | Authoritative create gate before collecting reference |
-| `apply`               | `customVoiceId`                                            | Pro/readiness check; selects voice without generation |
-| `clone`               | `sourceAssetId`, `name`, `confirmedConsent`, `previewText` | Reusable Fish Audio voice + preview                   |
-| `preview`             | `customVoiceId`, `previewText`                             | Refreshed short audition                              |
-| `rename`              | `customVoiceId`, `name`                                    | Updated product/provider display name                 |
-| `delete`              | `customVoiceId`, `confirmedDelete:true`                    | Permanently deletes provider voice and frees the slot |
-
-Do not use or expose a separate `manage_fish_audio_voice` tool. Fish model IDs,
-public/unlisted publishing, arbitrary tags, cover images, and provider-level
-catalog management are internal integration details. Delete only after an
-explicit user confirmation; use `rename` for a simple name change.
-
-### Sound Effects
-
-| Field             | Description       | Notes          |
-| ----------------- | ----------------- | -------------- |
-| `prompt`          | Sound description | Required       |
-| `durationSeconds` | Duration          | 0.5-22 seconds |
-| `promptInfluence` | Prompt adherence  | 0-1            |
-| `name`            | Asset name        | Optional       |
-
-## Voices
-
-Use `manage_voice action="list" voiceType="all"` for the current unified voice
-candidate list, localized display names, previews, and submission ids.
-
-### Voice presets are provider-specific — do NOT mix them
-
-Official voice ids are provider-specific. Always keep the returned `provider`
-and `voiceId` together; mixing values from different catalog tuples will fail.
-
-If you need a specific voice and a particular language:
-
-- For any narration language, query the catalog with that `language` and use a
-  returned provider/voice pair. Do not guess a raw provider id.
-
-## Hard rules — what you must NOT do
-
-1. Never use a voice preset name from a different provider.
-2. Never render official voice recommendations before the mandatory custom
-   voice `list` gate when no concrete voice was named.
-3. Never use explicit or inferred voice traits to exclude a ready custom voice
-   from the combined choice set.
-4. Never omit the final clone action option from an ordinary voice recommendation
-   or selection list.
-5. Never submit TTS when the voice is only described broadly and the user has
-   not confirmed a concrete preset.
-6. Never recommend or render a TTS voice option before calling `manage_voice
-action="list" voiceType="all"` for the current request.
-7. Never claim stable age, regional accent, pronunciation dictionary, or exact
-   duration controls; the current tool does not expose those as reliable fields.
-8. Never replace original recorded speech with TTS unless the user asks.
-9. Never import or clone a reference voice until the user has affirmatively
-   submitted the full ownership/permission and lawful-use commitment required
-   by the cloning intake. Never infer this confirmation from an attachment,
-   another completed field, a generic approval, or prior unrelated context.
-10. Never bypass cloned-voice Pro checks by passing a provider voice id to
-    `submit_voice` or another generation tool.
-11. Never ask the user to reselect audio when
-    the user has already supplied a usable reference for the current cloning
-    request. Preflight access, collect the missing authorization, name, and
-    preview text, then clone from its ChatCut audio asset id.
-12. Never treat unrelated speech already present in the project as a cloning
-    reference or as permission to clone it.
-13. Never render, download, attach, link, or expose a cloned-voice preview in
-    Grok Bot. Direct listening to the clean ChatCut editor link, then ask for
-    Retry / Apply in ordinary chat.
-14. Never emit ChatCut editor-native clone markup. Use the published-plugin
-    attachment and consent flow.
-15. Never expose Doubao, ElevenLabs, Fish Audio, provider model names,
-    provider-specific ids, or provider URLs to the user. Use `official voice`
-    and `cloned voice` product terminology, and sanitize provider details from
-    visible errors and status messages.
+Wait for the choice, then:
+
+- Official voice: submit its `voiceRef`.
+- Cloned voice: submit its exact `voiceRef` when final speech is requested.
+  Generation rechecks current ownership, readiness and plan access. If it returns
+  `FEATURE_NOT_INCLUDED`, do not synthesize through another route: explain the
+  plan requirement; the runtime shows the upgrade card.
+- `clone_voice`: in the native editor the card opens the clone dialog itself
+  and returns the saved voice into the same picker, so the answer already is
+  that cloned voice. Elsewhere, start the cloning route on the next turn.
+
+## Cloning
+
+Offering the clone option in a picker is required whatever the user's plan,
+quota, or availability, and needs no consent; those decide what happens after
+the user picks it. Cloning itself needs explicit authorization and a reference the user supplied
+for this request. Speech already in the project is never a reference or
+permission by itself.
+
+1. First call `manage_voice voiceType="custom" action="check-create-access"`;
+   it is the authoritative preflight (`list` is not). If the account cannot
+   create another voice, explain with the returned counts instead of opening
+   any clone flow.
+2. Pick the route:
+   - **Reference already supplied or identified** (native editor), or **any
+     external host such as Codex, Claude, or Grok Bot**: read
+     [references/cloning.md](references/cloning.md) and follow it. Never emit
+     `<clone-voice/>` in an external host; it cannot render there. Its intake
+     form uses these strings verbatim, in the conversation language:
+     - Authorization checkbox: zh `我确认拥有该音色或已获得克隆授权，并承诺不将其用于冒充他人、欺诈或其他违法用途。`;
+       en `I confirm that I own this voice or have permission to clone it, and will not use it for impersonation, fraud, or unlawful purposes.`;
+       es `Confirmo que esta voz es mía o que tengo permiso para clonarla, y que no la usaré para suplantación, fraude ni otros fines ilícitos.`
+     - Default preview text: zh `这是你的克隆音色，希望你喜欢这个效果。`;
+       en `This is your cloned voice. I hope you like the result.`;
+       es `Esta es tu voz clonada. Espero que te guste el resultado.`
+   - **Native editor, no usable reference:** use the editor dialog, which owns
+     recording/upload, name, preview text, authorization, entitlement, preview,
+     and retry. Do not collect any of these yourself. After every required tool
+     has finished, send this as the final message of the run: one short
+     sentence that they can click the button below to start cloning, then
+     `<clone-voice/>` alone on its own line, then one short sentence asking them
+     to select the saved voice from the menu that opens and send a message to
+     continue. For example:
+     `可以点击下方按钮开始克隆你的音色啦。\n<clone-voice/>\n保存后，在弹出的菜单中选择音色，再发消息给我继续。`
+     Then stop and wait.
+3. `<clone-voice/>` is an executable editor action, not text. Never quote it,
+   put it in backticks, describe it as a next step, or emit it in a progress,
+   pre-tool, or intermediate message. At most one per run.
+4. Saving in the dialog opens the voice menu; it does not attach the voice.
+   Selecting the saved voice checks Pro access. Saving or previewing a voice
+   is not permission to generate speech. When the user sends a cloned-voice
+   attachment, follow its hidden context.
+
+Rename or delete saved voices with the other custom `manage_voice` actions;
+delete only after an explicit permanent-delete confirmation.
+
+## Sound effects
+
+Search the Sound Effects library before spending credits: call `browse_library`
+with the sound-effects category and a descriptive query, then place the
+returned library sound with `edit_item` as its description explains. Use
+`submit_sound` only when the user explicitly asks for a generated or original
+sound, or the library has no suitable match. Describe the sound specifically:
+source, setting, and style ("footsteps on a wooden floor in an empty room",
+"cinematic whoosh", "8-bit game coin").
+
+## Hard rules
+
+1. Never render voice options or submit TTS before calling
+   `manage_voice action="list" voiceType="all"` for the current request, and
+   never submit while the voice is only broadly described.
+2. Never exclude a ready cloned voice with a playable preview from the picker
+   because of its sample language, its name, or explicit or inferred traits;
+   end every ordinary picker with exactly one clone action card.
+3. Never combine `voiceRef` with `provider` or `voiceId`, and never pass a
+   provider voice id to any tool to get around cloned-voice access checks.
+4. Never replace original recorded speech with TTS unless the user asks.
+5. Never import or clone a reference before the user affirmatively submits the
+   full ownership/permission and lawful-use confirmation. An attachment, a
+   name, a generic "yes", or another completed field is not that confirmation.
+6. Never clone unrelated speech already in the project, and never send the user
+   back to the dialog or ask them to reselect audio they already supplied.
+7. `<clone-voice/>` appears only as the final message, at most once per run.
+8. Never show a cloned-voice preview as raw `<audio>`, a Markdown link, or a
+   bare URL.
+9. Never expose provider names, model names, provider ids, or provider URLs,
+   and never cite this skill, a workflow, or a rule in visible text, including
+   short progress notes.

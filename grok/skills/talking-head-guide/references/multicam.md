@@ -13,6 +13,4 @@ For the editor-tool route, a **single cutaway clip that spans a cut in the
 reference angle** cannot be aligned as one piece. Split it with `split_item`
 first, then align each piece to its corresponding reference segment.
 
-When available, `multicam_sync` runs in the editor. If it reports that the editor
-is closed, open the target project before retrying. After either alignment route,
-read the project back and inspect matching frames to confirm synchronization.
+For Web execution, pass the full target `timelineId` explicitly. The internal agent uses its authorized run project; external callers must also pass `projectId`. The selected signed-in browser performs alignment from a captured snapshot even when Home or another project/timeline is visible. Keep that browser alive; navigation does not retarget accepted work. If no compatible browser is available or local media is missing, resolve that specific blocker and retry without changing the user's view. After it applies, read the target timeline back and verify its placement evidence.

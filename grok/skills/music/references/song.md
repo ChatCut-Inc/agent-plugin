@@ -18,9 +18,10 @@ tools for placement, trimming, fades, looping, and sync work.
 1. Resolve lyrics before spending credits:
    - preserve user-supplied lyrics as-is unless the user asks for a rewrite;
    - when the user asks to write a song without lyrics, draft a compact original
-     structure (`[Verse]`, `[Chorus]`, optional `[Bridge]`) and ask for approval;
-   - skip that approval only when the user explicitly asks for an end-to-end
-     run without review.
+     structure (`[Verse]`, `[Chorus]`, optional `[Bridge]`) from the brief.
+     Include the lyrics in the quoted scope so payment approval can cover the
+     resolved song. Pause for separate lyric review only when requested or when
+     a consequential choice remains unresolved. Obtain a current supported quote and explicit scoped confirmation before submission.
 2. Decide only the creative details that materially affect the result:
    language, genre or mood, tempo, instrumentation, arrangement, singing style,
    and optional vocal gender. Use stated choices; do not imitate a named living
@@ -55,8 +56,8 @@ the model understand song structure.
 
 ## Song Guardrails
 
-- Never infer vocals from a generic request for "music", "soundtrack", "theme
-  music", or 配乐; ask the vocal fork first.
+- Infer backing music from its role; use the song path for requested vocals or
+  lyrics. Ask only when that distinction materially affects the user's goal.
 - Do not call this path to remix, clean up, separate, or replace an existing
   copyrighted recording. The result is a new original asset.
 - Do not copy lyrics from a named song when the user has not supplied them;

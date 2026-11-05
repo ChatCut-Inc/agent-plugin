@@ -24,7 +24,7 @@ tools are missing or unauthenticated.
 
 ChatCut tools are served through the plugin's hosted `chatcut` MCP server. Treat the active MCP manifest and returned tool schemas as the runtime contract; do not assume a host-specific tool-name prefix.
 
-If the tools are available and authenticated, continue normally without discussing installation. If ChatCut is not installed, ask the user to add ChatCut from the host's official Plugins Marketplace. If authentication is required, ask the user to use the host's Authorize or Authenticate control and complete ChatCut OAuth in the browser; if the host shows Waiting for authorization, use Reopen. If the plugin is installed but tools remain unavailable after authorization, start a fresh conversation and inspect the host's plugin/MCP connection status. Do not register a duplicate server, run another host's CLI, store tokens in configuration, or install ChatCut Desktop as a workaround.
+If the tools are available and authenticated, continue normally without discussing installation. If ChatCut is not installed, ask the user to add ChatCut from Grok Bot's **Connect apps** (sidebar on a computer; avatar at the top left, then Connect apps, in the phone app), or from Cursor's plugin marketplace when running in Cursor. If authentication is required, ask the user to use the host's Authorize or Authenticate control and complete ChatCut OAuth in the browser; if the host shows Waiting for authorization, use Reopen on the in-chat card or Reconnect on the installed app. If the plugin is installed but tools remain unavailable after authorization, start a fresh conversation and inspect the host's plugin/MCP connection status. Do not register a duplicate server, run another host's CLI, store tokens in configuration, or install ChatCut Desktop as a workaround.
 
 Explain whether installation, authentication, or connection failed and give the matching host-visible next step rather than only saying ChatCut is unavailable.
 
@@ -198,7 +198,7 @@ First action for a new ChatCut task: use `list_projects`, `create_project`, `tar
 
 If a ChatCut project is already available from an editor URL, read the `projectId` from the `/editor/<projectId>` URL and pass it directly to project-scoped tools.
 
-If `chatcut` asks for authentication or project access, ask the user to re-authorize ChatCut from Grok Bot's Plugins settings, then retry with the exact `projectId` from the editor URL.
+If `chatcut` asks for authentication or project access, ask the user to select Reconnect on ChatCut under Grok Bot's Connect apps (or re-authorize ChatCut in Cursor's plugin settings), then retry with the exact `projectId` from the editor URL.
 
 ### Open the visible editor
 

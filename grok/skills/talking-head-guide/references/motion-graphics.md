@@ -6,21 +6,19 @@ Resolve the visual language before planning MG moments. Use the active MG workfl
 
 - **Active Design Style** — use it unless the user asks to change the overall style. If Project Context names an active Design Style but does not show details, inspect it once with `manage_design_style action="get"` before planning MG moments.
 - **Specific user style / reference** — follow it. If it is custom and not yet confirmed for a batch, use a real planned MG as the sample when the user needs to approve the look.
-- **Generic or vague direction** — quality words such as clean, premium, modern, professional, polished, or YouTube-style emphasis are goals, not a visual language. Follow the active MG workflow's style-alignment gate: prefer visual preset options, or use one representative MG for confirmation when the direction is textual / custom.
-- **No visual direction** — use the active MG workflow to show relevant visual preset options. Talking-head can be used as a catalog filter when available.
+- **Generic or vague direction** — quality words such as clean, premium, modern, professional, polished, or YouTube-style emphasis are goals, not a visual language. Follow the active MG workflow to browse visual references, or use one representative MG for confirmation when the direction is textual / custom.
+- **No visual direction** — follow the active MG workflow to browse and confirm suitable Design Styles. Choose the shortlist using the spoken content and representative video frames; the MG skill owns catalog selection and continuation.
 - **"Directly do" / "don't ask"** — choose a concrete temporary direction from the transcript and footage, then continue without user style confirmation. Do not create or update a Design Style from this unconfirmed guess.
 
-Picker is a visual Design Style selector. It shows preset thumbnails so the user can choose a visual direction by sight, instead of describing style in words.
-
-1. Call `manage_design_style` with `action: "list_presets"`, `scenario: "talking-head"` when clear, and the user's `locale`. Use the scenario as a catalog filter, then choose reasonable visual options by preset descriptions and the actual video context.
-2. Download the returned thumbnails to temporary local files, show them as ordinary chat image bubbles, then provide native option cards or text choices mapped to the exact preset ids.
-3. The image bubbles plus choices are a turn boundary: stop and wait for the user's selection.
-4. When the user picks an option, call `manage_design_style` with `action: "apply_preset"` and the selected `presetId`, then inspect the applied Design Style with `action: "get"` before authoring.
-5. If the user responds with text instead of picking, treat it as user direction and continue with the custom direction path.
+The active MG skill owns the visual picker, the host-specific form, and applying
+the answer. Follow that workflow for actual reference previews, selection or
+Other input, and `manage_design_style` for browsing, reading and applying styles; do not run a separate
+`list_presets` picker here. After applying the selection, read the full Design
+Style with `manage_design_style action="get"` before authoring.
 
 Persist only confirmed visual language:
 
-- **Picked preset** — the user confirmed it by choosing the visual option. Call `manage_design_style action="apply_preset"`.
+- **Selected library direction** — choosing the visual option confirms it. Follow the active MG skill to apply an existing style or save an independent reference, including its representative image and source association.
 - **Custom direction** — after the user accepts the sample, treat it as the confirmed direction for the current MG work. If the current environment supports saving project Design Styles and the user accepts it as the shared project style, save/apply it with the agreed style facts.
 - **Unconfirmed guess** — do not create or update a Design Style, including when the user said "directly do it".
 
@@ -35,6 +33,15 @@ MG meaningfully helps comprehension or orientation when the content has:
 - **Structured information** — multiple points, steps, comparisons, rankings, lists, or processes.
 - **Chapter / topic markers** — opening titles, section titles, topic transitions, or visual dividers between sections.
 - **Abstract concepts** — cause-effect relationships, cycles, systems, frameworks, or other ideas that are hard to follow verbally.
+
+For Web talking-head visual directions, proactively suggest **text behind the
+person** for a fitting hook, key word or chapter title. It adds depth while
+leaving the speaker in front. Use the active Motion Graphics workflow's Quality
+`body_outline_v1` occlusion, zero feathering and no visible outline; body pose
+keypoints are not a silhouette. Keep one original video item and mask only the
+behind-text graphics. Preserve readable text, captions and the confirmed style;
+this is an option to recommend, not a treatment to force onto every shot. Check
+the active host's support rather than promising Web reader features on Desktop.
 
 ### Repeated Components
 
@@ -63,15 +70,20 @@ Use this subsection only when the active Motion Graphics workflow explicitly ask
 
 Skip this subsection for direct-authoring workflows. If you are creating or editing JSX yourself with `create_motion_graphic_from_code` / `edit_asset`, do not use `referenceAssetIds`, `:template`, `:style`, role anchors, or Gemini brief language.
 
-For generator workflows, carry the visual language into the tool call. For now, templates are generation references, not direct-apply targets. Template refs from a Design Style are no different from any other template ID. For new MG assets, pass one code reference source: same-role role anchor with `referenceAssetIds: ["<roleAnchorAssetId>:template"]` only when the visual job, structure, and canvas role are the same; otherwise use the matched template ID directly, for example `referenceAssetIds: ["<templateId>:style"]`. If no template matches, write the confirmed Direction in the brief and use any accepted role anchor only for the same role. Template slot counts are not user constraints: if the user asks for more/fewer bars, rows, items, or data points than the template shows, generate a new structure instead of asking them to fit the slots.
+For generator workflows, follow the active MG skill's instance/template reference
+workflow under the confirmed Design Style. Code is optional; the one-code-source
+limit is per generation, not per video. Use different instances when the content
+needs different structures. Template slot counts are not user constraints.
+Let the selected visual and code references carry the detailed style/motion,
+while the brief describes current content, role, background and shot constraints.
 
-When a template or role anchor is passed, keep the Gemini brief focused on content, role / broad form, background, and frame constraints. Let the reference carry detailed style and motion language.
+Map the shared decisions into a generator brief like this (field details are in the motion-graphic-gen skill):
 
-Map the four shared decisions into a generator brief like this:
-
+- **Why this MG exists** -> `Viewer job` and `Takeaway`: what the viewer should get from this moment, and the one thing to remember.
+- **Delivery** -> `Tone & energy`, read from how the speaker says it (a joke, a warning, a surprising number).
 - **Content** -> `Content` in the brief.
 - **Timing** -> timeline start, plus internal `Timing` only when the MG has its own beats. Internal `Timing` values say _when_ each element appears, not _how_ it moves; leave the motion style to Gemini.
-- **Form and placement** -> `Size & shape` in the brief, not final canvas placement. Do not write final `left`, `top`, `right`, `bottom`, coordinates, or placement anchors such as "lower-left" / "top-right" into the Gemini brief.
+- **Form and placement** -> the placement rect, plus `Size & shape` only for real fit constraints. The visual form (card, chart, metaphor, kinetic type) is the generator's concept; pass a form only when the user asked for it, or as an optional `Idea`. Do not write final `left`, `top`, `right`, `bottom`, coordinates, or placement anchors such as "lower-left" / "top-right" into the Gemini brief.
 - **Background** -> `Background: transparent` or `Background: opaque`.
 
 #### 1. Content
@@ -116,7 +128,7 @@ From the target screenshot, include canvas tone only when it affects legibility:
 
 Choose background from the form:
 
-- Use `Background: transparent` for talking-head overlays: lower-thirds, side treatments, quote treatments, compact diagrams, and other graphics that sit over A-roll. A transparent root may still contain internal semi-transparent or solid panels.
+- Use `Background: transparent` for talking-head overlays: lower-thirds, side treatments, quote treatments, compact diagrams, and other graphics that sit over A-roll. A transparent root does not authorize generic backing panels. Follow the active MG skill's No Cards / Transparent Background rules, including explicit user or confirmed style/reference requirements.
 - Use `Background: opaque` when the MG is its own visual surface: full-screen opening titles, strong chapter beats, full-screen information layouts, and full-screen emphasis moments.
 - For full-screen opaque MGs, do not add a separate `solid` item underneath as a color matte. The MG owns the frame; change its `bgColor` / `transparentBackground` properties instead. Do not create temporary solid fallbacks; if you encounter an old transparent-MG-plus-solid fallback while replacing it with an opaque generated MG, delete both fallback pieces, not only the old MG.
 
@@ -132,3 +144,10 @@ Default to a transparent overlay unless a full-screen beat is intended — guess
 - Verify with screenshots. Pass multiple frames in one tool call — settled state appears alongside any transient mid-animation frames. **Compare frames before concluding**: apparent truncation, missing elements, or "broken design" visible in only some of the batch is animation, not a real flaw. If unclear, re-capture more frames around the suspect one before adjusting anything. Judge from the settled frames. For multiple placed MGs, batch their settled frames into a single call.
 - Check the full frame: face/head is clear, important objects and gestures are clear, caption zone is clear when relevant, MG is fully visible, MG content is correct, text is legible, no readable text overlaps, and the composition feels balanced and intentional.
 - If it fails, first adjust position and size. If position/size cannot make it work, edit the asset or change the design form. Verify each intentionally recurring component on a target frame before expanding it.
+
+### Caption-driven moments
+
+Use caption tools and published ordinary/animated presets for caption treatments.
+Custom caption-owned renderers receive `caption_v1` for current display text and
+active words; ordinary timeline MG assets do not. Keep captions with their native
+owner rather than creating a separate timeline MG for each subtitle.
