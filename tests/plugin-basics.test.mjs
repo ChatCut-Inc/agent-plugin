@@ -22,10 +22,12 @@ for (const [host, folder, setupCommand] of hosts) {
   test(`${host} basics retain hosted setup without the removed diagnostic workflow`, async () => {
     const skill = await readFile(new URL("SKILL.md", skillRoot), "utf8");
     assert.ok(skill.includes(setupCommand));
-    const connection = host === "antigravity"
-      ? await readFile(new URL("../antigravity/mcp_config.json", import.meta.url), "utf8")
-      : skill;
-    assert.ok(connection.includes("https://api.chatcut.io/api/external-mcp/mcp"));
+    if (host === "antigravity") {
+      const connection = JSON.parse(await readFile(new URL("../antigravity/mcp_config.json", import.meta.url), "utf8"));
+      assert.equal(connection.mcpServers.chatcut.serverUrl, "https://api.chatcut.io/api/external-mcp/mcp");
+    } else {
+      assert.match(skill, /https:\/\/api\.chatcut\.io\/api\/external-mcp\/mcp\b/);
+    }
     assert.ok(skill.includes("keep the original error and identify the failing step"));
     assert.doesNotMatch(skill, collectorReferences);
   });
