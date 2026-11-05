@@ -59,6 +59,50 @@ Grok Bot: see [grok/README.md](./grok/README.md). Cursor: see [cursor/README.md]
 
 Other MCP clients that support remote servers with OAuth can connect to `https://api.chatcut.io/api/external-mcp/mcp` and sign in with a ChatCut account.
 
+## What you can make
+
+ChatCut edits your own footage and generates new media, and the result is an editable timeline. Items marked *(Desktop)* need ChatCut Desktop. Generation uses ChatCut credits, and the agent asks before spending them.
+
+**Editing**
+
+- Talking-head cleanup: remove silences, filler words, repeated takes and stumbles, and tighten the pacing.
+- Highlight clips and short cuts from long interviews, podcasts and lectures.
+- Multicam sync: line up camera angles and separate audio recordings, then cut to whoever is speaking.
+- B-roll, background music and vertical 9:16 versions for TikTok, Instagram Reels and YouTube Shorts.
+- Scene-by-scene video analysis, and checks that each edit is visible in the editor.
+
+**Captions and subtitles**
+
+- Word-timed transcripts and subtitles, including Chinese.
+- Animated caption styles, and custom kinetic typography *(Desktop)*.
+- Subtitle translation.
+
+**Voice, music and sound**
+
+- Text-to-speech voiceovers, and voice clones with the speaker's consent.
+- Music generation, instrumental or with vocals.
+- Sound effects.
+- Speech cleanup: remove background noise, hum and room echo.
+- Audio effects such as EQ, reverb and crossfades *(Desktop)*.
+
+**Generation**
+
+- AI video from text, images or reference frames, with models such as Seedance and Kling.
+- AI images, thumbnails and covers, with models such as GPT Image and Nano Banana.
+- Motion graphics: title cards, lower thirds, animated overlays and full-frame animations.
+- Talking-photo presenter videos (digital human / AI avatar).
+- Lip sync for existing footage.
+- Video translation and dubbing into other languages, with or without lip sync.
+- Viral video remakes that keep a reference video's motion and timing with your own person or product *(Desktop)*.
+
+**Effects and look**
+
+- Transitions, visual effects and custom shaders.
+- Color grading, LUTs, masks and background removal *(Desktop)*.
+- Beauty and body retouch *(Desktop)*.
+
+**Video types:** talking-head videos, podcasts and interviews, tutorials and lectures, product demos and app promos, UGC-style product ads, short-form videos, viral video remakes, screen-recorded demos *(Desktop)*, multicam shoots and translated videos.
+
 ## Install ChatCut Desktop (recommended)
 
 Ask your agent to read the complete [ChatCut Desktop setup guide](https://chatcut.io/desktop) using `curl -fsSL https://chatcut.io/desktop` (`curl.exe` on Windows), then install ChatCut and connect the current agent. The official macOS and Windows installers do not need Node.js or npm. Desktop owns its local tools and Skills. Run setup on a supported macOS or Windows computer with a graphical desktop. Linux and remote agents without access to that computer cannot install Desktop there; continue in a local agent on the supported computer.
