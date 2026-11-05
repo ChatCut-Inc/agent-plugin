@@ -1,9 +1,11 @@
 ---
 name: multicam-sync
-description: Synchronize footage from a multi-camera / multi-recorder shoot — several cameras plus separate audio recorders covering one session, imported as loose clips — and make a speaker-follow draft by default unless the user explicitly asks for sync only. Use when a user drops in multiple clips from the same recording and wants them aligned, asks for multicam / 多机位 / multi-angle sync, wants a "cut to whoever is talking" edit, or refers to camera A/B, angles, or separate lav or field recordings that need to line up with picture.
+description: AI Multicam Editor synchronizes footage from a multi-camera / multi-recorder shoot — several cameras plus separate audio recorders covering one session, imported as loose clips — and makes a speaker-follow draft by default unless the user explicitly asks for sync only. Use when a user drops in multiple clips from the same recording and wants them aligned, asks for multicam / 多机位 / multi-angle sync, wants a "cut to whoever is talking" edit, or refers to camera A/B, angles, or separate lav or field recordings that need to line up with picture.
 ---
 
-# Multicam Sync
+# AI Multicam Editor
+
+The compatibility Skill ID is `multicam-sync`; the user-facing name is **AI Multicam Editor**.
 
 Parts 1–3 always run: they produce the synced master, a verifiable fact that every
 later edit is rebuilt from. Part 4 cuts a draft from it by default; skip it only for an explicit sync-only request.

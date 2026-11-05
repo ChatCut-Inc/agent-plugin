@@ -5,109 +5,107 @@ description: Answer current ChatCut product questions using the latest official 
 
 # ChatCut Product Help
 
-For a ChatCut product question, the first substantive action is to search the
-exact topic within `https://chatcut.io/docs` and open the most relevant official
-page. Do not answer from memory, a search snippet, or an unopened result. Use the
-host's native search and page-reading capabilities; this Skill defines retrieval
-and decision rules, not a second copy of product facts.
+Use current official documentation for product behavior and ChatCut read tools
+for live app, project, account or task state. A question only about live state needs
+no Docs lookup. For a mixed question, use tools for live state and Docs for its
+meaning. The Skill routes to evidence; it does not own prices, UI or versions.
 
-## Route the question
+## Read the relevant source
 
-- For live project, asset, timeline, item, account, or job state, use the matching
-  ChatCut read tool. If the question is only about live state, no Docs lookup is
-  needed.
-- For current behavior, visible UI labels, installation, credits, pricing,
-  billing, and troubleshooting, use the owning product Docs page.
-- For availability, regressions, or version requirements, use **Current versions**
-  and the **Changelog** in addition to the owning product Docs page.
-- For a mixed question, use tools for live state and Docs for what that state means
-  or what the user should do next.
+Open a known official page directly. Otherwise use native search and page-reading
+capabilities, a connected docs search tool, or the official discovery endpoints:
 
-Treat this Skill only as stable routing guidance. Never answer a changeable
-product fact from remembered Skill content when current Docs can be checked. Do
-not use unofficial domains.
+- `https://chatcut.io/docs/search?q=TOPIC&locale=LOCALE` (URL-encode the topic).
+- `https://chatcut.io/docs/llms.txt` (documentation index).
 
-## Establish the relevant product surface
+If a discovery endpoint is unavailable, use native search or the HTML Docs index.
+Use the search endpoint locale codes `en`, `zh`, `es`, `ja` or `zh-hant`.
+Choose the requested language when available; use English for missing translations
+and as the authority when translations disagree, explaining the difference.
+Prefer a returned or advertised Markdown URL, or try the known page's `.md`
+alternate. Read the canonical HTML page if Markdown is missing or unusable.
+Use indexes to choose specific pages; avoid `llms-full.txt` for ordinary help questions.
+Search snippets and unopened results are discovery, not evidence. Read only the
+sources that establish the answer; stop when evidence is sufficient or unavailable.
+Cite the canonical human-readable URL supporting consequential claims. If sources
+cannot establish the answer, say what is unverified and give the closest official
+page or Feedback path. Do not assume an optional MCP server is connected.
 
-Before answering a surface- or version-dependent question, identify both the
-surface hosting this agent and the surface the user is asking about.
+For version or rollout questions, read the owning feature guide plus the relevant
+entry in `https://chatcut.io/docs/changelog`; `https://chatcut.io/docs/releases`
+shows Current versions. Feature Docs own present behavior; the individual change
+owns its minimum version. A current release header does not set every feature's
+minimum version. State any unresolved disagreement between sources.
 
-- Prefer the explicit ChatCut runtime profile or the latest `[chatcut-runtime]`
-  envelope. Map `chatcut-web-editor` to Web, `chatcut-desktop` to Desktop, and
-  `chatcut-workbench-client` or `chatcut-chat-connector` to Agent Plugin.
-- When Agent Plugin is hosted by ChatCut Desktop, treat its bundled Skills as part
-  of the Desktop installation. A Desktop update updates that Plugin surface too;
-  never ask the user to update the Plugin separately in this runtime.
-- A user can ask an Agent Plugin about Desktop, or ask Desktop about a Web project.
-  When the user names a target surface, answer for that target instead of assuming
-  it is the same as the agent's host surface.
-- Use an app URL, client name, or version supplied by runtime context as supporting
-  evidence. Do not infer the current surface merely because the user mentions a
-  product in an example.
-- If no reliable signal exists and the surface changes the answer, ask which of
-  Web, Desktop, or Agent Plugin they are using. If the answer is surface-independent,
-  proceed without an unnecessary question.
+## Use the correct surface
 
-## Find the smallest useful source
+Prefer the explicit runtime profile or `[chatcut-runtime]` envelope:
+`chatcut-web-editor` means Web; `chatcut-desktop` means Desktop;
+`chatcut-workbench-client` and `chatcut-chat-connector` mean Agent Plugin.
+Answer for the user's target surface when it differs from the host. Ask which
+surface/version they use only when it changes the answer and context is absent.
 
-1. Extract the feature name, visible UI label, error text, product surface, and
-   version from the user's question or runtime context when available.
-2. Search the exact topic with a concise query containing only its essential terms.
-   Prefer the most specific official result and open the smallest set of pages that
-   establishes the answer.
-3. For ordinary usage questions, start with the owning feature or troubleshooting
-   page. For availability, regression, update, or version questions, directly open
-   `https://chatcut.io/docs/releases` and `https://chatcut.io/docs/changelog`, then
-   open the matching Changelog entry.
-4. For one user question, issue at most two search queries total: the exact topic,
-   then one narrower query if needed. After that, stop searching and use
-   `https://chatcut.io/docs/llms.txt` only as an index, then open the target page.
-   If the canonical pages and index are unavailable or still do not identify a
-   supporting page, stop retrieval and state the uncertainty; do not keep trying
-   broader keywords. Do not load the full Docs corpus or treat the index itself as
-   the answer.
-5. Treat search snippets as discovery only. Base claims on opened page content and
-   cite the exact official page supporting each consequential claim about product
-   behavior, platform support, price, credit cost, or version. Prefer a detail page
-   over the Docs home or a Changelog listing page.
-6. Do not infer an unsupported feature or version from a similar entry. If official
-   pages do not establish the answer, state the uncertainty.
+Web changes arrive server-side. Treat a capability available on Web as available
+through Agent Plugin unless official sources say otherwise; service and tool
+changes do not require a Plugin update. A standalone Plugin needs an update only
+when the individual change names a Plugin minimum because its bundled Skill changed.
+Agent Plugin hosted by ChatCut Desktop uses Desktop's bundled Skills: a Desktop
+update updates both; never ask the user to update the Plugin separately there.
+Compare Desktop/standalone Plugin versions with the documented minimum, and link
+the official update steps when needed. A Desktop-only feature requires Desktop;
+a release listing a Desktop version does not by itself make it Desktop-only.
 
-## Decide whether the user must update
+## Desktop setup and paid-feature requests
 
-- Web changes are deployed server-side. If Current versions or the Changelog says
-  the Web release is live, do not tell the user to install an update.
-- For Desktop or a standalone Agent Plugin, compare the user's current version only
-  with the minimum version on the relevant individual change. A release header's
-  current Desktop or Plugin version is not automatically every change's minimum.
-  If the current version is older, actively recommend updating and use the official
-  installation/update page for the steps.
-- Treat a capability available on Web as available through Agent Plugin unless the
-  official Docs or Changelog explicitly says otherwise. Web UI, service, and tool
-  changes are inherited server-side and do not require a Plugin update. Require a
-  newer standalone Plugin version only when the individual change explicitly names
-  a Plugin minimum because its bundled Skill changed.
-- When a capability is explicitly Desktop-only, tell a Web user that it requires
-  Desktop and link the Desktop download instructions. Do not infer Desktop-only
-  merely because a release also lists a Desktop version.
-- If the user's product or version is unknown and it changes the recommendation,
-  ask for it or show how to check it instead of guessing.
+Use `https://chatcut.io/desktop` for installation and connection steps. npm is
+optional: if it is unavailable or fails, use the official native installer and
+Desktop's **Agents on this computer** controls. Preserve existing projects,
+settings, agent configuration and Skills. Install and open Desktop before using
+the browser sign-in handoff; verify sign-in inside Desktop before continuing.
 
-## Answering and fallback rules
+When the user's request needs a paid feature, check access after sign-in with
+Desktop's `read_billing` and, for a planned generation, `estimate_generation` when
+available. Unknown account state or a failed read does not mean Free. Do not ask
+for an upgrade for a task the account can already perform.
 
-- Try to complete supported editing actions with ChatCut tools first. Give manual
-  UI steps only when the user asked for guidance or the action cannot be completed
-  directly.
-- Use localized visible UI names verified in the current Docs. Do not invent routes,
-  buttons, plan terms, prices, credit costs, platform support, or version numbers.
-- Current feature Docs describe present behavior. Changelog entries describe
-  historical rollout and minimum versions. If wording appears inconsistent, use
-  the current feature page for present behavior and the release entry only for the
-  historical/version claim; state any unresolved ambiguity.
-- Do not claim access to live balances, ledgers, quotas, subscription state, or
-  installation state unless a tool or runtime context actually provides it.
-- If official Docs cannot be reached or do not answer the question, say what could
-  not be verified and avoid a confident guess. Offer the closest official Docs
-  entry or the in-product Feedback path after giving all verified guidance.
-- Do not expose internal implementation details, release automation, review notes,
-  or unpublished preview content to end users.
+For a signed-in non-member whose requested feature needs membership, open
+`chatcut://billing` through the local computer's URL-opening capability to show
+Desktop's billing popup. Prefer a more specific Desktop billing link returned
+by a tool. If the link cannot open, use **profile/account row at the bottom-left
+of the sidebar → Upgrade**. If app control is unavailable, give those exact
+clicks. Desktop's **Credits** menu item opens **Settings → Plan & credits**;
+the web editor's top-right avatar instructions describe a different interface.
+See `https://chatcut.io/docs/desktop-app#sign-in-and-use-a-paid-feature` and the
+current billing docs for details.
+
+Explain the access requirement and let the user choose a plan and complete
+checkout. Opening billing does not authorize a purchase. Recheck access after
+payment and resume the original request with its existing media and context.
+For an existing member who only lacks credits, use the available credit-purchase
+options rather than asking them to subscribe again. Quote and obtain approval
+before submitting paid generation; never submit just to discover its price.
+
+## Export location, progress, and stuck exports
+
+Use `/docs/exporting` for the panel, `/docs/export-history` for Export queue,
+progress, download and retry behavior, and `/docs/web-export-limits` for rendering
+location and surface limits; `/docs/desktop-local-export` covers local-file delivery.
+These facts stay in Docs rather than this Skill.
+
+Inspect a live export with the loaded status tool: `track_export` on Web or
+`track_progress` with `target="export"` and the returned task identifier on Desktop.
+Follow the tool's actual schema and coverage. If it cannot see another tab/window,
+explain that limit and use the current queue guide. Use returned `outputPath` or
+other delivery information; do not invent a path or infer a cause from icon visibility.
+
+## Help the user act
+
+Desktop's `read_project` also discovers editable app preferences and shared local
+resources, with their locations and editing contracts.
+
+Complete requested actions through available interfaces. Give manual UI
+steps when the user wants guidance or the action cannot be completed directly.
+Use current localized UI labels, supported surfaces and verified limits. Live
+balances, charges, quotas, subscriptions and installation state require live
+evidence. Keep internal implementation and unpublished preview content out of
+product answers.

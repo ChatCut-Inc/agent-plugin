@@ -9,7 +9,7 @@ Read before using Omni on `submit_video`. The existing `omni` choice now uses Ve
 - A user explicitly choosing Omni for a continuation or a first/last-frame transition.
 - Upscaled 1080p/4k delivery when requested. Upscaling is not native high-resolution detail; do not silently raise the cost.
 
-This is an upgrade of the previous Omni branch, not evidence that it beats Seedance/Kling on every scene. Do not change the default model for future generations after an Omni edit.
+This is an upgrade of the previous Omni branch, not evidence that it beats Seedance on every scene. Do not change the default model for future generations after an Omni edit.
 
 ## Supported contract
 
@@ -18,11 +18,11 @@ This is an upgrade of the previous Omni branch, not evidence that it beats Seeda
 | Text-to-video            | `prompt`                                             |
 | First-frame animation    | `prompt`, `firstFrame`                               |
 | First/last interpolation | `prompt`, `firstFrame`, `lastFrame`                  |
-| Subject references       | `prompt`, up to 3 `refImages`                        |
+| Subject references       | `prompt`, up to 3 `refImages` (ChatCut's cap)        |
 | Targeted video edit      | `prompt`, `continueFrom`, optional `taskMode:"edit"` |
 | Video continuation       | `prompt`, `continueFrom`, `taskMode:"extend"`        |
 
-Choose one of frames, references, or source video; never mix them. A last frame requires a first frame. `continueFrom` is a project video asset ref, not an external URL. Images must also be project image asset refs.
+Choose one of frames, references, or source video; never mix them. A last frame requires a first frame. `continueFrom` accepts a project video asset ref or a public HTTPS/`s3://` video resource. Image slots accept project images or public image resources. Pass resource URLs directly without importing them into the library.
 
 - Generation/extension: integer `durationSeconds` 3–10. Extension specifies **added seconds**; the returned asset contains the original plus the continuation (live verified: 3s source + 3s requested = 6s result). Do not append that full asset after the source and duplicate it. Replace the source item only when requested; no timeline mutation is automatic. Output-video billing covers the added part; source input is also charged.
 - Edit: source duration is inherited; `durationSeconds` is ignored.

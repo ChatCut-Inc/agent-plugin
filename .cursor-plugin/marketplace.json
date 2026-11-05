@@ -8,7 +8,20 @@
     {
       "name": "chatcut",
       "source": "grok",
-      "description": "AI video editing in ChatCut: cut footage, add captions, clean up talking-head videos, and export editable timelines."
+      "description": "Edit videos in ChatCut from Grok Bot: cut footage, add captions, clean up talking-head videos, and export editable timelines.",
+      "minClientVersions": {
+        "cursor": "never"
+      }
+    },
+    {
+      "name": "chatcut-cursor",
+      "source": "cursor",
+      "description": "Edit videos in ChatCut from Cursor: cut footage, add captions, clean up talking-head videos, and export editable timelines.",
+      "minClientVersions": {
+        "grokbot": "never",
+        "sand": "never",
+        "sandMobile": "never"
+      }
     }
   ]
 }

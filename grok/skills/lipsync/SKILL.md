@@ -30,6 +30,10 @@ is not final dialogue. If no mouth synchronization is requested, use dialogue
 replacement instead of this tool. Integrated HeyGen translation includes its own mouth
 synchronization; do not lip-sync its output a second time by default.
 
+When a generation tool returns `FEATURE_NOT_INCLUDED` for a `generation.*` feature, use its payer and access details. If the project owner needs Pro, explain that the owner pays and must upgrade; the member's own Pro does not unlock the project. Do not give the member a personal upgrade link or send them to their own billing menu. They can find the owner in the project's existing members view when available. Otherwise share the returned upgrade link, or ChatCut’s avatar menu → Upgrade. Existing credits are preserved and generation still consumes credits after upgrading. This rejection does not charge for generation; existing agent conversation fees are separate, so do not claim the whole conversation was free. Preserve the exact original tool input and project, then stop. Do not automatically search for or substitute stock media; offer alternatives only if the user explicitly asks.
+
+When the user returns with “continue”, “继续”, “jixu”, or says they upgraded, recheck current payer eligibility and credits for the original input with `estimate_generation` when supported, otherwise the original tool’s precheck. If there is no separate precheck, one retry of the original tool lets its server check current access. If eligible, submit the original input once; if still blocked, explain the current blocker and stop. Do not ask the user to choose between the original generation and stock media again or state the old rejection as current status without checking. If a job was already accepted, track it instead of submitting again. Never switch generation tools, providers or services to bypass a gate.
+
 ## Prepare, submit and inspect
 
 1. Resolve the exact ready source-video and speech-audio assets. Prepare the requested
@@ -43,6 +47,12 @@ synchronization; do not lip-sync its output a second time by default.
    Do not promise arbitrary multi-person targeting or that a long new speech can fit
    a short original performance. Resolve material duration differences before paying
    for rendering. Keeping duration and keeping natural speech pace can conflict.
+   A missing cloud copy is not a missing local source. Do not stop because
+   `sourceAccess.cloud` is `not-available` or the original upload is `deferred`.
+   Submit the resolved assets when ready; the tool requests any required upload.
+   If it reports an upload in progress, follow its wait/retry instructions with
+   the same video, audio and request ID. Ask for relinking only when the tool
+   reports that the source file cannot be read.
 3. In Grok Bot, first present the actual audio through the host's supported playback,
    measured durations, proposed treatment and known cost, and obtain approval
    before calling `submit_lipsync`. Do not assume a ChatCut Desktop confirmation

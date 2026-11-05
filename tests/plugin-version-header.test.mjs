@@ -12,6 +12,7 @@ const hosts = [
   ["codex", "codex/.codex-plugin/plugin.json", "codex/.mcp.json", "http_headers"],
   ["claude", "claude/.claude-plugin/plugin.json", "claude/.claude-plugin/plugin.json", "headers"],
   ["grok", "grok/.cursor-plugin/plugin.json", "grok/mcp.json", "headers"],
+  ["cursor", "cursor/.cursor-plugin/plugin.json", "cursor/mcp.json", "headers"],
   ["kimi", "kimi/kimi.plugin.json", "kimi/.mcp.json", "http_headers"],
   ["kimi manifest", "kimi/kimi.plugin.json", "kimi/kimi.plugin.json", "headers"],
 ];

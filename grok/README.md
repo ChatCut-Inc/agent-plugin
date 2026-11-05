@@ -6,6 +6,9 @@ projects, import media, edit timelines, transcribe speech, add captions and moti
 graphics, generate media, and export finished work. Available tools and generation
 models depend on the connected ChatCut account and its current access.
 
+This is the Grok Bot listing. Cursor uses the separate `cursor/` listing in the
+same repository, with the same skills.
+
 Edits remain editable in the ChatCut timeline. The plugin does not replace a project with a locally flattened video unless the user explicitly requests a rendered deliverable.
 
 ## Requirements
@@ -23,12 +26,14 @@ Edits remain editable in the ChatCut timeline. The plugin does not replace a pro
 
 After marketplace approval:
 
-1. Open **Connect apps** in Grok Bot.
+1. Open **Connect apps** in Grok Bot. On a computer it is in the sidebar; in the
+   phone app, tap your avatar at the top left, then **Connect apps**.
 2. Find **ChatCut** and select **Add**. If it is not listed, it is not yet
    available through that marketplace.
 3. Select **Authorize** or **Authenticate** and complete ChatCut sign-in in the browser.
-4. If the host shows **Waiting for authorization**, select **Reopen** and finish the browser flow.
-5. Confirm ChatCut appears under installed plugins and its tools are connected.
+4. If the host shows **Waiting for authorization**, select **Reopen** on the
+   in-chat card, or **Reconnect** on the app, and finish the browser flow.
+5. Confirm ChatCut appears under **Installed** and its tools are connected.
 
 The plugin connects to:
 
@@ -37,7 +42,7 @@ https://api.chatcut.io/api/external-mcp/mcp
 ```
 
 Authentication uses OAuth. No API key or access token is stored in this repository.
-Follow the official [Grok Bot connection guide](https://cursor.com/help/grok-bot/connect-plugins)
+Follow the official [Grok Bot connection guide](https://cursor.com/help/grok-bot/connect-apps)
 for reconnecting an existing installation.
 
 ## Example requests
@@ -52,6 +57,7 @@ for reconnecting an existing installation.
 
 - The plugin can read and update ChatCut projects, assets, timelines, captions, generations, and exports available to the ChatCut account authorized by the user.
 - Files are transferred only when the user asks to import them or the requested workflow requires the supplied media.
+- Media that stays on the user's phone, or that the bot's computer cannot read, is uploaded through a ChatCut browser upload link created for the current project; it works in a phone browser.
 - The bundled import helper uploads selected media directly to storage using a ChatCut-issued upload session. Media bytes do not pass through the ChatCut application backend.
 - Generated media and edits are stored in the user's ChatCut project.
 - The package contains JavaScript and Markdown support files but no native executables or bundled `ffmpeg`/`ffprobe` binaries.
@@ -65,14 +71,14 @@ for reconnecting an existing installation.
 - Voice cloning requires explicit confirmation that the user has the right to use the referenced voice.
 - Paid generation actions should not run until required choices and consent are established.
 - The user can review editable work in the ChatCut editor before requesting export.
-- Disconnect or remove ChatCut from the host's Plugins settings to stop future plugin access. Account and data-deletion requests are handled according to the ChatCut Privacy Policy.
+- Disconnect or remove ChatCut from Grok Bot's Connect apps to stop future plugin access. Account and data-deletion requests are handled according to the ChatCut Privacy Policy.
 
 ## Plugin structure
 
 ```text
 .cursor-plugin/plugin.json   Cursor-format manifest consumed by Grok Bot
 mcp.json                     Hosted ChatCut MCP connection
-skills/                      ChatCut workflow skills
+skills/                      ChatCut workflow skills, mirrored in ../cursor/skills
 assets/                      Plugin logo and widget media manifest
 LICENSE                      Apache License 2.0
 ```

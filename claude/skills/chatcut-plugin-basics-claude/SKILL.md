@@ -1,6 +1,6 @@
 ---
 name: chatcut-plugin-basics-claude
-description: "Use for installing ChatCut (安装 ChatCut), recreating a viral or reference video with the user's own footage (recreate, clone, remake, 复刻爆款, 复刻视频, 做同款), and MANDATORY before hosted ChatCut video editing in Claude Code. Also use whenever video editing should stay editable in ChatCut, even if the user does not mention ChatCut: edit or cut a video (剪视频、剪辑), add captions or subtitles (加字幕), clean up a talking-head recording (剪口播), or add B-roll, music or motion graphics. Default new installations and generic source-video remakes to Desktop; honor user-selected Skills/workflows, existing Web projects and explicit Web requests. Covers hosted connection diagnostics and editing tools."
+description: "Use for installing ChatCut (安装 ChatCut), recreating a viral or reference video with the user's own footage (recreate, clone, remake, 复刻爆款, 复刻视频, 做同款), and MANDATORY before hosted ChatCut video editing in Claude Code. Also use whenever video editing should stay editable in ChatCut, even if the user does not mention ChatCut: edit or cut a video (剪视频、剪辑), add captions or subtitles (加字幕), clean up a talking-head recording (剪口播), or add B-roll, music or motion graphics. Default new installations and generic source-video remakes to Desktop; honor user-selected Skills/workflows, existing Web projects and explicit Web requests. Covers hosted connection setup and editing tools."
 ---
 
 # ChatCut Plugin Basics (Claude Code)
@@ -36,13 +36,7 @@ ChatCut tools are served through the configured Hosted MCP server: `chatcut` for
 
 If the tools are available and authenticated, continue normal work without reinstalling or starting a new session. Otherwise, check registration with `claude mcp get chatcut` and `claude mcp get plugin:chatcut:chatcut` (or inspect `/mcp` when the CLI is unavailable). If either exists, use that server and do not create a duplicate. Follow the matching path:
 
-When an existing connection or OAuth attempt reports an error, or tools remain absent after successful authentication, preserve that evidence and follow [connection diagnostics](references/connection-diagnostics.md) before retrying login or changing anything. An initial sign-in requirement by itself is expected, not a confirmed connection defect. The diagnostic helper collects evidence independently of the broken MCP connection; it does not require ChatCut Desktop.
-
-Also use connection diagnostics when previously available tools disappear or the host reports an unfamiliar MCP/protocol error. Capture the current-host snapshot described in that reference; preserve unknown errors and stages.
-
-For a failed hosted ChatCut tool request after connection, immediately preserve the original tool error and any available failure time, conversation ID and local call ID in the dedicated failure record described there. The Agent gathers these facts; do not ask the user to manually reconstruct them. Startup-status notices and later successful checks do not establish what happened to that tool request.
-
-Save the visible error before reading runtime databases, including unfamiliar error messages and cause. A failed Windows database read does not invalidate that error or prevent local collection with `--offline`. Keep independent bounded App evidence separate and check `evidenceSummary.hostLogCoverage` for retained and missing sources. Do not require prior stderr setup, database export or permission changes. A startup error hidden from the Agent still needs an accessible source.
+If an existing connection, OAuth attempt, or hosted tool request fails, keep the original error and identify the failing step before retrying login or changing settings. An initial sign-in requirement by itself is expected, not a confirmed connection defect.
 
 1. **Server not registered:** Offer to register the Hosted MCP server directly at user scope. Do not install, reinstall, repair, or enable a plugin to obtain the server:
 
