@@ -1,0 +1,1 @@
+../../../codex/skills/multicam-sync/SKILL.md

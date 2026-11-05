@@ -1,0 +1,1 @@
+../../../codex/skills/video-translation/SKILL.md

@@ -1,0 +1,14 @@
+{
+  "mcpServers": {
+    "chatcut": {
+      "serverUrl": "https://api.chatcut.io/api/external-mcp/mcp",
+      "headers": {
+        "x-chatcut-mcp-client": "antigravity",
+        "x-chatcut-mcp-surface": "embedded-preview",
+        "x-chatcut-plugin-version": "1.0.0",
+        "x-chatcut-install-source": "antigravity_marketplace"
+      },
+      "timeoutSeconds": 600
+    }
+  }
+}

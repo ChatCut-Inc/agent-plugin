@@ -1,0 +1,34 @@
+{
+  "$schema": "https://antigravity.google/schemas/v1/plugin.json",
+  "name": "chatcut",
+  "displayName": "ChatCut",
+  "version": "1.0.0",
+  "description": "Edit videos with AI in ChatCut: install ChatCut Desktop, cut footage, add captions, clean up talking-head videos, and recreate viral videos with your footage.",
+  "logo": "assets/logo.png",
+  "suggestedPrompts": [
+    "Install ChatCut on this computer",
+    "Recreate this reference video with my product",
+    "Continue editing my existing ChatCut project"
+  ],
+  "author": {
+    "name": "ChatCut",
+    "email": "dev@chatcut.io",
+    "url": "https://chatcut.io"
+  },
+  "homepage": "https://chatcut.io",
+  "repository": "https://github.com/ChatCut-Inc/agent-plugin",
+  "license": "Apache-2.0",
+  "keywords": [
+    "chatcut",
+    "video",
+    "video-editing",
+    "captions",
+    "subtitles",
+    "transcription",
+    "motion-graphics",
+    "mcp",
+    "desktop",
+    "install",
+    "video-remake"
+  ]
+}

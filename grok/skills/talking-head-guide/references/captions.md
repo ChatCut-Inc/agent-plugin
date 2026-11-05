@@ -1,27 +1,160 @@
-- Captions are edited as an SRT-like ordered Card list. Read once with `read_captions`, then use its Card ids and revision with `set_card_text`, `set_card_style`, `set_card_span_style`, `merge_cards`, or `reset_card`. Caption style uses `captionStyle:{version:1,...}` CSS slots with parallel `fontFamily`, `fontFallbacks`, `presentation`, and `pagination`; geometry belongs to layout, never captionStyle. If the user identifies one Card, use `set_card_style`; if they identify exact text/words, use `set_card_span_style`. Each span entry has sibling fields: `{"text":"...","style":{...},"activeStyle":{"animation":{...}}}`. `style` is the always-visible appearance; `activeStyle` applies only while that span's timed words are spoken. NEVER put `activeStyle` inside `style`. Animation samples the active overlay over the stable normal text. If the highlight background itself should fade or move, put `backgroundColor` in `activeStyle`, not `style`; a background in `style` stays visible throughout, and animation with no active paint difference can be invisible. Span animation supports deterministic enter/exit keyframes using `opacity`, typed `transform` fields (`translateX`, `translateY`, `scale`, `rotate`), and bounded `clipPath:"inset(...)"`. For a true left-to-right highlighter wipe use `inset(0 100% 0 0)` to `inset(0)`; do not use polygon/path/round clipping or browser animation names. "Swipe" is an intent to encode with inset or translate keyframes, not a literal `highlightAnimation:"swipe"` value. Never move a span request to track-wide `style`/`source_update`, and never claim Card or span animation is unsupported. Apply global segmentation with one `style` pacing call (`auto`, `phrase`, or `word`); `resegment_cards` is only its legacy alias and must not be expanded into sequential `split_card` calls. Pacing structurally rematerializes Cards and invalidates prior Card ids, so run `read_captions` afterward, repair any reported translation coverage, and use the new ids. Font size and box geometry are not segmentation actions. Legacy `display_text` word overrides are compatibility-only. NEVER edit the transcript to fix caption wording or boundaries — `manage_transcript fix` is only for an ASR-misheard source word.
+# Web caption tracks
 
-- Exact-word font sizing is supported. To make highlighted or named words larger or smaller, call `set_card_span_style` again for the same text with `style.fontSizeScale` (for example, `1.15` for 15% larger); the existing span style is merged and preserved. `fontSizeScale` is relative to the Card's effective font size. NEVER use Card-level `sizePx` or `fontSizeRatio` for this request, never resize every Card containing a highlighted word, and never claim partial-text sizing is unsupported.
+The current Web caption tools are **v2-only**. If a tool says the project is v1,
+call `edit_captions {"action":"refresh"}` once to convert saved captions without
+regenerating them, then read again. Do not try legacy Program/Cue operations,
+disable/re-enable, or reset as a migration workaround. Reads never migrate.
 
-### Goal
+## Read identities before editing
 
-Improve accessibility and engagement with on-screen text.
+`read_captions` returns native caption tracks, items, revision and global CC.
+`captionTrackSummary` labels C1/C2 identify caption tracks; `availableSources`
+labels V1/A1 identify **media** tracks. Copy actual returned ids. A caption item
+owns one caption trackId; its optional source binding is not its owning track.
+Do not invent a UUID or fields such as `suppression` or a stored track-level
+`languageCode`. `track_items` creation and patch operations supply storage defaults.
 
-Captions start from the source transcript. When the user asks for translation or bilingual captions, use `edit_captions` action `translate`; its `languageCode` is the translation target. Languages are ordinary caption sources, so use `set_sources` to switch among translations that already exist.
+For caption spelling, punctuation and wording fixes, use `set_card_text` with
+the returned Card id and revision. For grouping, emphasis, style, placement and
+translation, stay in the caption tools. Do not require a source-transcript
+audit, source FIX or raw transcript-file edits for caption polish. Caption text
+changes what viewers read, not reusable source transcription or audio. Source
+repair is a separate explicit request. Preserve meaning, negation, units,
+conditions, uncertainty and the user's existing edits.
 
-### Presets
+## Add original or translated captions
 
-Prefer built-in caption presets because they provide more stable, tested results. Use only real built-in `edit_captions` preset names; there is no `youtube` or `vox` preset.
+For an absent original track, inspect availableSources, then call:
 
-- For a general style request, first list the language-aware presets with `edit_captions` action `template`, then choose one or offer relevant returned presets for the user to choose from.
-- Use custom `style` / `layout` only when the user clearly requests a custom look or a specific adjustment.
-- For adjustments, start from the closest preset and change only the requested properties.
+```json
+{
+  "action": "track_items",
+  "json": "{\"operation\":\"create-track\",\"name\":\"Original\",\"source\":{\"trackId\":\"<media source id>\"}}"
+}
+```
 
-### Optional emphasis follow-up
+Generate with the returned **caption track id**, not the media V1/A1 id:
+`track_items {operation:"generate",trackId:"<caption track id>"}`. Omitted trackId
+generates all sourced unlocked caption tracks. Never start paid ASR merely by
+reading or enabling CC; obtain missing speech transcription through its actual
+transcription tools when the task requires it.
 
-After captions are first created and verified, if the user has not already requested emphasis, ask once whether they want it. Base the question on the actual caption content: mention only relevant categories—such as data, concepts or conclusions, people, organizations or product names, steps or actions, and contrasts or risks—and include an option to let the Agent decide. Treat a chosen category as guidance, not a requirement to emphasize every match. Do not interrupt an explicitly requested end-to-end workflow; offer this only after the requested work is complete.
+For “Cut looks good, add Chinese and Japanese captions”, preserve the cut and
+original captions, then use **two translation calls**, not manual track rows:
 
-Emphasis is opt-in. Once requested, read the complete caption sequence with `read_captions`. First choose Cards whose content adds distinct value for understanding, recall, action, decision, state tracking, or an expressive payoff. Suppress setup, filler, and repeated payloads; allow adjacent selections when each adds something independent, and let the content determine how many spans to emphasize.
+```json
+{"action":"translate","json":"{\"languageCode\":\"zh\",\"mode\":\"bilingual\"}"}
+{"action":"translate","json":"{\"languageCode\":\"ja\",\"mode\":\"bilingual\"}"}
+```
 
-Within each eligible Card, choose the smallest contiguous verbatim span that remains truthful. Preserve negation or modality, conditions, scope or uncertainty, required units or referents, indispensable action objects, and both sides of a contrast when needed. If the same text occurs more than once, use `occurrence`; use `languageCode` to target one bilingual projection.
+Read back original + both language tracks. Existing translations are reused
+unless the user explicitly requests retranslation with force:true. Translation
+creates independently styled pages with aligned/estimated target-word timings;
+never claim measured target-language speech alignment. Use mode:"translation"
+only when the user wants to hide the selected original. Languages already present
+can be shown/hidden with update-track hidden:false/true without translating again.
+If the original already is one requested language (for example Chinese speech),
+keep that original track and translate only the missing language; do not add a
+duplicate Chinese translation of already-Chinese captions.
 
-Apply the requested spans with `set_card_span_style`, then read the captions again and verify the resulting `inlineStyles`. Do not change caption wording, timing, Card boundaries, line breaks, position, pacing, or overall style.
+## Move, style and delete native captions
+
+- Move a Card: `track_items {operation:"move",itemIds:["<item id>"],trackId:"<destination caption track id>"}`. Identity and visible appearance survive; incompatible source bindings detach, and old automatic generation is suppressed atomically.
+- Style one track: `style {trackId:"<caption track id>",captionStyle:{version:1,token:{color:"#ffffff"}}}`. Native style/layout/template actions target the returned caption track id, not a legacy sourceId from a Program.
+- Position a track: `layout {trackId:"<caption track id>",top:760,width:1400}`. Geometry is not captionStyle.
+- Delete a track and its Cards: `track_items {operation:"delete-track",trackId:"<caption track id>"}`. This never deletes its source media. Respect track/item locks.
+- Create or patch tracks/items with `create-track`, `update-track`, `create-item`, `update-item`. Caption reads omit renderer source and reconciliation internals; do not use those compact projections as full `upsert-track`/`upsert-item` rows.
+
+Card actions `set_card_text`, `set_card_style`, `set_card_layout`,
+`set_card_tokens`, `set_card_span_style`, `split_card`, and `merge_cards` use a
+native item id as cardId and the current revision **inside json**. Words expose
+their real token ids and Card-relative frame timing. For a split, beforeWordKey
+must be an interior timed token. Do not guess frame units or token identities.
+Send edits sequentially. Batch synchronous Card edits with one top-level revision
+and edits array; the native batch is atomic and a failed edit writes nothing.
+Reread after structural edits for fresh ids.
+
+Exact-word emphasis uses set_card_span_style with sibling style/activeStyle.
+Normal style remains visible throughout; put an animated highlight's paint in
+activeStyle. Preserve negation and meaning, and apply emphasis only when requested.
+For a swipe, encode bounded inset or typed transform keyframes, not a made-up
+animation name. Do not change every Card when only one span was requested.
+
+For relative word sizing, use `style.fontSizeScale` (1.15 means 15% larger)
+rather than guessing a pixel `fontSize`. Keep normal `style` static; animation
+belongs in its sibling `activeStyle`. For example, pass this object inside
+`set_card_span_style`'s `json`, replacing the Card id, revision and exact text
+with values from `read_captions`:
+
+```json
+{
+  "cardId": "<item id>",
+  "revision": "<current revision>",
+  "spans": [
+    {
+      "text": "exact words",
+      "style": { "color": "#ffffff", "fontSizeScale": 1.15 },
+      "activeStyle": {
+        "color": "#1a1a1a",
+        "backgroundColor": "#facc15",
+        "animation": {
+          "enter": {
+            "durationMs": 180,
+            "keyframes": [
+              { "offset": 0, "opacity": 0 },
+              { "offset": 1, "opacity": 1 }
+            ]
+          }
+        }
+      }
+    }
+  ]
+}
+```
+
+Each enter/exit phase needs `durationMs` and a `keyframes` array with offsets
+from 0 to 1; `enter.from` / `enter.to` is not the canonical shape. The contrasting
+active paint is intended to reveal the fade; verify it in the target renderer.
+If an animation is rejected, correct its format and verify the requested motion;
+do not silently remove the animation and report the animated request complete.
+
+## Presets and render verification
+
+Start a new look from the published caption presets, then refine with caption
+tools instead of rebuilding the treatment from scratch. For a simple caption
+request, use the saved project style preference without
+forcing a chooser. For an explicit look, apply it directly. For comparison,
+read `edit_captions action:"template"` with the actual caption language and
+choose from `publishedTemplates`, not the legacy built-in list. Search with
+`query`; continue with `publishedNextOffset` as `offset`. Include suitable
+`kind:"motion-graphic"` entries when the user asks for expressive or animated
+captions. Load `widget-forms` and copy each selected template's returned
+`previewOptions` into the preview cards; do not guess catalog IDs or revisions.
+Use the host's actual preview result before asserting that a template can or
+cannot be previewed. Report a concrete preview failure instead of applying the
+template to capture a still or substituting ordinary styling for MG.
+
+Published templates come from real caption examples in a backing project. Read
+`manage_design_style get` for linked preferences, then the live catalog. After
+selection, apply its exact `catalogTemplateId` and supported `languageCode` to
+the intended caption track and verify the saved identity. MG renderers can
+consume rawText/styleSpans from caption_v1 explicitly; CSS and span animations
+are not automatically painted over custom code.
+
+Caption JSX is owned directly by a native track or item via action:"renderer",
+not an MG asset. sourceId selects the native caption track; cardId plus revision
+selects an item. Code reads implicit `useSpecialEffects().caption_v1`. Read the
+tool's current capabilities before requesting other analysis protocols. MG code
+owns appearance while active; clear it and choose an ordinary template for CSS
+and span styling. Keep code validation, property controls and source timing intact.
+
+For a requested custom animated treatment or reference recreation beyond the
+catalog, load the active Motion Graphics skill and read its MG caption design
+reference and `caption_v1` contract before authoring. Use the caption-specific
+creative workflow, not the ordinary MG style-picker or generation workflow.
+
+Verify actual short/long Cards over the footage: both requested languages, source
+following, no overlap/clipping, readable size and safe placement, correct CC and
+track visibility, and persistence after reopen. A successful tool call is not
+proof that the composed frame is correct. Do not claim export/native parity from
+state inspection alone.

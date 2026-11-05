@@ -5,10 +5,10 @@ Read this document before generating with `model: "seedance-2-5"`, the default f
 ## Capabilities
 
 - Duration: 4-30 integer seconds via `durationSeconds` (default 5).
-- Resolution: 480p, 720p (default), or 1080p. Ark encodes 1080p output as 10-bit H.265/HEVC.
+- Resolution: 480p, 720p (default), or 1080p. Ark encodes 1080p output as 10-bit H.265/HEVC. ChatCut offers 2.5 up to 1080p; for 4K use full `seedance2`. Ark lists about CNY 0.67/1.51/3.74 per second at 480p/720p/1080p without video input; reference-video seconds are billed too. The confirmation card shows the exact credit quote.
 - Ratio: `16:9`, `4:3`, `1:1`, `3:4`, `9:16`, `21:9`, or adaptive for locked frame/edit/extend tasks.
 - Output: defaults to mp4 for generate tasks and MOV for edit/extend tasks when `outputFormat` is omitted.
-- Audio generation is always enabled. Control dialogue, music, ambience, and silence in the prompt.
+- Audio generation is always enabled. Describe dialogue, music, and ambience in the prompt; a request for silence may be ignored, so mute the clip's audio after import when it must be silent.
 - Native prompt/audio output languages include Chinese, English, Spanish, Indonesian, Malay, Thai, Arabic, Portuguese, Vietnamese, Japanese, and Korean.
 
 ## Inputs
@@ -23,11 +23,13 @@ Read this document before generating with `model: "seedance-2-5"`, the default f
 
 Video references must each be 2-30s and total at most 30s. Audio references must each be 2-30s and total at most 30s. The tool validates counts; check source durations before submitting when metadata is available.
 
+Media bounds (Ark's own for every Seedance 2.x model; MiniMax's differ): frame images, reference images, and reference videos 300–6000 px per side with width/height 0.4–2.5; reference videos 407,696–8,295,044 total pixels (about 480p to 4K) at 24–60 fps.
+
 Seedance 2.5 supports audio-only reference generation. A visual reference is not required when `refAudios` is the only input.
 
 Frame mode and reference mode remain mutually exclusive. Do not combine `firstFrame`/`lastFrame` with any `refImages`/`refVideos`/`refAudios`.
 
-Every media input must be a project asset ref from `read_project`, `asset://<id>`, or a same-project asset URL. Import external media first. Refer to inputs explicitly as `@Image1`, `@Video1`, and `@Audio1`, then immediately identify what each reference controls.
+Media inputs accept project asset refs from `read_project`, `asset://<id>`, same-project asset URLs, or public HTTPS/`s3://` resource URLs. Pass public resources directly without importing them; the backend measures their actual media metadata and keeps them outside the library. Refer to inputs explicitly as `@Image1`, `@Video1`, and `@Audio1`, then immediately identify what each reference controls.
 
 ## Task Modes
 
@@ -62,7 +64,7 @@ When the complete input list is known, list each unused reference in an `Unused 
 
 ### Generate
 
-For text-only generation, state the subject, setting, main event, visible style or mood when requested, camera, and sound only when relevant. For reference generation, write the reference roles first, then the subject relationships, event sequence, and continuity requirements. Convert abstract claims or emotions into observable actions, expressions, sounds, or results when precise control is needed. Keep dialogue verbatim when provided; do not invent missing lines. Identify the speaker, language only when specified, and whether other people remain naturally silent. Use `{dialogue}` for spoken lines, `()` for music, and `<>` for sound effects when distinction is useful. State `no subtitles` only when the user requests no generated text.
+For text-only generation, state the subject, setting, main event, visible style or mood when requested, camera, and sound only when relevant. For reference generation, write the reference roles first, then the subject relationships, event sequence, and continuity requirements. Convert abstract claims or emotions into observable actions, expressions, sounds, or results when precise control is needed. Keep dialogue verbatim when provided; do not invent missing lines. Identify the speaker, language only when specified, and whether other people remain naturally silent. Use `{dialogue}` for spoken lines, `()` for music, `<>` for sound effects, and `【】` for on-screen subtitles when distinction is useful. State `no subtitles` only when the user requests no generated text.
 
 For product or process prompts, express each step as initial state, one concrete operation, and observable end state. For transfers, pickups, or placements, state the single item's ownership after each change. Anchor spatial relationships to stable objects such as a counter, table, doorway, or vehicle rather than relying only on screen-left or screen-right.
 
@@ -204,6 +206,20 @@ Keep <identity, count, prop ownership, setting layout, and camera direction> con
 - Dialogue, music, ambience, effects, subtitles, and silence appear only when requested and remain assigned to the correct source or speaker.
 - The final output is a single clean prompt without meta-commentary, analysis, parameter instructions, or unrequested generic constraints.
 
+## 480p Drafts and 1080p Finals
+
+Every `seedance-2-5` 480p clip is a draft, priced like any 480p clip. Offer one when the user wants to check a shot cheaply before paying for the final, or for a long or costly 1080p clip. Never drop to 480p on your own.
+
+1. Submit with `resolution: "480p"`.
+2. Show the draft to the user. If they approve, submit `{ "model": "seedance-2-5", "fromDraft": "<the draft's assetId>" }` with no prompt, references, frames, duration or ratio. The final reuses all of them, plus the seed and audio setting, and is 1080p only.
+3. If the user wants changes, write a new prompt and make a new 480p clip; a final cannot change the shot.
+
+Limits: drafts can become finals for 7 days. The final is close to the draft but not frame-identical, and can still fail content review. If the user only needs 720p, one normal 720p clip costs less than a draft plus a 1080p final.
+
+## Continuing a Shot
+
+Set `returnLastFrame: true` to also save the clip's last frame, Ark's unwatermarked full-resolution JPEG, as an image asset; the receipt names it. Pass that image as the next clip's `firstFrame` to continue the shot without extracting a frame. Skip it for one-off clips.
+
 ## Prompt Structure
 
 Write as a director, not as a keyword list:
@@ -226,7 +242,7 @@ References: @Image1 is the hero product; @Video1 supplies camera motion only; @A
 No subtitles. Keep the product geometry and label unchanged throughout.
 ```
 
-Negative audio instructions are supported: "no BGM", "ambient sound only", "no dialogue", or "no sound". Say "no subtitles" when generated text is unwanted.
+Seedance always generates audio. The prompt may ask for "no BGM", "ambient sound only", or "no dialogue", but the model may not comply; for a silent clip, mute the clip's audio after import. Say "no subtitles" when generated text is unwanted.
 
 ## Consistency
 
