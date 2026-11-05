@@ -1,8 +1,61 @@
 # ChatCut Agent Plugins
+**ChatCut is an AI video editor for agents: an MCP server and plugin that lets Codex, ChatGPT, Claude Code, Cursor, Grok Bot, Gemini CLI and Kimi Work edit your own footage, add captions and subtitles, remove silences and filler words, create motion graphics, generate video, voiceovers and music, and export an editable timeline.**\
+[Website](https://chatcut.io) · [Setup guide](https://chatcut.io/desktop) · [ChatGPT and Codex](https://chatcut.io/chatgpt-plugin) · [Claude Code](https://chatcut.io/claude-code-plugin) · [Pricing](https://chatcut.io/pricing)
 
 AI video editing for your agent. The ChatCut Agent Plugins connect Codex, Claude Code, Grok Bot, Cursor, and Kimi Work to ChatCut, so you can ask your agent to edit a video, add captions, clean up a talking-head recording, or recreate a viral video with your own footage, and get an editable timeline back.
 
 Under the hood the plugins import media, change a project timeline, create motion graphics, generate assets, transcribe audio, add captions, export videos, and verify that edits are visible in the editor.
+
+## Quick install
+
+**ChatCut Desktop (recommended).** Paste this into Codex, the ChatGPT desktop app, Claude Code or another local agent. The agent installs ChatCut Desktop, opens sign-in, and connects itself to Desktop's local `chatcut_desktop` MCP server:
+
+```text
+Read ChatCut.io/desktop to install ChatCut
+```
+
+Or run the official installer yourself:
+
+```sh
+# macOS 13 or newer (Apple Silicon or Intel)
+curl -fsSL https://chatcut.io/install.sh | sh
+```
+
+```powershell
+# Windows 10 or newer (x64)
+irm https://chatcut.io/install.ps1 | iex
+```
+
+In the ChatGPT or Codex desktop app you can also open **Plugins** in the sidebar, search for **ChatCut**, and select **Install**.
+
+**Hosted Web plugin.** Use this for existing ChatCut Web projects or Web-only use.
+
+Claude Code (`claude mcp login` needs Claude Code 2.1.210 or newer; [full guide](https://chatcut.io/web-plugin/claude)):
+
+```sh
+claude plugin marketplace add https://github.com/ChatCut-Inc/agent-plugin.git#main
+claude plugin install chatcut@chatcut-inc
+claude mcp login plugin:chatcut:chatcut
+```
+
+Codex CLI (in the Codex desktop app, use its bundled Codex CLI; [full guide](https://chatcut.io/web-plugin/chatgpt)):
+
+```sh
+codex plugin marketplace add https://github.com/ChatCut-Inc/agent-plugin.git --ref main
+codex plugin marketplace list   # note the marketplace name
+codex plugin add chatcut@<marketplace>
+codex mcp login chatcut
+```
+
+Gemini CLI:
+
+```sh
+gemini extensions install https://github.com/ChatCut-Inc/agent-plugin
+```
+
+Grok Bot and Cursor: see [grok/README.md](./grok/README.md). Kimi Work: see [kimi/README.md](./kimi/README.md).
+
+Other MCP clients that support remote servers with OAuth can connect to `https://api.chatcut.io/api/external-mcp/mcp` and sign in with a ChatCut account.
 
 ## Install ChatCut Desktop (recommended)
 
