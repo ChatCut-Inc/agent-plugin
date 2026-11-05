@@ -1,5 +1,5 @@
 # ChatCut Agent Plugins
-**ChatCut is an AI video editor for agents: an MCP server and plugin that lets Codex, ChatGPT, Claude Code, Cursor, Grok Bot, Gemini CLI and Kimi Work edit your own footage, add captions and subtitles, remove silences and filler words, create motion graphics, generate video, voiceovers and music, and export an editable timeline.**\
+**ChatCut is an AI video editor for agents: an MCP server and plugin that lets Codex, ChatGPT, Claude Code, Cursor, Grok Bot, Gemini CLI, Kimi Work, WorkBuddy, Doubao and Qwen Work edit your own footage, add captions and subtitles, remove silences and filler words, create motion graphics, generate video, voiceovers and music, and export an editable timeline.**\
 [Website](https://chatcut.io) · [Setup guide](https://chatcut.io/desktop) · [ChatGPT and Codex](https://chatcut.io/chatgpt-plugin) · [Claude Code](https://chatcut.io/claude-code-plugin) · [Pricing](https://chatcut.io/pricing)
 
 AI video editing for your agent. The ChatCut Agent Plugins connect Codex, Claude Code, Grok Bot, Cursor, and Kimi Work to ChatCut, so you can ask your agent to edit a video, add captions, clean up a talking-head recording, or recreate a viral video with your own footage, and get an editable timeline back.
@@ -28,6 +28,8 @@ irm https://chatcut.io/install.ps1 | iex
 
 In the ChatGPT or Codex desktop app you can also open **Plugins** in the sidebar, search for **ChatCut**, and select **Install**.
 
+Doubao (豆包) connects to ChatCut Desktop through a local connector: see [doubao/README.md](./doubao/README.md).
+
 **Hosted Web plugin.** Use this for existing ChatCut Web projects or Web-only use.
 
 Claude Code (`claude mcp login` needs Claude Code 2.1.210 or newer; [full guide](https://chatcut.io/web-plugin/claude)):
@@ -53,7 +55,7 @@ Gemini CLI:
 gemini extensions install https://github.com/ChatCut-Inc/agent-plugin
 ```
 
-Grok Bot and Cursor: see [grok/README.md](./grok/README.md). Kimi Work: see [kimi/README.md](./kimi/README.md).
+Grok Bot and Cursor: see [grok/README.md](./grok/README.md). Kimi Work: see [kimi/README.md](./kimi/README.md). WorkBuddy: see [workbuddy/README.md](./workbuddy/README.md). Qwen Work (千问办公): see [qwen/README.md](./qwen/README.md).
 
 Other MCP clients that support remote servers with OAuth can connect to `https://api.chatcut.io/api/external-mcp/mcp` and sign in with a ChatCut account.
 
@@ -71,6 +73,9 @@ The hosted packages below remain available for existing Web projects and explici
 - `claude/` - the Claude Code plugin package.
 - `grok/` - the Grok Bot and Cursor plugin package.
 - `kimi/` - the Kimi Work plugin package, with mandatory basics, core craft skills, and in-app browser adapters; see [its package and migration guide](./kimi/README.md).
+- `workbuddy/` - the WorkBuddy expert package for the hosted Web plugin; see [its README](./workbuddy/README.md).
+- `doubao/` - the Doubao (豆包) Skill package for ChatCut Desktop; see [its README](./doubao/README.md).
+- `qwen/` - the Qwen Work (千问办公) expert kit for the hosted Web plugin; see [its README](./qwen/README.md).
 - `chatcut-desktop-codex-plugin/` - the store-facing, skill-only package that
   helps Codex install and connect the signed ChatCut Desktop app.
 - `codex/.codex-plugin/plugin.json` - Codex plugin metadata.

@@ -1,0 +1,26 @@
+{
+  "mcpServers": {
+    "chatcut": {
+      "type": "http",
+      "url": "https://api.chatcut.io/api/external-mcp/mcp",
+      "headers": {
+        "x-chatcut-mcp-client": "workbuddy",
+        "x-chatcut-mcp-surface": "embedded-preview"
+      },
+      "x-workbuddy": {
+        "displayName": {
+          "zh": "ChatCut 视频剪辑师",
+          "en": "ChatCut Video Editor"
+        },
+        "description": {
+          "zh": "连接 ChatCut 账户，用自然语言创建项目、导入素材、编辑时间线、生成视听素材并导出视频。",
+          "en": "Connect your ChatCut account to create projects, import media, edit timelines, generate audiovisual assets, and export videos with natural language."
+        },
+        "icon": "./avatars/chatcut.png",
+        "auth": {
+          "type": "oauth"
+        }
+      }
+    }
+  }
+}

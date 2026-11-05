@@ -1,0 +1,51 @@
+{
+  "name": "chatcut-video-editor-web",
+  "displayName": "ChatCut 视频剪辑师",
+  "displayNameEn": "ChatCut Video Editor",
+  "displayNameCn": "ChatCut 视频剪辑师",
+  "version": "2.0.4",
+  "description": "一站式完成口播精剪、MG 动画和产品 / App 宣传片，支持 AI 视频、图片、音乐与配音生成，并可在网页编辑器中随时继续调整。",
+  "descriptionEn": "Create talking-head videos, motion graphics and product promos in ChatCut, with AI media generation and an editable multitrack timeline.",
+  "descriptionZh": "一站式完成口播精剪、MG 动画和产品 / App 宣传片，支持 AI 视频、图片、音乐与配音生成，并可在网页编辑器中随时继续调整。",
+  "author": {
+    "name": "ChatCut",
+    "url": "https://chatcut.io"
+  },
+  "homepage": "https://chatcut.io",
+  "repository": "https://github.com/ChatCut-Inc/agent-plugin",
+  "license": "GPL-3.0-only",
+  "category": "content-creation",
+  "tags": [
+    "video-editing",
+    "motion-graphics",
+    "voiceover",
+    "chatcut",
+    "web"
+  ],
+  "skills": [
+    "./skills/talking-head-guide",
+    "./skills/create-motion-graphics",
+    "./skills/app-promo-guide",
+    "./skills/asset-import",
+    "./skills/chatcut-plugin-basics",
+    "./skills/digital-human",
+    "./skills/export",
+    "./skills/known-errors",
+    "./skills/music",
+    "./skills/product-help",
+    "./skills/shader-gen",
+    "./skills/transcription",
+    "./skills/verification",
+    "./skills/video-gen",
+    "./skills/video-translation",
+    "./skills/voice",
+    "./skills/widget-forms"
+  ],
+  "keywords": [
+    "视频剪辑",
+    "MG 动画",
+    "产品宣传片",
+    "口播",
+    "ChatCut"
+  ]
+}
