@@ -1,0 +1,1 @@
+../../../../codex/skills/video-gen/references/seedance2.md

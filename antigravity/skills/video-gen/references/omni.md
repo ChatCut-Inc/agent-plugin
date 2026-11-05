@@ -1,0 +1,1 @@
+../../../../codex/skills/video-gen/references/omni.md

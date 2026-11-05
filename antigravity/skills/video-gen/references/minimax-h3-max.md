@@ -1,0 +1,1 @@
+../../../../codex/skills/video-gen/references/minimax-h3-max.md

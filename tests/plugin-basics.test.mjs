@@ -5,6 +5,7 @@ import test from "node:test";
 const hosts = [
   ["codex", "codex/skills/chatcut-plugin-basics/", "codex mcp login chatcut"],
   ["claude", "claude/skills/chatcut-plugin-basics-claude/", "claude mcp add-json --scope user chatcut"],
+  ["antigravity", "antigravity/skills/chatcut-plugin-basics/", "agy plugin list"],
 ];
 const removedResources = [
   "scripts/mcp-doctor.mjs",
@@ -21,7 +22,12 @@ for (const [host, folder, setupCommand] of hosts) {
   test(`${host} basics retain hosted setup without the removed diagnostic workflow`, async () => {
     const skill = await readFile(new URL("SKILL.md", skillRoot), "utf8");
     assert.ok(skill.includes(setupCommand));
-    assert.ok(skill.includes("https://api.chatcut.io/api/external-mcp/mcp"));
+    if (host === "antigravity") {
+      const connection = JSON.parse(await readFile(new URL("../antigravity/mcp_config.json", import.meta.url), "utf8"));
+      assert.equal(connection.mcpServers.chatcut.serverUrl, "https://api.chatcut.io/api/external-mcp/mcp");
+    } else {
+      assert.match(skill, /https:\/\/api\.chatcut\.io\/api\/external-mcp\/mcp\b/);
+    }
     assert.ok(skill.includes("keep the original error and identify the failing step"));
     assert.doesNotMatch(skill, collectorReferences);
   });

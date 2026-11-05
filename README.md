@@ -1,6 +1,6 @@
 # ChatCut Agent Plugins
 
-AI video editing for your agent. The ChatCut Agent Plugins connect Codex, Claude Code, Grok Bot, Cursor, and Kimi Work to ChatCut, so you can ask your agent to edit a video, add captions, clean up a talking-head recording, or recreate a viral video with your own footage, and get an editable timeline back.
+AI video editing for your agent. The ChatCut Agent Plugins connect Codex, Claude Code, Grok Bot, Cursor, Google Antigravity, and Kimi Work to ChatCut, so you can ask your agent to edit a video, add captions, clean up a talking-head recording, or recreate a viral video with your own footage, and get an editable timeline back.
 
 Under the hood the plugins import media, change a project timeline, create motion graphics, generate assets, transcribe audio, add captions, export videos, and verify that edits are visible in the editor.
 
@@ -18,6 +18,9 @@ The hosted packages below remain available for existing Web projects and explici
 - `claude/` - the Claude Code plugin package.
 - `grok/` - the Grok Bot plugin package (hidden from Cursor).
 - `cursor/` - the Cursor plugin package (hidden from Grok Bot); its skills and assets symlink to `grok/`.
+- `antigravity/` - the Google Antigravity plugin package.
+- `antigravity/plugin.json` - Antigravity plugin metadata.
+- `antigravity/mcp_config.json` - Antigravity MCP server configuration.
 - `kimi/` - the Kimi Work plugin package, with mandatory basics, core craft skills, and in-app browser adapters; see [its package and migration guide](./kimi/README.md).
 - `chatcut-desktop-codex-plugin/` - the store-facing, skill-only package that
   helps Codex install and connect the signed ChatCut Desktop app.
@@ -35,7 +38,7 @@ The hosted packages below remain available for existing Web projects and explici
 ## Requirements
 
 - A ChatCut account.
-- Codex with plugin support, Claude Code 2.x (CLI or desktop app), Grok Bot, Cursor, or Kimi Work.
+- Codex with plugin support, Claude Code 2.x (CLI or desktop app), Grok Bot, Cursor, Google Antigravity (App, CLI, or IDE), or Kimi Work.
 - Access to a ChatCut project you want to edit.
 
 ## Optional hosted Web plugin authentication
@@ -46,9 +49,9 @@ The plugin connects to ChatCut through the hosted ChatCut MCP endpoint:
 https://api.chatcut.io/api/external-mcp/mcp
 ```
 
-The host handles authentication when the plugin is installed or first used (`codex mcp login chatcut`, or `claude mcp login plugin:chatcut:chatcut` in Claude Code). Grok Bot and Cursor users complete the authorization flow from the host's Plugins screen. Follow the sign-in flow to connect your ChatCut account.
+The host handles authentication when the plugin is installed or first used (`codex mcp login chatcut`, or `claude mcp login plugin:chatcut:chatcut` in Claude Code). Grok Bot and Cursor users complete the authorization flow from the host's Plugins screen. Antigravity users select **Customizations → Authenticate** next to the ChatCut MCP server. Follow the sign-in flow to connect your ChatCut account.
 
-Install instructions per host: [Codex Web guide](https://chatcut.io/web-plugin/chatgpt) for Codex, [Claude Code Web guide](https://chatcut.io/web-plugin/claude) for Claude Code (agent-executable copy in [./docs/claude-code-web-install.md](./docs/claude-code-web-install.md)), [./grok/README.md](./grok/README.md) for Grok Bot, and [./cursor/README.md](./cursor/README.md) for Cursor.
+Install instructions per host: [Codex Web guide](https://chatcut.io/web-plugin/chatgpt) for Codex, [Claude Code Web guide](https://chatcut.io/web-plugin/claude) for Claude Code (agent-executable copy in [./docs/claude-code-web-install.md](./docs/claude-code-web-install.md)), [./grok/README.md](./grok/README.md) for Grok Bot, [./cursor/README.md](./cursor/README.md) for Cursor, and [./antigravity/README.md](./antigravity/README.md) for Antigravity.
 
 ## Example Prompts
 
