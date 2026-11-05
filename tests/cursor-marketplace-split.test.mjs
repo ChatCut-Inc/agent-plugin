@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { readdir, readFile } from "node:fs/promises";
+import { readdir, readFile, readlink } from "node:fs/promises";
 import test from "node:test";
 
 const root = new URL("../", import.meta.url);
@@ -52,10 +52,11 @@ const listFiles = async (dir) => {
     .sort();
 };
 
-// Until Cursor gets its own host adapters, its skills are a verbatim copy so
+// Until Cursor gets its own host adapters, share the directories directly so
 // the two listings cannot drift apart.
 for (const dir of ["skills/", "assets/"]) {
   test(`cursor/${dir} mirrors grok/${dir}`, async () => {
+    assert.equal(await readlink(new URL(`cursor/${dir.slice(0, -1)}`, root)), `../grok/${dir.slice(0, -1)}`);
     const grokFiles = await listFiles(`grok/${dir}`);
     assert.deepEqual(await listFiles(`cursor/${dir}`), grokFiles);
     for (const file of grokFiles) {

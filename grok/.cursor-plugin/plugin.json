@@ -2,7 +2,7 @@
   "name": "chatcut",
   "displayName": "ChatCut",
   "version": "1.10.20",
-  "description": "Let Grok Bot agents create and edit videos in ChatCut through natural-language requests, with editable timelines, captions, motion graphics, media generation, and export.",
+  "description": "Edit videos in ChatCut from Grok Bot: cut footage, add captions and subtitles, clean up talking-head recordings, add motion graphics and generated media, and export editable timelines.",
   "minClientVersions": {
     "cursor": "never"
   },

@@ -49,8 +49,8 @@ Authentication uses OAuth. No API key or access token is stored in this reposito
 ```text
 .cursor-plugin/plugin.json   Cursor plugin manifest
 mcp.json                     Hosted ChatCut MCP connection
-skills/                      ChatCut workflow skills, kept identical to grok/skills
-assets/                      Plugin logo and widget media manifest
+skills/                      Symlink to ../grok/skills
+assets/                      Symlink to ../grok/assets
 LICENSE                      Apache License 2.0
 ```
 

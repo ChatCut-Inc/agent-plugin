@@ -5,7 +5,8 @@
       "headers": {
         "x-chatcut-mcp-client": "grok",
         "x-chatcut-mcp-surface": "embedded-preview",
-        "x-chatcut-plugin-version": "1.10.20"
+        "x-chatcut-plugin-version": "1.10.20",
+        "x-chatcut-install-source": "cursor_marketplace"
       }
     }
   }

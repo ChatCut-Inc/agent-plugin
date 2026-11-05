@@ -1,0 +1,16 @@
+{
+  "name": "chatcut",
+  "version": "1.0.0",
+  "description": "AI video editing in ChatCut from Gemini CLI: cut footage, add captions and subtitles, clean up talking-head videos, add motion graphics, and export editable timelines.",
+  "mcpServers": {
+    "chatcut": {
+      "httpUrl": "https://api.chatcut.io/api/external-mcp/mcp",
+      "oauth": {
+        "enabled": true
+      },
+      "headers": {
+        "x-chatcut-install-source": "gemini_cli"
+      }
+    }
+  }
+}

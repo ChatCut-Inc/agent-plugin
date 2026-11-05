@@ -8,7 +8,7 @@
     {
       "name": "chatcut",
       "source": "grok",
-      "description": "Create and edit ChatCut videos from Grok Bot.",
+      "description": "Edit videos in ChatCut from Grok Bot: cut footage, add captions, clean up talking-head videos, and export editable timelines.",
       "minClientVersions": {
         "cursor": "never"
       }
@@ -16,7 +16,7 @@
     {
       "name": "chatcut-cursor",
       "source": "cursor",
-      "description": "Create and edit ChatCut videos from Cursor.",
+      "description": "Edit videos in ChatCut from Cursor: cut footage, add captions, clean up talking-head videos, and export editable timelines.",
       "minClientVersions": {
         "grokbot": "never",
         "sand": "never",
