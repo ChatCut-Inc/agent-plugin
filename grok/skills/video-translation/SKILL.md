@@ -1,208 +1,348 @@
 ---
 name: video-translation
-description: Translate, dub, and localize speech in an existing video while optionally preserving speaker voices, generating translated captions, or synchronizing the speaker's lip movements. Use when the user asks for 视频译制、多语言配音、 把视频里的中文变成英文、让视频里的人说另一种语言、保留原音色、翻译声音、 口型同步、translated video, video dubbing, voice translation, or lip-synced localization, as well as traducción de video, doblaje de video, traducir un video, or sincronización labial. This Skill MUST be loaded before composing treatment choices for an ambiguous video-translation request in any language, including a turn that only asks the user to choose a treatment. Do not use when the user only wants subtitles translated, wants an SRT/VTT file, wants text or a script translated before generating a new avatar video, or wants ordinary TTS with a newly selected voice.
+description: |
+  Translate the original speech in an existing video into another language,
+  with or without lip sync. Own all video-translation planning and review. Use for 视频翻译、
+  视频译制、多语言配音、translated video or lip-synced localization. Includes
+  source-language correction and optional target-language wording edits before
+  generation. For wholly new scripts, voice and optional lipsync
+  provide independently reviewable speech and duration; a new presenter performance uses digital-human.
+  Subtitle-only translation is a separate workflow.
 ---
 
 # Video Translation
 
-Create a new localized video asset from an existing project video. Treat
-speech translation, dubbing, voice preservation, lip synchronization, captions,
-quality, authorization, generation, and verification as one workflow.
+## Scope and inputs
 
-Lip-synced translation starts with source-transcript review in ordinary chat.
-The recognized source wording is never treated as final until the user has
-approved it or supplied corrections. Audio-only
-translation keeps the existing direct-submit flow and skips this review.
+This skill owns every video-translation request, including translation without
+mouth changes. Keep source review, translation decisions and final verification
+here; `voice` and `lipsync` execute reusable stages rather than own translation.
 
-## When to Use
+When a generation tool returns `FEATURE_NOT_INCLUDED` for a `generation.*` feature, use its payer and access details. If the project owner needs Pro, explain that the owner pays and must upgrade; the member's own Pro does not unlock the project. Do not give the member a personal upgrade link or send them to their own billing menu. They can find the owner in the project's existing members view when available. Otherwise share the returned upgrade link, or ChatCut’s avatar menu → Upgrade. Existing credits are preserved and generation still consumes credits after upgrading. This rejection does not charge for generation; existing agent conversation fees are separate, so do not claim the whole conversation was free. Preserve the exact original tool input and project, then stop. Do not automatically search for or substitute stock media; offer alternatives only if the user explicitly asks.
 
-Use this skill when the user wants an existing video to:
+When the user returns with “continue”, “继续”, “jixu”, or says they upgraded, recheck current payer eligibility and credits for the original input with `estimate_generation` when supported, otherwise the original tool’s precheck. If there is no separate precheck, one retry of the original tool lets its server check current access. If eligible, submit the original input once; if still blocked, explain the current blocker and stop. Do not ask the user to choose between the original generation and stock media again or state the old rejection as current status without checking. If a job was already accepted, track it instead of submitting again. Never switch generation tools, providers or services to bypass a gate.
 
-- Make its speakers speak another language.
-- Produce a dubbed or localized version.
-- Preserve the original speakers' vocal identity across languages.
-- Synchronize visible mouth movements with translated speech.
-- Translate only the spoken audio while keeping the original picture.
-- Generate a translated video with optional translated captions.
-- Create a language-specific version for another market.
+## Capability model and planning
 
-Typical triggering requests include:
+Plan from the requested content, picture preservation and mouth synchronization,
+then account for explicit voice or preview preferences. These recommendations
+explain useful starting points. Adapt them using the actual media, live tool
+schema, availability and quotes; clarify unresolved choices that affect the result.
 
-- "让视频里这个人说英语。"
-- "把中文口播做成英文版，口型也对上。"
-- "把这段采访译制成日语，保留每个人的声音。"
-- "做一个西班牙语配音版。"
-- "只把声音翻译成英语，画面不要变。"
-- "把这个中文数字人成片改成英文。"
+| Capability                            | Inputs, outputs and planning implications                                                                                                                                                                                                                               |
+| ------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Integrated `video_translation`        | Existing video + target language → translated video with generated dubbing and optional mouth synchronization. Proofread provides editable text for review; generated speech is available in the rendered result. The integrated service creates the speech.            |
+| Voice cloning and TTS through `voice` | Reference recording → reusable speaker identity; text + compatible voice → speech audio. A saved compatible clone can be reused. The generated audio provides the actual words, pronunciation, duration and pauses for audition and alignment with existing footage.    |
+| `lipsync`                             | Existing video + final speech audio → video with mouth movements matched to that audio. The audio supplies the words and voice. Prepare suitable speech and video durations first, use the live tool's supported duration treatment, then inspect the resulting pacing. |
 
-Route adjacent requests elsewhere:
+For translation with mouth synchronization, integrated translation is usually the
+simplest plan: review text, then generate dubbing and mouth movement together.
+For translation with unchanged picture, independent original-voice dubbing is
+the default: it preserves the picture and generally costs less than integrated
+video generation. Compare live quotes for the actual task. The integrated audio-only
+option also produces a dubbed video retaining the picture; consider it when
+explicitly requested or better suited to the known constraints. Use integrated
+`prepare` for its text-review workflow; use the source transcript
+and agent translation to prepare independent TTS.
 
-- Only translate, add, edit, or export captions: use caption translation.
-- Translate a script before generating a new avatar video: translate the text,
-  then use the Digital Human Skill.
-- Generate speech with a chosen replacement voice: use the Voice Skill.
-- Transcribe spoken content without changing it: use the Transcription Skill.
-- Edit pauses, mistakes, framing, or B-roll in talking-head footage: use the
-  Talking Head Guide.
-- Generate new footage rather than localize an existing video: use Video Gen.
+When the user explicitly wants a specified voice, supported speech controls or
+audition before video rendering, independent audio gives them control over that
+stage. Generate and audition the actual speech, align it with the picture, then
+reuse the approved final audio for `lipsync` if mouth changes are wanted. This
+keeps the heard performance and the rendered performance tied to the same audio.
+Select compatible voices and controls from the live tool's supported options.
 
-Treat these requests as ambiguous:
+For a wholly new script, `voice` lets the agent measure and adjust the changed
+speech duration before optional mouth rendering. Supplied final audio can enter
+alignment and placement directly. Subtitle-only work uses the subtitle workflow;
+a new presenter performance uses `digital-human`.
 
-- "把这个视频翻译成英文。"
-- "帮我做一个英文版。"
-- "中文改成英语。"
-- "做一个海外版。"
-- "把这个视频国际化一下。"
+Load the selected execution skill for its input preparation, timing and
+verification guidance. Translation scope and recovery are described below.
+Already-generated avatar videos can be source videos; creating a new avatar is
+a separate capability.
 
-For an ambiguous request, ask one treatment question with text choices. Keep
-the wording natural for the conversation, and include all applicable paths:
+Resolve the source, target language and intended speaking turns before choosing
+processing scope. Translation preserves the source speaker's identity by default;
+load `voice` to resolve that identity when using the controlled speech route.
 
-- Lip-sync translation: continue through the editable source-transcript review
-  and submit with `audioOnly: false` or omit `audioOnly`.
-- Audio-only translation: keep the existing direct-submit path and submit with
-  `audioOnly: true`.
-- Subtitle-only translation: use caption translation and do not submit a video
-  translation job.
+Audio intervals and speaker stems are different. Replacing an interval removes
+its whole mix, including music, ambience and any overlapping voice. Non-overlapping
+speaking turns allow other turns to remain untouched, but do not separate sounds
+underneath the selected speaker. Inspect which components must remain and which
+tracks actually exist before proposing generation. If only a mix is available and
+the user requires underlying sounds unchanged, explain that missing capability
+and resolve stems or a tradeoff first; voice cloning does not separate the mix.
 
-Keep user-facing terminology in one language. These are localized concept names,
-not fixed full option sentences; descriptions may stay natural for the context:
+Mouth rendering has a separate visual scope: the supplied frames are processed
+without a speaker or spatial selector. A time crop does not exclude other people
+still visible; do not promise their picture remains untouched unless the actual
+edit isolates that visual scope. No-lip audio replacement retains the picture.
 
-| Conversation language | Lip-sync path                        | Audio-only path          | Subtitle-only path            |
-| --------------------- | ------------------------------------ | ------------------------ | ----------------------------- |
-| Chinese               | 口型同步翻译                         | 只翻译声音               | 只翻译字幕                    |
-| English               | Lip-synced translation               | Audio-only translation   | Subtitle-only translation     |
-| Spanish               | Traducción con sincronización labial | Traducción solo de audio | Traducción solo de subtítulos |
+Preserve stated requirements when adapting the plan. A visible speaker alone
+is not a request for lip sync, and a selected voice does not settle that choice.
+If requirements conflict or a capability is unavailable, explain the specific
+constraint and resolve the tradeoff; do not silently substitute another voice,
+change preserved footage, or relax the requested content.
 
-The target translation language does not control this copy; the user's
-conversation language does. Never append a second-language gloss such as
-`(lip-sync)` to a localized label.
+Before translating, establish segment timing budgets with
+the [speech timing budget](#speech-timing-budget). Before any paid
+speech synthesis or video rendering, check the target script
+against the source for meaning, omissions, numbers and proper names, then check
+target-language grammar and natural spoken wording. Apply this to both integrated
+translation drafts and translations prepared for the `voice` route. Preserve user
+edits and clarify material ambiguity; users need not know the target language to
+confirm their source. This agent check does not add a mandatory review round.
 
-Do not omit lip-sync when the source has a visible speaker. Do not relabel
-audio-only translation as generic "AI voice replacement"; choosing a new
-synthetic voice is a separate Voice Skill workflow. If the user already stated
-one treatment, skip this question and follow that route directly.
+## Review text on either route
 
-Do not submit a paid video-translation job until changing the spoken audio is
-explicitly requested or confirmed.
+Read the complete transcript for the intended source scope with `read_script`
+and its canonical library document, waiting for transcription if needed. On the
+integrated route, use the actual prepared draft for review.
+Use editable source text first, with optional target review as described in the
+review interaction below. On the `voice` route the agent translates the corrected
+source itself and maintains the segment timing map; there is no integrated draft or
+revision to create. User source approval can authorize automatic translation,
+without requiring fluency in the target language. Reuse that approval, then follow
+`voice` for compatible voice selection, synthesis and placement.
 
-## Workflow
+Follow the active host's `widget-forms` skill to present one prefilled, editable
+source textarea containing readable, connected prose, with paragraph breaks where
+useful. In embedded hosts, pair it with one `form-single` next-step choice:
+“Confirm source and use automatic translation” or “Review translation”, localized
+to the conversation language. Default to the former; show no foreign-language
+editor initially. Only if the user chooses review, present the actual target in
+one prefilled editable textarea. Follow the active host's equivalent supported
+interaction outside embedded hosts. Do not invent collapsible widget attributes.
+Users can confirm the source and authorize automatic translation without
+opening or reviewing the foreign text.
+Do not substitute a corrections/instructions field for editing the source itself,
+and do not make one input per SRT cue. Escape embedded attributes and use `default`
+for textarea prefills. Keep each transcript's own cue IDs, timing and mapping to
+readable text internally; source and target may have different segmentation.
+Never show placeholders as recognized or translated content.
 
-1. **Resolve the source video.** It must be an imported project video asset;
-   use the exact asset id from the attachment, selection, or `browse_assets`.
-   Local or external media must be imported first.
-2. **Resolve the target language from the live catalog.** Call
-   `submit_video_translation` with `action: "list_languages"` and no other
-   arguments. This only reads the catalog; it requires no project, transcript
-   review, confirmation, or credits. Then copy the matching returned value
-   verbatim into `targetLanguage`, including any dialect, region,
-   or script qualifier. Do not invent a language name or send an ISO code.
-   Match the user's requested language and variant against the returned catalog;
-   confirm the language when the user only implied a market ("海外版"). If a
-   submission reports an unsupported language, use its suggested candidates or
-   refresh the catalog with `action: "list_languages"` instead of retrying
-   guessed names. The `action` argument is required on every call.
-3. **Pick the treatment:**
-   - Lip-sync: `mode: "speed"` — translated dubbing that preserves
-     the speakers' vocal identity, plus synchronized mouth movements. Continue
-     through the source-transcript review below.
-   - `audioOnly: true` — translate the audio only and keep the picture
-     untouched. Use for screen recordings, voice-over footage, or when the user
-     says the picture must not change. Prefer this for transparent WebM when
-     preserving the alpha channel matters. **Skip steps 4–6 and keep the existing
-     direct-submit flow; do not require or pass `reviewedSourceTranscript`.**
-4. **Prepare the source transcript for lip-sync only.** If word-level
-   transcription is not complete, call `trigger_transcript`, wait for it with
-   `track_progress`, and retry only when it is ready. Call `read_script`, then
-   read the matching `library/<filename>.md` source transcript. Do not use the
-   editable `timeline.md` cut as the translation source. **Do not substitute
-   `inspect_asset` transcript ranges for `read_script`; the range result may be
-   partial and is not the canonical complete source transcript.**
-5. **Present the source-text review for lip-sync only.** Load `widget-forms`,
-   but use ordinary chat rather than a form. Strip the library's `[sN]`
-   addresses and speaker-rendering rows while preserving exactly one recognized
-   transcript segment per line, in source order. Show the complete transcript
-   in clearly labeled text and ask the user either to approve it or send
-   corrections. For a long transcript, split it into numbered consecutive chat
-   chunks without omitting segments, then ask for approval only after the final
-   chunk. Keep the full segment-to-line mapping internally. Do not expose
-   segment ids, word indices, file syntax, or timestamps. Verify that the first
-   and last non-empty source segments are present before asking for approval.
-   **Stop and wait. Never submit a translation in the same turn that first
-   presents the transcript.**
+## Independent dubbing: synthesize, align and deliver
 
-6. **Use the approved revision exactly.** Treat explicit approval of the shown
-   text, or the user's corrected text, as confirmation. Preserve its wording,
-   punctuation, order, and line breaks. Do not paraphrase it and do not ask the
-   user to confirm the same text again. If the user sends further corrections,
-   update the stored complete transcript and wait for explicit approval before
-   continuing. Keep those corrections applied rather than reverting to the
-   earlier recognized text.
-7. **Duration behavior.** By default the output may run slightly longer or
-   shorter than the source so the translated speech keeps a natural pace. Pass
-   `keepDuration: true` only when the user needs the exact original length
-   (for example to swap it into an existing timeline slot), and mention that
-   pacing may sound faster.
-8. **Submit** with `submit_video_translation` using `action: "submit"`. For lip-sync, pass
-   `reviewedSourceTranscript` as the exact complete approved text from
-   step 6; the tool combines those reviewed lines with the original segment
-   timestamps and creates source subtitles. For `audioOnly: true`, omit
-   `reviewedSourceTranscript` and preserve the pre-existing direct-submit path.
-   The tool shows the user a paid confirmation before the job starts; do not
-   resubmit after a denial.
-9. **Track** with `track_progress(action="wait")` until the translated video
-   asset lands in the library, then hand it back (place on the timeline only
-   when asked).
+After source confirmation, translate the corrected source against the segment
+budgets established above. Preserve meaning, names and numbers; estimate natural
+speaking time before synthesis and check target-language grammar. Users need not
+proofread a language they do not know. Reuse the common review interaction above;
+there is no provider draft or revision in this path.
 
-## Constraints and cost
+Before selecting/reusing a voice, cloning or synthesizing independent speech,
+load [voice](../voice/SKILL.md) unless it is already loaded in this conversation.
+That skill owns voice compatibility, reference preparation, cloning, synthesis,
+actual audio timing and recovery; this translation skill does not replace those
+instructions. Pass it the corrected translation, timing plan, resolved speaker
+requirement and picture constraints. Preserving the original speaker is already
+a voice choice: loading `voice` does not reopen a preset picker or repeat approval.
+A reusable compatible clone still requires the speech workflow, not a new clone.
 
-- The whole source video is translated and billed by its full duration. To
-  localize only a section, follow [processing-source preparation](#prepare-the-processing-source)
-  to trim/export it into its own asset first, then translate the shorter asset.
-- Optional translated captions: `enableCaption: true` burns subtitles into the
-  output video.
-- ChatCut always requests preservation of the source resolution and bitrate.
-  This is best-effort for lip-sync because the picture is re-rendered. A
-  transparent WebM may become opaque, and 4K or >30 fps media may be
-  re-encoded. The tool confirmation calls these cases out; never promise that
-  lip-sync will preserve the container, alpha channel, HDR, codec, bitrate, or
-  frame rate exactly.
-- When the picture must not be lip-synced, choose `audioOnly: true`; this avoids
-  facial re-rendering and is the safest treatment for transparent sources, but
-  do not promise byte-for-byte container preservation. After completion ChatCut
-  compares the source and output resolution, frame rate, and alpha pixel format
-  when media probing is available, and reports detected changes in generation
-  status.
-- Multiple speakers are supported; pass `speakerCount` when the user states it.
-- For lip-sync, the editable review starts with one source segment per line so
-  the submitted text can reuse the original word-level timing. Pass the complete
-  approved text directly to the tool; do not merge, split, reorder, or silently
-  normalize it in the conversation layer. Do not invoke this review for
-  `audioOnly: true`.
-- Indicative cost: ≈ 8 credits per minute of source video.
-- Speech is dubbed with voices matched to the original speakers; it is a
-  translation of the recorded voice, so confirm the user has rights to the
-  footage and its speakers when the material is clearly someone else's.
-- Never reveal or discuss the underlying provider; present this as ChatCut's
-  AI video translation.
+Follow `voice` through final audio and alignment, then return here for translation
+verification and delivery. Only load `lipsync` if mouth changes were requested.
+Integrated translation does not require `voice`; supplied final audio does
+not require cloning or synthesis.
+
+Continue requested placement/export. Check the delivered language and wording,
+voice through listening, speech against visual events, and preserved picture and
+sounds. If lip sync was requested, inspect continuous video with sound. Report
+only checks actually performed; a completed job is not proof of those qualities.
+
+## Integrated translation task
+
+An integrated tool does not mean this account can use every operation. Check the
+backend's actual availability and structured errors. Reviewed translation stays
+unavailable until the deployment has verified account rights
+and use of the approved wording. Supplier draft pricing does not block this workflow.
+If blocked, preserve the user's text and explain the limitation;
+never bypass it with legacy direct generation or present an agent-written preview
+as the draft that the provider will actually render.
+
+Only after selecting the integrated route, use `video_translation`; `action` is required.
+
+1. `list_languages` reads the live language catalog. Copy the exact returned target
+   language value, including regional/script qualifiers; do not guess ISO codes.
+2. Prepare the actual source asset for the requested scope using
+   [processing-source preparation](#prepare-the-processing-source).
+   Read this asset's complete transcript using `read_script` and its canonical
+   library document after transcription is ready. This local text is a comparison
+   aid, not proof of what the provider recognized or received as translation input.
+   Verify the prepared asset’s actual duration and content before creating a task.
+   Draft cue times refer to this asset. If the source scope changes, prepare the
+   correct source asset and a task for it; editing text updates the existing source’s
+   wording, while the source asset determines the video being processed.
+3. `prepare` prepares a draft, or saves edits on the same `taskId`. Follow the tool's
+   actual schema and returned state. ChatCut does not charge users for preparing,
+   reading, editing or confirming the draft. Supplier preparation cost remains
+   unverified; do not describe it as zero. Final video generation is billed separately.
+   Never invent a provider-generated translation.
+   A ready draft means text is ready for review, not that dubbing or lip sync has
+   finished. Describe those as planned generation in plain conversation-language
+   terms (for example, “保留你的声音” and “口型同步”); do not claim a separate voice
+   clone has been created.
+4. Use `get` on that task to read current text, revision, status, next action and any error. Task
+   states are `preparing`, `ready`, `failed`, `submitting`, or `submitted`.
+   Recover `submitting` with the same task, revision and lip-sync choice; after `submitted`, use
+   its generation job for rendering/import status. Do not edit an in-flight generation. Preserve
+   its task ID across interrupted conversations and edits; do not create a second task
+   just to resume or check progress. Initial `prepare` takes `sourceAssetId` and
+   `targetLanguage`. To edit a ready draft, send `taskId` and `expectedRevision`
+   from `get`. Target-only edits use `targetTranscriptSrt`. Source corrections must
+   include both `sourceTranscriptSrt` and the corresponding `targetTranscriptSrt`
+   in the same `prepare` call; this saves the pair atomically and advances revision.
+5. Read source provenance and capability flags. `sourceTranscriptSrt` is the current
+   editable source draft; `originalSourceTranscriptSrt` preserves the initial local
+   recognition reference. `sourceCorrectionSupported: true` permits saving corrections
+   with updated target text. `providerSourceRetranslationSupported: false` means the
+   agent must update the translation; this does not ask the provider to re-recognize
+   or retranslate the corrected source. Never conflate local ASR with provider ASR.
+
+When the user changes the source, compare it with the saved source and update the
+actual target draft accordingly, correcting names consistently in both saved
+drafts and repeating the target-script check above. If the user also edits the target, preserve
+those edits when consistent; clarify a material conflict rather than silently choosing.
+Save both SRTs with `prepare` on the same task and current revision, then describe
+the saved changes briefly in the user's language. Do not silently render unchanged
+translation after receiving a source correction.
+
+Preserve each transcript's cue structure/timing when saving. Map continuous-prose
+edits back to the existing cues yourself when unambiguous; ask a focused clarification
+only if the intended wording cannot be determined. Substantial new-script rewrites
+belong to `voice` with optional `lipsync`, outside this translation workflow.
+If the user specifically requires the provider itself to retranslate supplied corrected
+source text, explain that unsupported operation; do not present agent target edits as
+provider-side retranslation.
+
+A stale revision requires `get` before further edits. Any source or target change
+invalidates approval of the old revision. After saving, briefly describe changes in
+the user's language. Choosing “Confirm source and use automatic translation”
+authorizes proceeding with the translation of that submitted source: use the newly
+saved revision and let the runtime generation guard request final authorization
+for that exact version and cost. Do not add another mandatory text-review round
+or require foreign-language accuracy confirmation. A source edit without that
+authorization does not authorize generation. Reuse explicit approval for an
+unchanged saved revision; never carry an old revision's approval onto changed text.
+
+## Integrated generation and delivery
+
+Use `generate` with `taskId`, `revision` and an explicit `audioOnly` choice for
+the reviewed draft when the tool reports it can proceed. Respect the runtime confirmation; a model-written claim of confirmation is
+not a substitute for the host's authorization. Final generation must use the saved
+revision authorized by the user, including its actual target text. Do not fall back to an uncontrolled retranslation when draft
+support or provider rights are unavailable.
+
+- `audioOnly: true` means dubbed speech without mouth synchronization, not subtitles
+  only. It still uses the reviewed content.
+- Duration stretching (`keepDuration`) is chosen at the initial `prepare`, not at
+  `generate`. Inspect actual output duration and pacing afterward. Neither choice
+  guarantees exact duration or arbitrary-length text fitting; do not promise a
+  numerical stretching limit.
+- Do not pass remembered `mode` or external voice IDs outside the live schema.
+- Captions, if returned, are separate actual outputs; do not promise burned-in
+  subtitles from a deprecated generation flag. Add requested subtitles with editing tools.
+
+Use `get` and the returned generation job with `track_progress` as appropriate to
+its actual stage. After completion inspect the returned asset and its actual duration,
+audio and picture. Continue requested timeline placement, version assembly and export;
+a job ID alone is not delivery. Lip-sync may re-encode or change alpha, resolution or
+frame rate. Audio-only avoids mouth redrawing but does not guarantee byte-identical
+container or picture encoding.
+
+## Diagnose before retrying
+
+If the provider reports `pending moderation`, check the same task rather than
+submitting a new paid request. If the task returns
+`nextAction: inspect-provider-session` or `PREPARATION_REQUIRES_RECONCILIATION`,
+stop automatic polling and request operator reconciliation, preserving the task ID.
+A `failed` status alone does not authorize a fresh preparation or generation.
+
+| Observation                                     | Next action                                                                                                     |
+| ----------------------------------------------- | --------------------------------------------------------------------------------------------------------------- |
+| Unsupported language                            | Refresh the catalog or use returned candidates, not guessed spellings                                           |
+| Draft unavailable or permission denied          | Preserve the task/text and explain the blocked capability; do not claim approved-text generation succeeded      |
+| Source changed, stale text or revision conflict | Get the current draft; save source corrections with corresponding target edits before renewed authorization     |
+| Submit timeout or unknown outcome               | Get the same task before retrying; never start a fresh paid task blindly                                        |
+| Incorrect words                                 | Correct the source and corresponding target, or the target alone; lip sync cannot fix incorrect speech          |
+| Wrong voice or pronunciation                    | Inspect the actual dubbed audio; discuss a controlled voice/TTS route if needed                                 |
+| Correct audio, poor mouth movement              | Inspect faces, occlusion, cuts and duration; avoid redundant cloning or translation                             |
+| Provider completed, output/import failed        | Recover the existing output when available; do not poll forever or pay to regenerate an already rendered result |
+
+Use live estimates and error details; unknown provider causes or charges remain
+unknown. User-facing explanations describe ChatCut capabilities, not internal model
+names, provider identifiers or infrastructure.
+
+## Speech timing budget
+
+Before translating or drafting dialogue for existing visuals, inspect the actual
+source speech segments and pauses alongside the relevant visual events. Establish
+where each meaning unit can be spoken, including intentional gaps and any fixed
+boundaries. A single shot can use a simple segment plan; it does not need the
+multi-section table below.
+
+Estimate the target-language speaking time at the intended delivery pace while
+writing each segment. Preserve meaning, numbers and proper names; concise natural
+phrasing and supported pacing are choices, mechanical character-count matching
+is not. Apply already stated priorities for content, picture and timing. Only ask
+when a material conflict remains that those priorities do not resolve.
+
+After synthesis, compare actual spoken segment starts, ends and pauses with those
+windows and the picture, whether or not lips will be changed. Check both overruns
+and speech finishing while visible speech continues. Do not treat equal total
+length, long padding silence or cutting off words as alignment. Use two distinct
+adjustment layers:
+
+- During TTS, use only controls advertised by the selected voice's catalog entry;
+  do not assume a delivery tag or speed parameter exists for every voice.
+- When words and voice are already correct and only pacing needs adjustment,
+  prefer reusing that audio: copy it into your workspace, apply FFmpeg `atempo`
+  for pitch-preserving tempo adjustment, and import the derived audio as a new
+  project asset with the current host's import path. A timeline rate edit does
+  not change the source asset used by a later generation tool; prepare the
+  derived asset when that tool needs the adjusted audio itself.
+
+Keep changes moderate, remeasure actual speech segments and pauses, and verify
+the exported result against the picture. Neither pitch preservation nor matching
+length guarantees natural delivery. Do not repeatedly synthesize at random to
+hit an exact duration; resolve remaining conflicts through permitted wording,
+placement or visual changes, or clarify constraints that cannot be met together.
+
+## Single-speaker dialogue replacement
+
+For a simple talking-head replacement, including translated dubbing without lip
+sync, first resolve any obvious script-versus-duration conflict as described in
+the speech timing budget above. For a selected section, use
+[processing-source preparation](#prepare-the-processing-source)
+before any whole-asset generation. Establish the intended script and selected voice, generate or
+reuse final audio, then check the actual words and measured speech windows. Compare that audio with the source video and its speech windows
+before dialogue replacement or `lipsync`. Both speech running beyond its window
+and ending while visible speech continues can be material mismatches. Choose
+wording, supported pacing, pauses or placement that fit the user's timing intent;
+adapt visuals only when their requested preservation permits it. Adding silence
+does not by itself fix visibly unmatched speech, and changing speed does not by
+itself prove a natural result. Inspect the adjusted output. Do not expect lip sync to make arbitrary-length speech
+fit, and do not require the multi-section mapping table below for a single shot.
+Reuse existing final audio and approval rather than regenerating or reconfirming it.
 
 ## Prepare the processing source
+
+`sourceAccess.cloud: "not-available"` and `originalUpload: "deferred"` do not
+mean the local source is unusable. Independent dubbing can read the local source
+without uploading its video. When integrated translation or lip sync needs cloud
+media, call that tool with the resolved asset IDs; it requests the required uploads.
+Follow an upload-in-progress response with its wait/retry instructions, preserving
+the existing task and approved audio. Only ask the user to relink or upload manually
+when the tool reports that automatic upload is unavailable or the file is missing.
 
 Whole-asset generation needs an actual asset containing only the requested source
 section. Resolve whether the user's range refers to source time or timeline time;
 map timeline ranges through item offsets and playback rate before preparing media.
-Use a readable host-local original or obtain it through `request_asset_download`
-and follow its returned delivery contract. A user-authenticated URL belongs in
-the signed-in browser, not an unauthenticated cloud shell. Trim the required
-source interval with available shell media tools such as ffmpeg, then follow
-[asset-import](../asset-import/SKILL.md) with `import_media`. If the input must
-include existing timeline edits, prepare a separate working timeline containing
-only that section, follow [export](../export/SKILL.md) with the advertised
-`submit_export` and `track_export` tools, then import the completed output only
-after it is readable by the host. A browser export downloads on the rendering
-computer and may not have a cloud URL; follow the export Skill's delivery rules
-and do not switch to cloud rendering without user intent. Preserve the original
-timeline. Report unavailable download, preparation, or export capabilities rather
-than calling tools from a different ChatCut surface.
+Copy the source media into your workspace, trim the required source interval
+with shell media tools such as ffmpeg, and import the result as a new project
+asset. If the input must include existing timeline edits, export only that
+timeline range, wait for the export to finish, and import its output. Use the
+current host's download, export and import tools; the environment notes and
+tool descriptions say which ones apply. Preserve the original timeline.
 
-Verify the prepared asset's actual content and duration. Its times are relative
+Verify the prepared asset’s actual content and duration. Its times are relative
 to that asset; placement returns to the intended original timeline range.

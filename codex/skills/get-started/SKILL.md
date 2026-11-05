@@ -7,7 +7,7 @@ description: "Welcome a new ChatCut user in one short message: what ChatCut does
 
 Write one short message in the user's language. Do not call tools for it, list every feature, or mention models, plans or credits.
 
-If the plugin was installed in the middle of a ChatCut task, skip the welcome: say in one sentence that ChatCut is ready and continue that task in this conversation.
+If the plugin was installed in the middle of a ChatCut task, skip the welcome: acknowledge installation in one sentence and continue that task through `chatcut-plugin-basics` in this conversation. Do not claim the connection is ready until it is verified.
 
 ## The message
 

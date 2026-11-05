@@ -1,8 +1,8 @@
 {
   "name": "chatcut",
   "displayName": "ChatCut",
-  "version": "1.10.28",
-  "description": "ChatCut plugin for editable video editing and creation workflows from Claude Code.",
+  "version": "1.11.0",
+  "description": "Edit videos with AI in ChatCut from your agent: install ChatCut Desktop, cut footage, add captions, clean up talking-head recordings, recreate viral videos with your own footage, and keep editing existing ChatCut Web projects.",
   "author": {
     "name": "ChatCut",
     "email": "dev@chatcut.io",
@@ -15,7 +15,7 @@
   "privacyPolicyUrl": "https://chatcut.io/privacy",
   "termsOfServiceUrl": "https://chatcut.io/terms",
   "repository": "https://github.com/ChatCut-Inc/agent-plugin.git",
-  "license": "GPL-3.0-only",
+  "license": "Apache-2.0",
   "keywords": [
     "chatcut",
     "video",
@@ -27,7 +27,11 @@
     "timeline",
     "local-video",
     "claude-code",
-    "mcp"
+    "mcp",
+    "desktop",
+    "install",
+    "video-remake",
+    "video-recreation"
   ],
   "mcpServers": {
     "chatcut": {
@@ -37,7 +41,8 @@
       "headers": {
         "x-chatcut-mcp-client": "claude_code",
         "x-chatcut-mcp-surface": "embedded-preview",
-        "x-chatcut-plugin-version": "1.10.28"
+        "x-chatcut-plugin-version": "1.11.0",
+        "x-chatcut-install-source": "official_plugin"
       }
     }
   },

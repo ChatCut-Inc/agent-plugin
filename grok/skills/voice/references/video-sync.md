@@ -1,10 +1,29 @@
 # Voiceover Video Sync
 
-Use this reference from the `voice` skill when existing visuals drive narration
-timing. The job is not just generating TTS; it is making the spoken meaning line
-up with what is on screen.
+Use this reference from the `voice` skill to align narration and visuals.
+Preserve which medium drives timing: an existing visual target uses the
+visual-led workflow below; a new MG sequence built around narration uses the
+narration-led workflow. Do not change an accepted timing direction implicitly.
 
-## When to Use
+## New MG driven by narration
+
+When narration drives a new MG sequence and no existing visual windows constrain
+it, split the confirmed script into semantic/visual beats and follow `voice` for
+voice choice and TTS generation. Generate the audio segments first, then use the
+completed assets' actual durations to set MG windows and duration. Estimates are
+planning budgets only; do not freeze timeline windows or finalize dependent MG
+timing from them. Keep deliberate gaps and holds explicit.
+
+Place MG and audio on separate tracks, then check the complete composition for
+semantic and timing alignment. If an existing visual target already determines
+timing, use the visual-led workflow instead.
+
+## Existing visuals drive timing
+
+The remaining workflow and rules apply when visual windows already constrain
+the narration.
+
+### When to Use
 
 - The user has an existing video, timeline, screen recording, slide animation,
   product demo, B-roll edit, MG explainer, or similar visual sequence.

@@ -1,6 +1,6 @@
 {
   "name": "chatcut",
-  "version": "1.10.29",
+  "version": "1.11.1",
   "description": "Edit and package talking-head videos, create motion graphics, and generate images, video clips, voiceovers and music as editable ChatCut projects from Codex.",
   "author": {
     "name": "ChatCut",
@@ -9,7 +9,7 @@
   },
   "homepage": "https://chatcut.io",
   "repository": "https://github.com/ChatCut-Inc/agent-plugin.git",
-  "license": "GPL-3.0-only",
+  "license": "Apache-2.0",
   "keywords": [
     "chatcut",
     "video",
@@ -21,7 +21,11 @@
     "timeline",
     "local-video",
     "codex",
-    "mcp"
+    "mcp",
+    "desktop",
+    "install",
+    "video-remake",
+    "video-recreation"
   ],
   "mcpServers": "./.mcp.json",
   "skills": "./skills/",
@@ -36,7 +40,10 @@
     "longDescription": "Turn raw footage into a finished video without leaving the chat. ChatCut works on a real multi-track timeline, so every cut, caption, graphic and generated clip stays editable in the ChatCut editor.\n\nTalking-head editing and packaging\n- Remove pauses, filler words, false starts and repeated takes.\n- Add styled, animated captions with keyword highlights, plus B-roll, music and sound effects.\n- Reframe for vertical and cut long videos into shorts for TikTok, Reels or Shorts.\n\nMotion graphics\n- Animated titles, key-point callouts, lower thirds, charts and end cards, designed for your footage and editable afterwards.\n\nAI asset generation\n- Generate images, video clips, voiceovers, music and sound effects, and place them straight on your timeline.\n- Translate and dub videos, and create AI presenter videos.\n\nExport an MP4 and check the result frame by frame before you share it. Works with local files, attachments and links. Projects are saved to your ChatCut account, so you can keep refining them in the editor by hand or by chat.",
     "developerName": "ChatCut",
     "category": "Creativity",
-    "capabilities": ["Read", "Write"],
+    "capabilities": [
+      "Read",
+      "Write"
+    ],
     "websiteURL": "https://chatcut.io",
     "supportURL": "https://chatcut.io/contact",
     "privacyPolicyURL": "https://chatcut.io/privacy",

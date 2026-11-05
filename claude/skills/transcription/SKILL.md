@@ -1,6 +1,6 @@
 ---
 name: transcription
-description: Hosted ChatCut plugin sessions only (the `chatcut` MCP server). If the conversation is driving ChatCut Desktop (a `chatcut_desktop*` MCP server), load this skill only when the user explicitly chooses the plugin/web surface — desktop sessions otherwise ship their own instructions and tools. Use for ChatCut transcription, transcript readiness, captions, subtitles, transcript repair, filler removal, and speech-led editing setup.
+description: Hosted ChatCut plugin sessions only (the `chatcut` MCP server). If the conversation is driving ChatCut Desktop (a `chatcut_desktop*` MCP server), load this skill only when the user explicitly chooses the plugin/web surface — desktop sessions otherwise ship their own instructions and tools. Use when the user wants to add captions or subtitles to a video (加字幕、字幕), transcribe speech, or clean filler words; covers ChatCut transcription, transcript readiness, captions, subtitles, transcript repair, filler removal, and speech-led editing setup.
 ---
 
 # Transcription
