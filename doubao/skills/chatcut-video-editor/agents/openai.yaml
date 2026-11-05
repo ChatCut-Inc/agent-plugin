@@ -1,0 +1,12 @@
+interface:
+  display_name: "ChatCut 视频剪辑专家"
+  short_description: "用自然语言剪视频、生成素材，添加字幕与动效，随时手动调整并导出成片"
+  default_prompt: "使用 $chatcut-video-editor 创意精剪这段口播，优化叙事节奏，并添加字幕、B-roll、音乐和 MG 动画。"
+dependencies:
+  tools:
+    - type: "mcp"
+      value: "chatcut_desktop"
+      description: "ChatCut Desktop 在本机提供的项目绑定视频剪辑工具"
+      transport: "stdio"
+policy:
+  allow_implicit_invocation: true

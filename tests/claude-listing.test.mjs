@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { lstat, readFile } from "node:fs/promises";
+import { stat, readFile } from "node:fs/promises";
 import test from "node:test";
 
 const pluginRoot = new URL("../claude/", import.meta.url);
@@ -13,10 +13,10 @@ test("Claude listing has the correct brand and public links", () => {
   assert.equal(manifest.termsOfServiceUrl, "https://chatcut.io/terms");
 });
 
-test("listing icon is a bundled square PNG within the directory limits", async () => {
+test("listing icon resolves to a shared square PNG within the directory limits", async () => {
   const icon = new URL(manifest.icon, pluginRoot);
   assert.ok(icon.href.startsWith(pluginRoot.href));
-  assert.equal((await lstat(icon)).isSymbolicLink(), false);
+  assert.equal((await stat(icon)).isFile(), true);
   const png = await readFile(icon);
   assert.deepEqual(png.subarray(0, 8), Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]));
   const width = png.readUInt32BE(16);

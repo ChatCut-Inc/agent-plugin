@@ -1,0 +1,1 @@
+../../../../kimi/skills/video-gen/references/seedance25.md

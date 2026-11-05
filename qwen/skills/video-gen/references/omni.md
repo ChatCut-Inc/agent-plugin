@@ -1,0 +1,1 @@
+../../../../kimi/skills/video-gen/references/omni.md

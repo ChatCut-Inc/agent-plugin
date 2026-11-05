@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { readdir, readFile, readlink } from "node:fs/promises";
+import { readdir, readFile, readlink, stat } from "node:fs/promises";
 import test from "node:test";
 
 const root = new URL("../", import.meta.url);
@@ -45,11 +45,16 @@ test("marketplace lists exactly the Grok Bot and Cursor packages", () => {
 });
 
 const listFiles = async (dir) => {
-  const entries = await readdir(new URL(dir, root), { recursive: true, withFileTypes: true });
-  return entries
-    .filter((entry) => entry.isFile())
-    .map((entry) => `${entry.parentPath ?? entry.path}/${entry.name}`.slice(new URL(dir, root).pathname.length))
-    .sort();
+  const files = [];
+  const walk = async (relative) => {
+    for (const name of await readdir(new URL(`${dir}${relative}`, root))) {
+      const path = `${relative}${name}`;
+      if ((await stat(new URL(`${dir}${path}`, root))).isDirectory()) await walk(`${path}/`);
+      else files.push(path);
+    }
+  };
+  await walk("");
+  return files.sort();
 };
 
 // Until Cursor gets its own host adapters, share the directories directly so

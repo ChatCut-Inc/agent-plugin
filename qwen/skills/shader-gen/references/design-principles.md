@@ -1,0 +1,1 @@
+../../../../codex/skills/shader-gen/references/design-principles.md

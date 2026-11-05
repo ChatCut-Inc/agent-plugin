@@ -1,0 +1,1 @@
+../../../../codex/skills/shader-gen/examples/door-open.md

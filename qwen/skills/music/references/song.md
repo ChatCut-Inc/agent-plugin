@@ -1,0 +1,1 @@
+../../../../kimi/skills/music/references/song.md

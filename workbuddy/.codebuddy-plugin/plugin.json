@@ -1,0 +1,86 @@
+{
+  "name": "chatcut-video-editor",
+  "version": "1.0.6",
+  "description": "An all-in-one ChatCut expert for AI video editing and asset generation, including professional timeline workflows, generated media, and project-file export for Premiere Pro and DaVinci Resolve.",
+  "author": {
+    "name": "ChatCut",
+    "email": "dev@chatcut.io"
+  },
+  "agents": ["./agents/chatcut-video-editor.md"],
+  "skills": [
+    "./skills/asset-import",
+    "./skills/motion-graphics",
+    "./skills/export",
+    "./skills/image-gen",
+    "./skills/known-errors",
+    "./skills/music",
+    "./skills/shader-gen",
+    "./skills/talking-head-guide",
+    "./skills/transcription",
+    "./skills/verification",
+    "./skills/widget-forms",
+    "./skills/video-gen",
+    "./skills/voice"
+  ],
+  "homepage": "https://chatcut.io",
+  "license": "Apache-2.0",
+  "keywords": [
+    "chatcut",
+    "video-editing",
+    "captions",
+    "motion-graphics",
+    "ai-video"
+  ],
+  "expertType": "agent",
+  "agentName": "chatcut-video-editor",
+  "displayName": {
+    "en": "All-in-one video creation expert",
+    "zh": "一站式视频创作专家"
+  },
+  "profession": {
+    "en": "ChatCut Video Editor",
+    "zh": "ChatCut 视频剪辑师"
+  },
+  "displayDescription": {
+    "en": "Supports AI video editing and asset generation. Video editing: media import and organization, talking-head cleanup, shot sequencing, multi-version editing, captions, B-roll, transitions, zooms, filters, color, and effects, with exports for finished video, audio, captions, and project files compatible with Premiere Pro and DaVinci Resolve. Asset generation: motion graphics, video, images, music, sound effects, and voiceovers. The timeline remains editable throughout.",
+    "zh": "支持AI视频剪辑与素材生成。视频剪辑：素材导入与整理、口播精剪、镜头编排、多版本剪辑、字幕、B-roll、转场、缩放、滤镜、调色与特效，支持导出成片、音频、字幕，以及适配Premiere Pro和DaVinci Resolve的工程文件；素材生成：MG动画、视频、图片、音乐、音效和配音。全程保留可编辑时间线"
+  },
+  "avatar": "avatars/chatcut.png",
+  "categoryId": "06-ContentCreative",
+  "defaultInitPrompt": {
+    "en": "Edit this talking-head video for a tighter story with captions, B-roll, music, and motion graphics.",
+    "zh": "创意精剪这段口播，优化叙事节奏，并添加字幕、B-roll、音乐和MG动画"
+  },
+  "plugin": "chatcut-video-editor",
+  "tags": [
+    {
+      "en": "Video Editing",
+      "zh": "视频剪辑"
+    },
+    {
+      "en": "Motion Graphics",
+      "zh": "动效设计"
+    },
+    {
+      "en": "AI Video Generation",
+      "zh": "AI 视频生成"
+    }
+  ],
+  "quickPrompts": [
+    {
+      "en": "Edit this talking-head video for a tighter story with captions, B-roll, music, and motion graphics.",
+      "zh": "创意精剪这段口播，优化叙事节奏，并添加字幕、B-roll、音乐和MG动画"
+    },
+    {
+      "en": "Create an AI video-editing explainer with motion graphics and an English voiceover.",
+      "zh": "制作一条讲解AI如何改变视频剪辑的MG动画视频，并添加英文旁白"
+    },
+    {
+      "en": "Turn this footage into 10 TikTok and Reels clips with captions, motion graphics, and thumbnails.",
+      "zh": "将这份素材剪成10条TikTok和Reels短视频，添加字幕、MG动画，并为每条制作封面"
+    }
+  ],
+  "dependencies": {
+    "mcpServers": "./.mcp.json"
+  }
+}
