@@ -7,6 +7,8 @@ description: "Install, open or connect ChatCut Desktop in Antigravity (安装 Ch
 
 This plugin uses ChatCut Desktop only: a signed app on the user's computer that provides the local `chatcut_desktop` MCP server and its own Skills. It does not connect ChatCut Web. Existing Web projects stay in the ChatCut Web editor; Desktop does not migrate them.
 
+A request to install ChatCut covers every step below. Run them in one go without stopping to ask for confirmation, then hand the user over to a new conversation (step 5), where the Desktop tools load.
+
 ## 1. Check the current connection
 
 If `chatcut_desktop` tools are available in this conversation, call `get_active_project`. A result with `surface: "desktop"` means Desktop is installed and connected, even when `projectId` is null. Make sure Desktop's Skills are visible (step 4), then continue the user's request without reinstalling. If it reports `signedIn: false`, local work still runs; ask the user to sign in in the ChatCut window when an account action needs it.
@@ -31,14 +33,16 @@ $env:CHATCUT_INSTALL_SOURCE='antigravity_marketplace'; irm https://chatcut.io/in
 
 The download is about 740 MB; tell the user before it starts. Wait for the command to finish. Do not add sudo, disable signature or trust checks, force-quit ChatCut, or automate the Desktop UI. Before updating a running app, have the user save and quit it normally. A failed install is not success: report its actual error.
 
-The installer does not register Antigravity. Lines about agent MCP setup failing, or a list of other agents, do not decide Antigravity's connection: continue with step 3. Let the user finish sign-in in the browser and ChatCut window; do not wait for it before step 3.
+The installer does not register Antigravity. Lines about agent MCP setup failing, or a list of other agents, do not decide Antigravity's connection: continue with step 3.
+
+The installer opens ChatCut and also a browser sign-in page. They are the same sign-in: tell the user to sign in once, in either the browser page or the ChatCut window. Do not wait for sign-in before continuing; setup does not need it.
 
 ## 3. Register `chatcut_desktop` in Antigravity
 
-Until ChatCut Desktop registers Antigravity itself, do this once, after explaining it and getting the user's agreement:
+Until ChatCut Desktop registers Antigravity itself, do this right after installing:
 
 1. Check that Desktop's launcher exists: macOS `$HOME/Library/Application Support/ChatCut/chatcut-mcp`, Windows `%APPDATA%\ChatCut\chatcut-mcp.cmd`. If it is missing, Desktop has not finished its first launch: ask the user to open ChatCut, then check again. Never create or edit the launcher.
-2. Run `agy mcp list`. If `chatcut_desktop` already points at that launcher, keep it. If it points somewhere else, show the user and agree on replacing it first, because `agy mcp add` overwrites an entry with the same name.
+2. Run `agy mcp list`. If `chatcut_desktop` already points at that launcher, keep it. If it points at an old ChatCut launcher that no longer exists, replace it. If it points at anything else, ask before replacing it, because `agy mcp add` overwrites an entry with the same name.
 3. Register it with the expanded absolute launcher path:
 
    ```sh
@@ -92,16 +96,18 @@ foreach ($name in $manifest.entries.PSObject.Properties.Name) {
 Get-ChildItem $dst
 ```
 
-## 5. Load the tools and verify
+## 5. Continue in a new conversation
 
-Refresh MCP servers: App → Settings (**Cmd+,** / **Ctrl+,**) → Customizations → Installed MCP Servers → refresh, or `/mcp` in the CLI. Then check this conversation's tools again before asking for anything else.
+Antigravity loads MCP tools and Skills when a conversation starts, so `chatcut_desktop` and Desktop's Skills become usable in a new conversation, not this one. Do not spend time refreshing or re-checking tools here.
 
-- If `chatcut_desktop` tools are now available, call `get_active_project` here. A null project is a valid connection. Continue the user's request in this conversation.
-- If they are not, Skills and MCP tools load when a conversation starts. Ask the user to start a new Antigravity conversation and give them one copyable prompt in a single `text` code block, in their language and voice. Keep setup details, file paths and status outside the block.
+Finish with a short message in the user's language:
 
-Report separately what is done and what is not: Desktop installed, launcher present, `chatcut_desktop` registered, Skills linked, tools visible in this conversation, a real tool read. A configuration change or installer success is not a tool read.
+1. One line on what was set up: ChatCut Desktop installed, connected to Antigravity, Skills added. Mention anything that failed, with its actual error, instead.
+2. Sign in once, in the browser page or the ChatCut window, if they have not yet.
+3. Start a new conversation (**New Conversation** in the App sidebar) and paste the prompt below. Antigravity offers agents no way to open one, so say this plainly rather than promising to do it. In the CLI, also give the one-line equivalent: `agy -i "<the prompt on one line>"`.
+4. One copyable prompt in a single `text` code block, in their language and voice. Keep setup details, file paths and status outside the block.
 
-The copyable prompt carries the user's original request and media paths when they have one. When they do not, use:
+The prompt carries the user's original request and media paths when they have one. When they do not, use:
 
 ```text
 ChatCut Desktop is installed on this computer. Please check that you can use ChatCut, then help me start creating.
@@ -113,6 +119,8 @@ Introduce how you can help me in these three areas:
 
 Ask what materials I have and what kind of video I want to make, then guide me step by step based on my answers. Also let me know that I can open ChatCut Desktop at any time to adjust the timeline, captions and motion graphics myself.
 ```
+
+If a new conversation still has no `chatcut_desktop` tools, check that Customizations → Installed MCP Servers lists `chatcut_desktop` as enabled, refresh it there once, and start another conversation.
 
 ## 6. Work in Desktop
 

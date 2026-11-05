@@ -32,11 +32,13 @@ Start a new conversation and ask, for example, “Install ChatCut on this comput
 
 ## What the agent does
 
+In one go, without stopping for confirmation:
+
 1. Reuses an existing `chatcut_desktop` connection when one works.
-2. Otherwise installs ChatCut Desktop with the official installer (`CHATCUT_INSTALL_SOURCE=antigravity_marketplace`) and lets the user sign in.
-3. With the user's agreement, registers Desktop's launcher as the stdio MCP server `chatcut_desktop` with `agy mcp add`, preserving other servers.
+2. Otherwise installs ChatCut Desktop with the official installer (`CHATCUT_INSTALL_SOURCE=antigravity_marketplace`). The installer opens ChatCut and a browser sign-in page; they are the same sign-in, so the user signs in once in either.
+3. Registers Desktop's launcher as the stdio MCP server `chatcut_desktop` with `agy mcp add`, preserving other servers.
 4. Links Desktop's Skills from `~/.agents/skills` into `~/.gemini/config/skills`, using Desktop's own manifest.
-5. Refreshes MCP servers and verifies a real `get_active_project` read, here or in a new conversation with a ready-to-copy prompt.
+5. Asks the user to start a new conversation, where Antigravity loads the new tools and Skills, and gives them a ready-to-copy prompt (plus an `agy -i` one-liner in the CLI). Antigravity offers agents no way to open a conversation themselves.
 
 Steps 3 and 4 are temporary: ChatCut Desktop registers Codex, Claude Code and other agents itself but not Antigravity yet. Once it does, the Skill only needs steps 1, 2 and 5.
 

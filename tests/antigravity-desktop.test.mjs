@@ -23,4 +23,7 @@ test("Antigravity Desktop Skill installs with its own source and never connects 
   assert.match(skill, /agy mcp add --env CHATCUT_MCP_CLIENT=antigravity chatcut_desktop/);
   assert.match(skill, /\.chatcut-desktop-skills\.json/);
   assert.doesNotMatch(skill, /external-mcp|web-plugin|chatcut_chatcut/);
+  // Installing is one request: no confirmation stop, then a new conversation.
+  assert.doesNotMatch(skill, /user's agreement|getting the user's agreement/);
+  assert.match(skill, /## 5\. Continue in a new conversation/);
 });
