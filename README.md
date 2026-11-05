@@ -66,16 +66,18 @@ ChatCut edits your own footage and generates new media, and the result is an edi
 **Editing**
 
 - Talking-head cleanup: remove silences, filler words, repeated takes and stumbles, and tighten the pacing.
+- Text-based editing: edit the video by editing its transcript.
 - Highlight clips and short cuts from long interviews, podcasts and lectures.
 - Multicam sync: line up camera angles and separate audio recordings, then cut to whoever is speaking.
-- B-roll, background music and vertical 9:16 versions for TikTok, Instagram Reels and YouTube Shorts.
+- Beat-synced cuts and automatic scene-cut detection *(Desktop)*.
+- B-roll, background music, markers and multiple timeline versions, including vertical 9:16 cuts for TikTok, Instagram Reels and YouTube Shorts.
 - Scene-by-scene video analysis, and checks that each edit is visible in the editor.
 
 **Captions and subtitles**
 
 - Word-timed transcripts and subtitles, including Chinese.
 - Animated caption styles, and custom kinetic typography *(Desktop)*.
-- Subtitle translation.
+- Subtitle translation, and SRT or TXT subtitle files.
 
 **Voice, music and sound**
 
@@ -83,17 +85,25 @@ ChatCut edits your own footage and generates new media, and the result is an edi
 - Music generation, instrumental or with vocals.
 - Sound effects.
 - Speech cleanup: remove background noise, hum and room echo.
-- Audio effects such as EQ, reverb and crossfades *(Desktop)*.
+- Short crossfades that smooth the audio at every cut.
+- Audio effects such as EQ, filters, delay and reverb *(Desktop)*.
 
 **Generation**
 
 - AI video from text, images or reference frames, with models such as Seedance and Kling.
 - AI images, thumbnails and covers, with models such as GPT Image and Nano Banana.
-- Motion graphics: title cards, lower thirds, animated overlays and full-frame animations.
 - Talking-photo presenter videos (digital human / AI avatar).
 - Lip sync for existing footage.
 - Video translation and dubbing into other languages, with or without lip sync.
 - Viral video remakes that keep a reference video's motion and timing with your own person or product *(Desktop)*.
+- Batches of up to 50 image, video, voice, music and sound jobs in one step *(Desktop)*.
+
+**Motion graphics and design**
+
+- Motion graphics: title cards, lower thirds, animated overlays and full-frame animations.
+- Motion graphic templates: apply published ones, or save your own for reuse in other projects.
+- Design styles that keep a brand's colors, fonts and logos consistent across captions and graphics.
+- Google Fonts and bundled Chinese fonts.
 
 **Effects and look**
 
@@ -101,7 +111,32 @@ ChatCut edits your own footage and generates new media, and the result is an edi
 - Color grading, LUTs, masks and background removal *(Desktop)*.
 - Beauty and body retouch *(Desktop)*.
 
-**Video types:** talking-head videos, podcasts and interviews, tutorials and lectures, product demos and app promos, UGC-style product ads, short-form videos, viral video remakes, screen-recorded demos *(Desktop)*, multicam shoots and translated videos.
+**Media in**
+
+- Stock video, photos, music and sound effects from Pexels, Pixabay, Unsplash and Freesound.
+- Product details, brand assets and screenshots collected from a web page.
+- Videos imported from a link *(Desktop)*.
+- Screen recordings with click and cursor data for demo videos *(Desktop)*.
+- Dropbox for importing media and X for posting finished videos *(Desktop)*. Google Drive, YouTube, TikTok and Instagram connectors open as each platform approves them.
+
+**Saved across projects**
+
+- Characters: people you feature again, with photos, a description and a voice, for consistent generated shots and presenter videos *(Desktop)*.
+- Products: photos, selling points, price and specs for product ads, so scripts stick to what you saved *(Desktop)*.
+- Memory of your preferences, and Workflow Skills that save a working editing process for reuse.
+
+**Writing and planning** *(Desktop)*
+
+- Screenplays and scripts with scene outlines, production breakdowns and shot lists.
+- Scripts export to Final Draft (FDX), Fountain, PDF or Word, and shot lists to CSV or HTML.
+
+**Export and handoff**
+
+- MP4 video, MP3, WAV, FLAC or AAC audio, and PNG stills.
+- Premiere Pro and DaVinci Resolve XML.
+- 剪映专业版 (Jianying Pro) and CapCut drafts, transparent ProRes 4444 motion graphics, 4K and HDR video, and Markdown, PDF or Word documents *(Desktop)*.
+
+**Video types:** talking-head videos, podcasts and interviews, tutorials and lectures, product demos and app promos, UGC-style product ads, short-form videos, viral video remakes, presenter and avatar videos, screen-recorded demos *(Desktop)*, multicam shoots, music videos cut to the beat *(Desktop)* and translated videos.
 
 ## Install ChatCut Desktop (recommended)
 
