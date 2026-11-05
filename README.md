@@ -30,6 +30,12 @@ In the ChatGPT or Codex desktop app you can also open **Plugins** in the sidebar
 
 Doubao Work (豆包工作) connects to ChatCut Desktop through a local connector: see [doubao/README.md](./doubao/README.md).
 
+Google Antigravity: install the Desktop package, then ask “Install ChatCut on this computer”. It installs and connects ChatCut Desktop only; see [antigravity-desktop/README.md](./antigravity-desktop/README.md).
+
+```sh
+agy plugin install https://github.com/ChatCut-Inc/agent-plugin/tree/main/antigravity-desktop
+```
+
 **Hosted Web plugin.** Use this for existing ChatCut Web projects or Web-only use.
 
 Claude Code (`claude mcp login` needs Claude Code 2.1.210 or newer; [full guide](https://chatcut.io/web-plugin/claude)):
@@ -55,7 +61,7 @@ Gemini CLI:
 gemini extensions install https://github.com/ChatCut-Inc/agent-plugin
 ```
 
-Grok Bot: see [grok/README.md](./grok/README.md). Cursor: see [cursor/README.md](./cursor/README.md). Antigravity: see [antigravity/README.md](./antigravity/README.md). Kimi Work: see [kimi/README.md](./kimi/README.md). WorkBuddy: see [workbuddy/README.md](./workbuddy/README.md). Qwen Work (千问办公): see [qwen/README.md](./qwen/README.md).
+Grok Bot: see [grok/README.md](./grok/README.md). Cursor: see [cursor/README.md](./cursor/README.md). Antigravity Web: see [antigravity/README.md](./antigravity/README.md). Kimi Work: see [kimi/README.md](./kimi/README.md). WorkBuddy: see [workbuddy/README.md](./workbuddy/README.md). Qwen Work (千问办公): see [qwen/README.md](./qwen/README.md).
 
 Other MCP clients that support remote servers with OAuth can connect to `https://api.chatcut.io/api/external-mcp/mcp` and sign in with a ChatCut account.
 
@@ -73,7 +79,8 @@ The hosted packages below remain available for existing Web projects and explici
 - `claude/` - the Claude Code plugin package.
 - `grok/` - the Grok Bot plugin package (hidden from Cursor).
 - `cursor/` - the Cursor plugin package (hidden from Grok Bot); its skills and assets symlink to `grok/`.
-- `antigravity/` - the Google Antigravity plugin package.
+- `antigravity-desktop/` - the Google Antigravity Desktop-only package: one Skill that installs ChatCut Desktop and connects `chatcut_desktop`, with no MCP server of its own; see [its README](./antigravity-desktop/README.md).
+- `antigravity/` - the Google Antigravity hosted Web plugin package.
 - `antigravity/plugin.json` - Antigravity plugin metadata.
 - `antigravity/mcp_config.json` - Antigravity MCP server configuration.
 - `kimi/` - the Kimi Work plugin package, with mandatory basics, core craft skills, and in-app browser adapters; see [its package and migration guide](./kimi/README.md).
