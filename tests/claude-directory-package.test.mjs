@@ -120,7 +120,8 @@ test("the README describes only editing and links the privacy policy", async () 
   const words = readme.replace(/```[\s\S]*?```/g, "").split(/\s+/).filter(Boolean);
   assert.ok(words.length >= 40);
   assert.match(readme, /https:\/\/chatcut\.io\/privacy/);
-  assert.ok(readme.includes(directoryUrl), "README names the MCP server URL");
+  const urls = new Set(readme.match(/https:\/\/[^\s`)]+/g));
+  assert.ok(urls.has(directoryUrl), "README names the MCP server URL");
   assert.match(readme, /does not generate/);
   assert.doesNotMatch(readme, /translate this video|generate video|voiceover|music generation/i);
 });
