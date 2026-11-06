@@ -74,6 +74,62 @@ image remains the poster and automatic fallback if video loading fails. Keep
 workflow; it does not open ChatCut's native avatar dialog, so request the source
 attachment separately and use `asset-import`.
 
+Map a caption style choice (the user asks to see, compare, or choose caption
+looks) to one `single` field with `variant:"visual"`. A simple "add captions"
+request needs no chooser. Read `edit_captions action:"template"` with the
+actual caption language in `json`, for example `{"languageCode":"zh-Hans"}`;
+search with `json.query` or continue from `publishedNextOffset`. Choose a
+focused set of `publishedTemplates` with `available:true`, including
+`kind:"motion-graphic"` entries for animated or expressive requests. For each,
+take its returned `previewOptions` entry: `presetId` as the option id, the
+template's exact `name` as the label, and its `captionPreview` copied
+unchanged. Add one localized `__other__` option with `otherPlaceholder`; do not
+add More or a browse-catalog option.
+
+Example field, replacing every placeholder with a returned catalog entry:
+
+```json
+{
+  "id": "caption_style",
+  "label": "Choose a caption style",
+  "type": "single",
+  "variant": "visual",
+  "captionTarget": { "languageCode": "zh-Hans" },
+  "otherPlaceholder": "Describe the caption style you want",
+  "options": [
+    {
+      "id": "RETURNED_PRESET_ID",
+      "label": "RETURNED_TEMPLATE_NAME",
+      "captionPreview": {
+        "kind": "catalog",
+        "templateId": "RETURNED_TEMPLATE_UUID",
+        "revision": 0,
+        "languageCode": "zh-Hans"
+      }
+    },
+    { "id": "__other__", "label": "Other" }
+  ]
+}
+```
+
+Caption languages are `en`, `zh-Hans`, `es`, `ja` and `zh-Hant`, independent
+of the conversation language. A `captionTarget.languageCode` must equal each
+option's language; compare languages in separate fields. Copy any
+`timelineId`, `captionsItemId`, `trackId`, `cardId` or `sourceId` from project
+reads, or omit them for a standalone sample. Never guess a UUID or revision,
+substitute a legacy built-in preset, or send HTML, CSS, `serverResolved` or a
+preview URL: the MCP App renders the preview and its fonts.
+
+Check each option's returned `available` / `unavailableReason` before inviting
+review. Correct a stale revision or language and retry, or report the
+limitation; never stand in another style or a static image for an MG preview.
+Previewing changes nothing and needs no transcription. After selection, follow
+the returned application recipe for the recorded target, or re-read
+`read_captions` and apply the selected `catalogTemplateId` and `languageCode`
+with `edit_captions action:"template"`. If the host already applied it, verify
+instead of applying again. Re-preview a changed revision. Other returns a new
+style requirement and applies nothing.
+
 Do not call `ask_followup_questions` solely to display a `playable_preview`,
 because a passive preview is not a question. Use Codex's supported audio
 attachment/media rendering when available. If this host session has no safe
@@ -110,6 +166,14 @@ video previews are available in ChatCut's AI Avatars library. Never embed or
 print the provider preview URL. A `create_avatar` selection returns to the
 workflow and then follows the normal conversation-attachment plus
 `asset-import` path.
+
+Claude Code does not render `captionPreview`. For a caption style choice, read
+the same live catalog as the Codex section and offer label-only Elicitation
+choices with the exact template names and a labeled Other, keeping each label
+mapped to its `presetId`, `templateId`, `revision` and `languageCode`. Say that
+animation and font previews are reviewed in ChatCut. Never approximate a
+template with CSS or embed its runtime or font URLs. The same selection,
+revision and application rules apply.
 
 For MG reference choices, look up the exact reference ID in the same manifest
 (`entries[referenceId]`, for example a `mg-reference:style:…` key). An image entry
