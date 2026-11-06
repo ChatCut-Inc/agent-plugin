@@ -79,6 +79,14 @@ asks. Subtitles export immediately.
 ## When something fails
 
 Keep the original error and identify the failing step. Follow a recovery hint
-in the result once before asking the user. Purchases, credit top-ups and plan
-changes are not available through this plugin: if a tool reports insufficient
-credits or access, say so plainly and continue with what is available.
+in the result once before asking the user.
+
+## Credits and plans
+
+`read_billing` shows the account's membership and available credits. When the
+account cannot cover a step (a tool reports insufficient credits or a missing
+plan, or a cloud export quote exceeds the balance) or the user asks to
+subscribe, upgrade or add credits, give them the ChatCut link: the
+`billingUrl` a tool returned, or `get_editor_url` with `openPricing: true`. The
+user opens it in their browser and pays on chatcut.io; nothing is bought in
+the chat. Do not bring up plans or pricing otherwise.

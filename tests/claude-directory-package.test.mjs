@@ -41,7 +41,7 @@ const DIRECTORY_ONLY = [".claude-plugin/plugin.json", "README.md", "skills/chatc
 
 // Tools, skills and flows the edit-only listing does not carry.
 const FORBIDDEN =
-  /submit_(?!export\b)\w+|video_translation|manage_(?:voice|custom_voice|avatar|memory|skill|user_files)\b|report_user_friction|web_browser|isolate_voice|estimate_generation|read_billing|ask_followup_questions|\b(?:image-gen|video-gen|music|voice|shader-gen|digital-human|video-translation|motion-graphic-gen|voice-isolation|asset-import|widget-forms)\b(?= skill|`)|`(?:image-gen|video-gen|music|voice|shader-gen|digital-human|video-translation|motion-graphic-gen|voice-isolation|asset-import|widget-forms)`|upload-media|serve-local-media|external-mcp\/mcp\b|openPricing|Gemini|Seedance/u;
+  /submit_(?!export\b)\w+|video_translation|manage_(?:voice|custom_voice|avatar|memory|skill|user_files)\b|report_user_friction|web_browser|isolate_voice|estimate_generation|ask_followup_questions|\b(?:image-gen|video-gen|music|voice|shader-gen|digital-human|video-translation|motion-graphic-gen|voice-isolation|asset-import|widget-forms)\b(?= skill|`)|`(?:image-gen|video-gen|music|voice|shader-gen|digital-human|video-translation|motion-graphic-gen|voice-isolation|asset-import|widget-forms)`|upload-media|serve-local-media|external-mcp\/mcp\b|Gemini|Seedance/u;
 
 async function files(directory) {
   const entries = [];
@@ -113,6 +113,17 @@ test("the package ships no generation skills or generation guidance", async () =
     const text = await readFile(join(folder, "skills", skill, "SKILL.md"), "utf8");
     assert.match(text, new RegExp(`^---\\nname: ${skill}\\ndescription: `), skill);
   }
+});
+
+test("pricing comes up only when the account falls short or the user asks", async () => {
+  const pricingLines = [];
+  for (const path of packaged.filter((entry) => !entry.endsWith(".png"))) {
+    const text = await readFile(join(folder, path), "utf8");
+    if (/openPricing|subscribe|upgrade/i.test(text)) pricingLines.push(path);
+  }
+  assert.deepEqual(pricingLines, ["skills/chatcut-editing-basics/SKILL.md"]);
+  const basics = await readFile(join(folder, "skills/chatcut-editing-basics/SKILL.md"), "utf8");
+  assert.match(basics, /pays on chatcut\.io; nothing is bought in\nthe chat\. Do not bring up plans or pricing otherwise\./);
 });
 
 test("the README describes only editing and links the privacy policy", async () => {
