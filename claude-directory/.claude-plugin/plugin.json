@@ -1,0 +1,44 @@
+{
+  "name": "chatcut-editor",
+  "displayName": "ChatCut",
+  "version": "1.0.0",
+  "description": "Edit videos in ChatCut from Claude: cut talking-head videos by editing the transcript, remove fillers and pauses, add captions, stock B-roll and code-rendered motion graphics, preview the result in chat and export it.",
+  "author": {
+    "name": "ChatCut",
+    "email": "dev@chatcut.io",
+    "url": "https://chatcut.io"
+  },
+  "homepage": "https://chatcut.io",
+  "icon": "./assets/logo-light.png",
+  "documentationUrl": "https://chatcut.io/claude",
+  "supportUrl": "https://chatcut.io/contact",
+  "privacyPolicyUrl": "https://chatcut.io/privacy",
+  "termsOfServiceUrl": "https://chatcut.io/terms",
+  "repository": "https://github.com/ChatCut-Inc/agent-plugin.git",
+  "license": "Apache-2.0",
+  "keywords": [
+    "chatcut",
+    "video",
+    "video-editing",
+    "editor",
+    "captions",
+    "subtitles",
+    "transcription",
+    "talking-head",
+    "b-roll",
+    "motion-graphics",
+    "timeline"
+  ],
+  "mcpServers": {
+    "chatcut": {
+      "type": "http",
+      "url": "https://api.chatcut.io/api/external-mcp/claude",
+      "oauth_resource": "https://api.chatcut.io/api/external-mcp/claude",
+      "headers": {
+        "x-chatcut-install-source": "claude_directory_plugin",
+        "x-chatcut-plugin-version": "1.0.0"
+      }
+    }
+  },
+  "skills": "./skills/"
+}
