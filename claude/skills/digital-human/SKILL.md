@@ -217,9 +217,19 @@ Claude Code plugin, the Widget Forms Skill's host adapter takes priority: never 
 raw ChatCut tags. Map each live identity to the host's visual-choice surface using
 `identityId` as its stable value and `name` as its label. In Codex, supply
 `previewVideoUrl` as `previewVideo` and `previewImageUrl` as `preview` so the image is
-the video's poster and failure fallback. Keep the create action
-as a separate `create_avatar` value; plugin hosts return that value to the workflow
-instead of opening ChatCut's native dialog automatically.
+the video's poster and failure fallback. Plugin avatar pickers use 4:5 portrait
+framing. Claude uses only the official catalog's returned `widgetPreviewVideoUrl`
+and `widgetPreviewImageUrl` on the public CDN; never embed provider or private
+runtime URLs. Omit identities without public widget media from Claude's media
+cards and say their preview is available in ChatCut.
+
+After the identity cards, include a localized `create_avatar` action and Other
+with a text entry. Codex uses `id:"__other__"` and `otherPlaceholder`; Claude uses
+the Widget Forms Other control. Keep both even when suitable identities exist.
+`create_avatar` returns to the creation workflow instead of opening ChatCut's
+native dialog automatically. Other returns the presenter requirements for a
+refined live catalog search; it is neither an identity nor permission to create
+an avatar or generate video.
 For a saved identity whose `list` row has no preview URLs, call `manage_avatar
 action=get` for that exact candidate before rendering it; use the selected ready
 revision's returned preview media and do not invent or copy media from another avatar.

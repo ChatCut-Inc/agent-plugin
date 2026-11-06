@@ -1,7 +1,7 @@
 {
   "name": "chatcut",
   "displayName": "ChatCut",
-  "version": "1.11.0",
+  "version": "1.11.2",
   "description": "Edit videos with AI in ChatCut from your agent: install ChatCut Desktop, cut footage, add captions, clean up talking-head recordings, recreate viral videos with your own footage, and keep editing existing ChatCut Web projects.",
   "author": {
     "name": "ChatCut",
@@ -46,7 +46,7 @@
       "headers": {
         "x-chatcut-mcp-client": "claude_code",
         "x-chatcut-mcp-surface": "embedded-preview",
-        "x-chatcut-plugin-version": "1.11.0",
+        "x-chatcut-plugin-version": "1.11.2",
         "x-chatcut-install-source": "official_plugin"
       }
     }
