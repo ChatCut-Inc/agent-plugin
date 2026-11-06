@@ -393,6 +393,12 @@ owns the current host's form, attachment, and media-card behavior. This skill
 owns the voice candidates, required fields, safety rules, and the asset ids
 passed to voice tools. Do not embed host-specific UI instructions here.
 
+In published Codex and Claude plugins, every ordinary voice chooser ends with
+one localized Other entry after the clone action. Other collects different
+voice requirements and returns to live catalog discovery; it is not a voice, a
+clone request, or permission to generate. `widget-forms` owns its input and the
+host's media limits, including Claude's label-only ready custom voices.
+
 "help me generate ... voice over in Chinese" is an English conversation asking
 for Chinese narration, so the audition widget copy stays in English while the
 voice candidates come from Doubao.
@@ -411,19 +417,23 @@ For an official audition:
    returned official voices.
 3. Load `widget-forms` and request one required `playable_single_choice`. Give
    every official option the `voiceId`, localized `name`, `summary`, and
-   matching `sampleUrl` from the same returned tuple. Supply `sampleUrl`
-   verbatim; never prepend an inferred S3, CDN, editor, localhost, or production
-   base URL, and never reconstruct it from the filename pattern. This differs
-   from a custom voice's `previewUrl`, which must be used exactly as returned by
-   `manage_voice`.
-4. Always add one no-media action option with stable value `clone_voice` as the
-   final card on every ordinary recommendation/selection surface. Label it
+   matching `sampleUrl` and `sampleMediaKey` from the same returned tuple.
+   Supply `sampleUrl` verbatim; never prepend an inferred S3, CDN, editor,
+   localhost, or production base URL, and never reconstruct it from the filename
+   pattern. This differs from a custom voice's `previewUrl`, which must be used
+   exactly as returned by `manage_voice`. Claude's form adapter resolves
+   official samples from `sampleMediaKey` instead and never embeds these source
+   URLs.
+4. Always add one no-media action option with stable value `clone_voice` on
+   every ordinary recommendation/selection surface. Label it
    `Clone my voice` when no ready custom voice exists, or `Clone another voice`
    when one does; localize it using the meanings above. In native ChatCut this
    is a compact `<visual-option>` without `media`, not a separate button. In
    external hosts it is the equivalent label-only option. A scenario-specific
    reference may explicitly replace this ordinary surface with a narrower one.
-5. Wait for the user to choose. If the answer maps to `clone_voice`, render the
+5. Wait for the user to choose. For Other, refine the live catalog search from
+   the submitted requirements and show updated choices; do not submit TTS.
+   If the answer maps to `clone_voice`, render the
    host-specific cloning entry/workflow on the next turn; do not start cloning
    from the audition reply itself. In the native editor the clone card opens
    the cloning dialog itself and returns the saved voice to the same picker, so
@@ -442,7 +452,9 @@ stored name as its display label, `previewText` as its summary when present,
 and the exact tool-returned `previewUrl` as audio media. Do not copy, download,
 rewrite, validate by hostname, or invent that URL. If a ready voice lacks a
 preview, omit it from the audition surface rather than making an unplayable
-text-only card.
+text-only card. In Claude, the `widget-forms` label-only fallback for private
+previews takes priority; never drop a ready custom voice only because its
+runtime URL cannot be embedded there.
 
 Keep every option's type, submission id, display label, preview, summary, and
 capabilities tied to the same `manage_voice` tuple. The target narration
@@ -828,8 +840,8 @@ If you need a specific voice and a particular language:
    voice `list` gate when no concrete voice was named.
 3. Never use explicit or inferred voice traits to exclude a ready custom voice
    with a playable preview from the combined audition surface.
-4. Never omit the final clone action card from a voice recommendation or
-   selection surface.
+4. Never omit the clone action from a voice recommendation or selection
+   surface, or the Other entry that follows it in a published plugin chooser.
 5. Never submit TTS when the voice is only described broadly and the user has
    not confirmed a concrete preset.
 6. Never recommend or render a TTS voice option before calling `manage_voice
