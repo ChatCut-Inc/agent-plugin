@@ -2,6 +2,8 @@
 **ChatCut is an AI video editor for agents: an MCP server and plugin that lets Codex, ChatGPT, Claude Code, Cursor, Grok Bot, Gemini CLI, Google Antigravity, Kimi Work, WorkBuddy, Doubao Work and Qwen Work edit your own footage, add captions and subtitles, remove silences and filler words, create motion graphics, generate video, voiceovers and music, and export an editable timeline.**\
 [Website](https://chatcut.io) · [Setup guide](https://chatcut.io/desktop) · [ChatGPT and Codex](https://chatcut.io/chatgpt-plugin) · [Claude Code](https://chatcut.io/claude-code-plugin) · [Pricing](https://chatcut.io/pricing)
 
+[![ChatCut MCP server on Glama](https://glama.ai/mcp/connectors/io.chatcut/chatcut/badges/score.svg)](https://glama.ai/mcp/connectors/io.chatcut/chatcut)
+
 AI video editing for your agent. The ChatCut Agent Plugins connect Codex, Claude Code, Grok Bot, Cursor, Google Antigravity, Kimi Work, WorkBuddy, Doubao Work and Qwen Work to ChatCut, so you can ask your agent to edit a video, add captions, clean up a talking-head recording, or recreate a viral video with your own footage, and get an editable timeline back.
 
 Under the hood the plugins import media, change a project timeline, create motion graphics, generate assets, transcribe audio, add captions, export videos, and verify that edits are visible in the editor.
@@ -64,6 +66,85 @@ gemini extensions install https://github.com/ChatCut-Inc/agent-plugin
 Grok Bot: see [grok/README.md](./grok/README.md). Cursor: see [cursor/README.md](./cursor/README.md). Antigravity Web: see [antigravity/README.md](./antigravity/README.md). Kimi Work: see [kimi/README.md](./kimi/README.md). WorkBuddy: see [workbuddy/README.md](./workbuddy/README.md). Qwen Work (千问办公): see [qwen/README.md](./qwen/README.md).
 
 Other MCP clients that support remote servers with OAuth can connect to `https://api.chatcut.io/api/external-mcp/mcp` and sign in with a ChatCut account.
+
+## What you can make
+
+ChatCut edits your own footage and generates new media, and the result is an editable timeline. Items marked *(Desktop)* need ChatCut Desktop. Generation uses ChatCut credits, and the agent asks before spending them.
+
+**Editing**
+
+- Talking-head cleanup: remove silences, filler words, repeated takes and stumbles, and tighten the pacing.
+- Text-based editing: edit the video by editing its transcript.
+- Highlight clips and short cuts from long interviews, podcasts and lectures.
+- Multicam sync: line up camera angles and separate audio recordings, then cut to whoever is speaking.
+- Beat-synced cuts and automatic scene-cut detection *(Desktop)*.
+- B-roll, background music, markers and multiple timeline versions, including vertical 9:16 cuts for TikTok, Instagram Reels and YouTube Shorts.
+- Scene-by-scene video analysis, and checks that each edit is visible in the editor.
+
+**Captions and subtitles**
+
+- Word-timed transcripts and subtitles, including Chinese.
+- Animated caption styles, and custom kinetic typography *(Desktop)*.
+- Subtitle translation, and SRT or TXT subtitle files.
+
+**Voice, music and sound**
+
+- Text-to-speech voiceovers, and voice clones with the speaker's consent.
+- Music generation, instrumental or with vocals.
+- Sound effects.
+- Speech cleanup: remove background noise, hum and room echo.
+- Short crossfades that smooth the audio at every cut.
+- Audio effects such as EQ, filters, delay and reverb *(Desktop)*.
+
+**Generation**
+
+- AI video from text, images or reference frames, with models such as Seedance and Kling.
+- AI images, thumbnails and covers, with models such as GPT Image and Nano Banana.
+- Talking-photo presenter videos (digital human / AI avatar).
+- Lip sync for existing footage.
+- Video translation and dubbing into other languages, with or without lip sync.
+- Viral video remakes that keep a reference video's motion and timing with your own person or product *(Desktop)*.
+- Batches of up to 50 image, video, voice, music and sound jobs in one step *(Desktop)*.
+
+**Motion graphics and design**
+
+- Motion graphics: title cards, lower thirds, animated overlays and full-frame animations.
+- Motion graphic templates: apply published ones, or save your own for reuse in other projects.
+- Design styles that keep a brand's colors, fonts and logos consistent across captions and graphics.
+- Google Fonts and bundled Chinese fonts.
+
+**Effects and look**
+
+- Transitions, visual effects and custom shaders.
+- Color grading, LUTs, masks and background removal *(Desktop)*.
+- Beauty and body retouch *(Desktop)*.
+
+**Media in**
+
+- Stock video, photos, music and sound effects from Pexels, Pixabay, Unsplash and Freesound.
+- Product details, brand assets and screenshots collected from a web page.
+- Videos imported from a link *(Desktop)*.
+- Screen recordings with click and cursor data for demo videos *(Desktop)*.
+- Dropbox for importing media and X for posting finished videos *(Desktop)*. Google Drive, YouTube, TikTok and Instagram connectors open as each platform approves them.
+
+**Saved across projects**
+
+- Characters: people you feature again, with photos, a description and a voice, for consistent generated shots and presenter videos *(Desktop)*.
+- Products: photos, selling points, price and specs for product ads, so scripts stick to what you saved *(Desktop)*.
+- Memory of your preferences, and Workflow Skills that save a working editing process for reuse.
+
+**Writing and planning** *(Desktop)*
+
+- Screenplays and scripts with scene outlines, production breakdowns and shot lists.
+- Scripts export to Final Draft (FDX), Fountain, PDF or Word, and shot lists to CSV or HTML.
+
+**Export and handoff**
+
+- MP4 video, MP3, WAV, FLAC or AAC audio, and PNG stills.
+- Premiere Pro and DaVinci Resolve XML.
+- 剪映专业版 (Jianying Pro) and CapCut drafts, transparent ProRes 4444 motion graphics, 4K and HDR video, and Markdown, PDF or Word documents *(Desktop)*.
+
+**Video types:** talking-head videos, podcasts and interviews, tutorials and lectures, product demos and app promos, UGC-style product ads, short-form videos, viral video remakes, presenter and avatar videos, screen-recorded demos *(Desktop)*, multicam shoots, music videos cut to the beat *(Desktop)* and translated videos.
 
 ## Install ChatCut Desktop (recommended)
 

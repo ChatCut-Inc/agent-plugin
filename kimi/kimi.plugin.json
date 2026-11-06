@@ -8,15 +8,20 @@
   "license": "Apache-2.0",
   "keywords": [
     "chatcut",
-    "video",
+    "kimi-work",
+    "mcp",
     "video-editing",
-    "editor",
+    "ai-video-editor",
     "captions",
     "subtitles",
     "transcription",
-    "timeline",
-    "kimi-work",
-    "mcp"
+    "talking-head",
+    "motion-graphics",
+    "video-generation",
+    "text-to-speech",
+    "music-generation",
+    "video-translation",
+    "timeline"
   ],
   "skillInstructions": "MANDATORY: Before the first ChatCut MCP tool call, load and read the entire chatcut-plugin-basics-kimi-work skill. This includes listing, creating or targeting projects and opening the editor. Use its workflow routing to load the relevant bundled craft skill. After creating or targeting a project, follow chatcut-editor-handoff before further content edits. OAuth belongs to the host; never expose tokenized editor URLs to the user.",
   "interface": {

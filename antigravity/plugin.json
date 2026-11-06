@@ -20,15 +20,19 @@
   "license": "Apache-2.0",
   "keywords": [
     "chatcut",
-    "video",
+    "mcp",
+    "desktop",
     "video-editing",
+    "ai-video-editor",
     "captions",
     "subtitles",
     "transcription",
+    "talking-head",
     "motion-graphics",
-    "mcp",
-    "desktop",
-    "install",
+    "video-generation",
+    "text-to-speech",
+    "music-generation",
+    "video-translation",
     "video-remake"
   ]
 }
