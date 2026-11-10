@@ -1,12 +1,17 @@
-# ChatCut Agent Plugins
+<h1 align="center">ChatCut Agent Plugins</h1>
+
+<div align="center">
+
 **ChatCut is an AI video editor for agents: an MCP server and plugin that lets Codex, ChatGPT, Claude Code, Cursor, Grok Bot, Gemini CLI, Google Antigravity, Kimi Work, WorkBuddy, Doubao Work and Qwen Work edit your own footage, add captions and subtitles, remove silences and filler words, create motion graphics, generate video, voiceovers and music, and export an editable timeline.**\
 [Website](https://chatcut.io) · [Setup guide](https://chatcut.io/desktop) · [ChatGPT and Codex](https://chatcut.io/chatgpt-plugin) · [Claude Code](https://chatcut.io/claude-code-plugin) · [Pricing](https://chatcut.io/pricing)
 
 [![ChatCut MCP server on Glama](https://glama.ai/mcp/connectors/io.chatcut/chatcut/badges/score.svg)](https://glama.ai/mcp/connectors/io.chatcut/chatcut)
 
-## What you can make
+</div>
 
-AI video editing for your agent: ask in your own words, and ChatCut makes the edit and hands back an editable timeline. Each card is a ChatCut Skill: open it to watch its preview, or paste its request from the table into your agent.
+<h2 align="center">What you can make</h2>
+
+<p align="center">AI video editing for your agent: ask in your own words, and ChatCut makes the edit and hands back an editable timeline. Each card is a ChatCut Skill: open it to watch its preview, or paste its request from the table into your agent.</p>
 
 <p align="center">
   <a href="https://chatcut.io/skills/speech-cleanup"><img src="docs/media/skills/speech-cleanup.jpg" width="260" alt="Speech Cleanup: removes retakes, long pauses and slips"></a>
@@ -19,6 +24,8 @@ AI video editing for your agent: ask in your own words, and ChatCut makes the ed
   <a href="https://chatcut.io/skills/animated-explainer-claymotion"><img src="docs/media/skills/animated-explainer-claymotion.jpg" width="260" alt="Claymotion: a narrated clay-animation short from a topic"></a>
   <a href="https://chatcut.io/skills/tvc-sugar-crystal-storm"><img src="docs/media/skills/tvc-sugar-crystal-storm.jpg" width="260" alt="Sugar Crystal Storm: a candy and snack TV commercial"></a>
 </p>
+
+<div align="center">
 
 | Skill | Paste this into your agent |
 | --- | --- |
@@ -33,6 +40,8 @@ AI video editing for your agent: ask in your own words, and ChatCut makes the ed
 | [Sugar Crystal Storm](https://chatcut.io/skills/tvc-sugar-crystal-storm) | `Make a TV ad for my snack` |
 
 More Skills: [chatcut.io/skills](https://chatcut.io/skills). Not set up yet? Start any request with `Read ChatCut.io/desktop to install ChatCut, then`, and your agent installs ChatCut first.
+
+</div>
 
 ## Install
 
