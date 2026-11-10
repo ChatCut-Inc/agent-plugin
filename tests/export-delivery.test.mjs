@@ -36,6 +36,21 @@ test("export delivers the downloaded file and keeps cloud fallback scoped", () =
   assert.doesNotMatch(codexExport, /return its `downloadUrl`/);
 });
 
+// Grok Bot's cloud-computer browser drops too often for local renders, and the
+// hosted connector defaults Grok's video and audio exports to cloud to match.
+test("Grok exports are cloud-first and deliver the fetched file", async () => {
+  assert.match(grokExport, /call `submit_export`\nwithout `renderMode`/);
+  assert.match(grokExport, /`target:"upload"` reports them uploaded/);
+  assert.match(grokExport, /Use `renderMode:"local"` only when the user explicitly asks/);
+  assert.match(grokExport, /`curl -fL -o "<file name>" "<downloadUrl>"`/);
+  assert.match(grokExport, /`requiresConfirmation:false`/);
+  assert.doesNotMatch(grokExport, /Video and audio default to `renderMode:"local"`/);
+  assert.doesNotMatch(grokExport, /There is no automatic cloud retry/);
+  const grokBasics = await read("grok/skills/chatcut-plugin-basics/SKILL.md");
+  assert.match(grokBasics, /In Grok, video and audio render in the\ncloud by default/);
+  assert.doesNotMatch(grokBasics, /The default browser export downloads on/);
+});
+
 test("basics no longer say export needs a download URL or is unavailable", async () => {
   for (const path of [
     "codex/skills/chatcut-plugin-basics/SKILL.md",

@@ -54,8 +54,10 @@ Visual understanding has two distinct surfaces:
 - To inspect media as it currently appears on the ChatCut timeline or editor, use `preview_timeline` with `views:["viewer"]` and bounded frames. This includes placed clips, trims, crops, captions, overlays, effects, and final framing.
 
 Export is a connector boundary in plugin sessions: load `export`, call
-`submit_export`, then use `track_export`. The default browser export downloads on
-the rendering computer and has no `downloadUrl`; deliver only the actual completed
+`submit_export`, then use `track_export`. In Grok, video and audio render in the
+cloud by default: tell the user the returned quote, then fetch the completed
+`downloadUrl` with `curl -fL` and send the file in this conversation. Use a local
+browser export only when the user asks for it. Deliver only the actual completed
 result according to the export Skill.
 
 ## Data Model

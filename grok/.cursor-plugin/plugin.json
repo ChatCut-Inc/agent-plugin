@@ -1,7 +1,7 @@
 {
   "name": "chatcut",
   "displayName": "ChatCut",
-  "version": "1.10.20",
+  "version": "1.10.21",
   "description": "Edit videos in ChatCut from Grok Bot: cut footage, add captions and subtitles, clean up talking-head recordings, add motion graphics and generated media, and export editable timelines.",
   "minClientVersions": {
     "cursor": "never"

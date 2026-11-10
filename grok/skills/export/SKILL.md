@@ -9,17 +9,24 @@ Export only when the user asks for a render, download, or final standalone deliv
 
 Use `submit_export` with the current tool schema. Confirm the target timeline, range, resolution, codec, and format from project state and user intent; do not guess a non-active timeline. Record every returned `renderId`.
 
-Video and audio default to `renderMode:"local"`: the connected ChatCut editor
-tab renders the timeline. Open the returned editor URL, activate the requested
-timeline, and keep that tab open through completion. If no capable editor is
-connected, resolve that error before retrying. There is no automatic cloud retry.
-Media already readable by that editor does not need another upload for this route.
-If the user explicitly chooses cloud, use that choice directly without requiring
-browser or Desktop setup first.
+In Grok, video and audio render in the cloud by default: call `submit_export`
+without `renderMode` and ChatCut renders on its servers (up to 1080p), so no
+browser tab has to stay connected. The project's media must already be in
+ChatCut: files sent through the ChatCut upload page already are; for files you
+imported with the upload helper, wait until `track_progress` with
+`target:"upload"` reports them uploaded. Follow Cloud Rendering for the quote and
+Delivery for the finished file.
 
-A server-side active-timeline result does not prove that an already-open browser
-tab switched timelines. Confirm the intended timeline in that tab, or ask the
-user to select it, and pass its explicit ID when submitting the export.
+Use `renderMode:"local"` only when the user explicitly asks for a local export
+or for 4K. The connected ChatCut editor tab then renders the timeline: open the
+returned editor URL, activate the requested timeline, and keep that tab open
+through completion. With `delivery:"host"` (Grok's default) it uploads the
+finished file for you to fetch instead of downloading it on the cloud computer.
+
+For a local export, a server-side active-timeline result does not prove that an
+already-open browser tab switched timelines. Confirm the intended timeline in
+that tab, or ask the user to select it, and pass its explicit ID when submitting
+the export.
 
 Use `track_export` for browser and cloud export status; do not use
 generation/transcription `track_progress`. Pass the returned `renderId` for an
@@ -49,15 +56,19 @@ Use Desktop `track_progress` with `target:"export"` and `exportTaskIds` set to t
 
 Deliver according to the completed result:
 
-- `source:"browser"`: relay `statusMessage`, filename, and available metadata.
-  The rendering tab downloads the file on its computer or writes to the chosen
-  file. This result has no `downloadUrl` or verified filesystem path. A tab on
-  Grok Bot's cloud computer downloads there, not to the user's laptop. Attach a
-  file only after the host locates and reads it; otherwise link the editor and
-  explain where to check its Export queue.
-- A completed result with a `downloadUrl`: use the host's normal file/link
-  delivery. Download it only through a permitted host route when a local artifact
-  is needed. Do not invent a download URL for a browser export.
+- A completed cloud result with a `downloadUrl` (the default): fetch it into
+  your own workspace with `curl -fL -o "<file name>" "<downloadUrl>"`, check the
+  saved file is `outputSizeBytes` bytes when reported, and send that file to the
+  user in this conversation as the result, following `cloudDownloadGuidance`. If
+  the download fails, call `track_export` once more and retry with its link; if
+  you cannot attach the file, give the user the `downloadUrl`.
+- A local result with `delivery.status:"ready"`: fetch `delivery.downloadUrl`
+  the same way, check `delivery.sizeBytes`, and send the file, following
+  `hostDeliveryGuidance`.
+- `source:"browser"` without host delivery: relay `statusMessage`, filename,
+  and available metadata. The rendering tab downloads the file on its computer;
+  a tab on Grok Bot's cloud computer downloads there, not to the user's device.
+  This result has no `downloadUrl`; do not invent one.
 
 Queued or running exports are not delivered. Report any render warnings and
 their effect on the output.
@@ -84,10 +95,10 @@ returned render ids.
 
 ## Cloud Rendering
 
-Use `renderMode:"cloud"` when the user asks for it or no usable local path exists and the original request permits it, following Local Export Recovery above. Cloud remains a supported fallback. Do not require a Desktop attempt or invent account entitlements.
+Cloud is Grok's default for video and audio: omit `renderMode` (or pass `"cloud"`). It renders up to 1080p; 4K needs a local export the user asks for. Do not require a Desktop attempt or invent account entitlements.
 
-When `submit_export` returns `CLOUD_EXPORT_QUOTE_REQUIRED` with `details.quote`, it has not accepted a render. Tell the user the quoted duration, free allowance and `estimatedCredits` before starting. Retry the same export with `cloudQuoteId` set to that quote's `id`. A zero-credit quote starts directly without another confirmation. For a nonzero charge, obtain one explicit confirmation of that quoted amount, then set `confirmCloudCharge:true`; choosing cloud alone does not approve an unknown charge. Use the account policy returned by the server rather than assuming a free allowance or changing old benefits.
+When `submit_export` returns `CLOUD_EXPORT_QUOTE_REQUIRED` with `details.quote`, it has not accepted a render. Tell the user the quoted duration, free allowance and `estimatedCredits`. A free quote (`requiresConfirmation:false`, within the account's remaining free cloud export allowance) can be retried right away with `cloudQuoteId` set to that quote's `id`. For a nonzero charge, obtain one explicit confirmation of that quoted amount, then retry with `cloudQuoteId` and `confirmCloudCharge:true`; a general export request does not approve an unknown charge. If the account cannot cover it, follow the billing recovery the error returns. Use the account policy returned by the server rather than assuming a free allowance or changing old benefits.
 
 Keep the same project, timeline, range, format and output settings for that quote. If it expires or the service requires a new quote, preserve the request and omit the stale `cloudQuoteId` to request a fresh quote. A larger charge needs new consent. If submission was accepted or uncertain, check the original job before retrying; never obtain a new quote to duplicate an in-progress export.
 
-If cloud rendering is blocked by media that is not remotely readable, use `asset-import` when the user permits upload, or report the blocker. Do not flatten or substitute the edit, upload sources, or switch a local export to cloud merely to obtain a download URL.
+If cloud rendering is blocked by media that is not in ChatCut yet, wait for helper uploads with `track_progress` `target:"upload"`, or use `asset-import` (the ChatCut upload page) when the user permits upload; otherwise report the blocker. Do not flatten or substitute the edit to get around it.
