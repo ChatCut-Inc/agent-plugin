@@ -41,7 +41,7 @@
 <p align="center">
   <a href="https://chatcut.io/skills/speech-cleanup?utm_source=github&amp;utm_medium=readme&amp;utm_campaign=agent-plugin"><img src="docs/media/skills/speech-cleanup.jpg" width="260" alt="Speech Cleanup: removes retakes, long pauses and slips"></a>
   <a href="https://chatcut.io/skills/add-captions?utm_source=github&amp;utm_medium=readme&amp;utm_campaign=agent-plugin"><img src="docs/media/skills/add-captions.jpg" width="260" alt="Add captions: readable captions in a style that fits"></a>
-  <a href="https://chatcut.io/skills/long-video-to-shorts?utm_source=github&amp;utm_medium=readme&amp;utm_campaign=agent-plugin"><img src="docs/media/skills/long-video-to-shorts.jpg" width="260" alt="Long video to shorts: turns the best moments into standalone clips"></a>
+  <a href="https://chatcut.io/viralvideocloner?utm_source=github&amp;utm_medium=readme&amp;utm_campaign=agent-plugin"><img src="docs/media/skills/viral-video-cloner.jpg" width="260" alt="Viral Video Cloner: keeps a viral video's moves, camera work and cuts, and swaps in your own people, product and setting"></a>
   <a href="https://chatcut.io/skills/mg-packaging-editorial-explainer?utm_source=github&amp;utm_medium=readme&amp;utm_campaign=agent-plugin"><img src="docs/media/skills/mg-packaging-editorial-explainer.jpg" width="260" alt="Editorial Explainer: news-style motion graphics and data charts"></a>
   <a href="https://chatcut.io/skills/video-translation?utm_source=github&amp;utm_medium=readme&amp;utm_campaign=agent-plugin"><img src="docs/media/skills/video-translation.jpg" width="260" alt="Video Translation: your voice and picture, in another language"></a>
   <a href="https://chatcut.io/skills/recreate-a-video?utm_source=github&amp;utm_medium=readme&amp;utm_campaign=agent-plugin"><img src="docs/media/skills/recreate-a-video.jpg" width="260" alt="Talking-Head Edit Recreation: recreates a reference edit with your footage"></a>
@@ -56,7 +56,7 @@
 | --- | --- |
 | [Speech Cleanup](https://chatcut.io/skills/speech-cleanup?utm_source=github&utm_medium=readme&utm_campaign=agent-plugin) | `Clean up my talking-head take` |
 | [Add captions](https://chatcut.io/skills/add-captions?utm_source=github&utm_medium=readme&utm_campaign=agent-plugin) | `Add animated captions to my video` |
-| [Long video to shorts](https://chatcut.io/skills/long-video-to-shorts?utm_source=github&utm_medium=readme&utm_campaign=agent-plugin) | `Cut my podcast into shorts` |
+| [Viral Video Cloner](https://chatcut.io/viralvideocloner?utm_source=github&utm_medium=readme&utm_campaign=agent-plugin) | `Recreate this viral video with my product` |
 | [Editorial Explainer](https://chatcut.io/skills/mg-packaging-editorial-explainer?utm_source=github&utm_medium=readme&utm_campaign=agent-plugin) | `Package my explainer with news-style motion graphics` |
 | [Video Translation](https://chatcut.io/skills/video-translation?utm_source=github&utm_medium=readme&utm_campaign=agent-plugin) | `Translate my video into Spanish` |
 | [Talking-Head Edit Recreation](https://chatcut.io/skills/recreate-a-video?utm_source=github&utm_medium=readme&utm_campaign=agent-plugin) | `Recreate this edit with my talking-head footage` |
