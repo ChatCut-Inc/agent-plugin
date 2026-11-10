@@ -6,70 +6,31 @@
 
 ## What you can make
 
-AI video editing for your agent: ask in your own words, and ChatCut makes the edit and hands back an editable timeline. Each card is a ChatCut Skill. Paste its request into your agent, or open the Skill to watch its preview.
+AI video editing for your agent: ask in your own words, and ChatCut makes the edit and hands back an editable timeline. Each card is a ChatCut Skill: open it to watch its preview, or paste its request from the table into your agent.
 
-<table>
-  <tr>
-    <td width="33%" valign="top">
-      <a href="https://chatcut.io/skills/speech-cleanup"><img src="docs/media/skills/speech-cleanup.jpg" width="100%" alt="A talking-head timeline with the filler words so, um, like and uh marked for removal"></a>
-      <br><a href="https://chatcut.io/skills/speech-cleanup"><b>Speech Cleanup</b></a>
-      <br>Removes retakes, long pauses and slips.
-      <br><code>Clean up my talking-head take</code>
-    </td>
-    <td width="33%" valign="top">
-      <a href="https://chatcut.io/skills/add-captions"><img src="docs/media/skills/add-captions.jpg" width="100%" alt="A woman talking to camera with the bold caption MAKE IT LOUD, the word IT highlighted"></a>
-      <br><a href="https://chatcut.io/skills/add-captions"><b>Add captions</b></a>
-      <br>Readable captions in a style that fits.
-      <br><code>Add animated captions to my video</code>
-    </td>
-    <td width="33%" valign="top">
-      <a href="https://chatcut.io/skills/long-video-to-shorts"><img src="docs/media/skills/long-video-to-shorts.jpg" width="100%" alt="Long video, short clips: one long recording turned into three vertical clips"></a>
-      <br><a href="https://chatcut.io/skills/long-video-to-shorts"><b>Long Video to Shorts</b></a>
-      <br>Turns the best moments into standalone clips.
-      <br><code>Cut my podcast into shorts</code>
-    </td>
-  </tr>
-  <tr>
-    <td width="33%" valign="top">
-      <a href="https://chatcut.io/skills/mg-packaging-editorial-explainer"><img src="docs/media/skills/mg-packaging-editorial-explainer.jpg" width="100%" alt="An animated bar chart on grey paper: $96,000 put in grows to $525,000"></a>
-      <br><a href="https://chatcut.io/skills/mg-packaging-editorial-explainer"><b>Editorial Explainer</b></a>
-      <br>News-style motion graphics and data charts.
-      <br><code>Package my explainer with news-style motion graphics</code>
-    </td>
-    <td width="33%" valign="top">
-      <a href="https://chatcut.io/skills/video-translation"><img src="docs/media/skills/video-translation.jpg" width="100%" alt="A speaker next to a language list of English, Spanish, Japanese and Chinese, with the subtitle Now it speaks your language"></a>
-      <br><a href="https://chatcut.io/skills/video-translation"><b>Video Translation</b></a>
-      <br>Your voice and picture, in another language.
-      <br><code>Translate my video into Spanish</code>
-    </td>
-    <td width="33%" valign="top">
-      <a href="https://chatcut.io/skills/recreate-a-video"><img src="docs/media/skills/recreate-a-video.jpg" width="100%" alt="A reference video and the recreated version side by side, captioned Find your focus and Find your flow"></a>
-      <br><a href="https://chatcut.io/skills/recreate-a-video"><b>Recreate a Video</b></a>
-      <br>Matches a reference video with your footage.
-      <br><code>Recreate this video with my footage</code>
-    </td>
-  </tr>
-  <tr>
-    <td width="33%" valign="top">
-      <a href="https://chatcut.io/skills/app-promo-kinetic-type"><img src="docs/media/skills/app-promo-kinetic-type.jpg" width="100%" alt="Kinetic type reading Power Your Business, with photo cards sliding in"></a>
-      <br><a href="https://chatcut.io/skills/app-promo-kinetic-type"><b>SaaS Kinetic Type Launch</b></a>
-      <br>A launch video from your site or screenshots.
-      <br><code>Turn my app screenshots into a launch video</code>
-    </td>
-    <td width="33%" valign="top">
-      <a href="https://chatcut.io/skills/animated-explainer-claymotion"><img src="docs/media/skills/animated-explainer-claymotion.jpg" width="100%" alt="A clay fox under an apple tree in a stop-motion scene"></a>
-      <br><a href="https://chatcut.io/skills/animated-explainer-claymotion"><b>Claymotion</b></a>
-      <br>A narrated clay-animation short from a topic.
-      <br><code>Explain my idea as a clay animation</code>
-    </td>
-    <td width="33%" valign="top">
-      <a href="https://chatcut.io/skills/tvc-sugar-crystal-storm"><img src="docs/media/skills/tvc-sugar-crystal-storm.jpg" width="100%" alt="A bag of lime sour gummy bears surrounded by floating gummies"></a>
-      <br><a href="https://chatcut.io/skills/tvc-sugar-crystal-storm"><b>Sugar Crystal Storm</b></a>
-      <br>A candy and snack TV commercial.
-      <br><code>Make a TV ad for my snack</code>
-    </td>
-  </tr>
-</table>
+<p align="center">
+  <a href="https://chatcut.io/skills/speech-cleanup"><img src="docs/media/skills/speech-cleanup.jpg" width="260" alt="Speech Cleanup: removes retakes, long pauses and slips"></a>
+  <a href="https://chatcut.io/skills/add-captions"><img src="docs/media/skills/add-captions.jpg" width="260" alt="Add captions: readable captions in a style that fits"></a>
+  <a href="https://chatcut.io/skills/long-video-to-shorts"><img src="docs/media/skills/long-video-to-shorts.jpg" width="260" alt="Long Video to Shorts: turns the best moments into standalone clips"></a>
+  <a href="https://chatcut.io/skills/mg-packaging-editorial-explainer"><img src="docs/media/skills/mg-packaging-editorial-explainer.jpg" width="260" alt="Editorial Explainer: news-style motion graphics and data charts"></a>
+  <a href="https://chatcut.io/skills/video-translation"><img src="docs/media/skills/video-translation.jpg" width="260" alt="Video Translation: your voice and picture, in another language"></a>
+  <a href="https://chatcut.io/skills/recreate-a-video"><img src="docs/media/skills/recreate-a-video.jpg" width="260" alt="Recreate a Video: matches a reference video with your footage"></a>
+  <a href="https://chatcut.io/skills/app-promo-kinetic-type"><img src="docs/media/skills/app-promo-kinetic-type.jpg" width="260" alt="SaaS Kinetic Type Launch: a launch video from your site or screenshots"></a>
+  <a href="https://chatcut.io/skills/animated-explainer-claymotion"><img src="docs/media/skills/animated-explainer-claymotion.jpg" width="260" alt="Claymotion: a narrated clay-animation short from a topic"></a>
+  <a href="https://chatcut.io/skills/tvc-sugar-crystal-storm"><img src="docs/media/skills/tvc-sugar-crystal-storm.jpg" width="260" alt="Sugar Crystal Storm: a candy and snack TV commercial"></a>
+</p>
+
+| Skill | Paste this into your agent |
+| --- | --- |
+| [Speech Cleanup](https://chatcut.io/skills/speech-cleanup) | `Clean up my talking-head take` |
+| [Add captions](https://chatcut.io/skills/add-captions) | `Add animated captions to my video` |
+| [Long Video to Shorts](https://chatcut.io/skills/long-video-to-shorts) | `Cut my podcast into shorts` |
+| [Editorial Explainer](https://chatcut.io/skills/mg-packaging-editorial-explainer) | `Package my explainer with news-style motion graphics` |
+| [Video Translation](https://chatcut.io/skills/video-translation) | `Translate my video into Spanish` |
+| [Recreate a Video](https://chatcut.io/skills/recreate-a-video) | `Recreate this video with my footage` |
+| [SaaS Kinetic Type Launch](https://chatcut.io/skills/app-promo-kinetic-type) | `Turn my app screenshots into a launch video` |
+| [Claymotion](https://chatcut.io/skills/animated-explainer-claymotion) | `Explain my idea as a clay animation` |
+| [Sugar Crystal Storm](https://chatcut.io/skills/tvc-sugar-crystal-storm) | `Make a TV ad for my snack` |
 
 More Skills: [chatcut.io/skills](https://chatcut.io/skills). Not set up yet? Start any request with `Read ChatCut.io/desktop to install ChatCut, then`, and your agent installs ChatCut first.
 
