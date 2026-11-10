@@ -1,6 +1,6 @@
 ---
 name: digital-human
-description: Create and manage script- or audio-driven AI avatar videos from an official or saved presenter, an imported portrait, or a representative still prepared from video. Use for 数字人、数字分身、虚拟人、照片开口说话、人像口播、改稿不重拍, AI avatar, AI avatar video, avatar video, talking avatar, talking photo, photo avatar, video avatar, AI presenter, virtual presenter, virtual spokesperson, digital human, or a person's digital twin, including choosing or creating the avatar and deciding its voice, script, aspect ratio, and output quality. Do not use for a static profile-picture avatar, game or 3D character creation, an industrial digital twin, ordinary B-roll, generic image-to-video, video translation, talking-head editing, lip-sync dubbing alone, or TTS-only requests.
+description: Create and manage script- or audio-driven AI avatar videos from a saved presenter, an imported portrait, or a representative still prepared from video. Use for 数字人、数字分身、虚拟人、照片开口说话、人像口播、改稿不重拍, AI avatar, AI avatar video, avatar video, talking avatar, talking photo, photo avatar, video avatar, AI presenter, virtual presenter, virtual spokesperson, digital human, or a person's digital twin, including choosing or creating the avatar and deciding its voice, script, aspect ratio, and output quality. Do not use for a static profile-picture avatar, game or 3D character creation, an industrial digital twin, ordinary B-roll, generic image-to-video, video translation, talking-head editing, lip-sync dubbing alone, or TTS-only requests.
 user-invocable: true
 ---
 
@@ -16,7 +16,7 @@ format, consent, generation, and verification as one stateful conversation.
 
 Use this skill when the user wants to:
 
-- Make an official or saved AI avatar, talking avatar, or virtual presenter speak.
+- Make a saved AI avatar, talking avatar, or virtual presenter speak.
 - Turn a consented portrait into a reusable digital-human identity.
 - Use a representative still from an imported video as a photo avatar.
 - Create a synthetic AI presenter from a description, when live capabilities allow it.
@@ -43,8 +43,8 @@ Route adjacent requests elsewhere:
 Resolve these slots before submission, but do not ask for them in a fixed order:
 
 1. **Target project** — use the active project when it is unambiguous.
-2. **Avatar identity and ready revision** — an official avatar, a saved avatar, or
-   a newly created photo or synthetic avatar.
+2. **Avatar identity and ready revision** — a saved avatar or a newly created
+   photo or synthetic avatar.
 3. **Speech source** — one exact available voice, one cloned voice, or one imported
    audio asset. A text-driven source also requires the final script.
 4. **Final script** — preserve the user's wording and punctuation. Show any AI-written
@@ -55,10 +55,8 @@ Resolve these slots before submission, but do not ask for them in a fixed order:
 6. **Resolution** — `1080p` by default; use `720p` when requested or when live
    capabilities require it, and explain any fallback.
 7. **Optional controls** — motion guidance only when the live capability response
-   says it is supported. For an official catalog avatar, use its returned
-   `hasBackground` value: preserve the original scene when true and request a
-   transparent background when false. For a saved/custom avatar, preserve its original
-   background by default. Request a transparent background only when the user explicitly
+   says it is supported. Preserve the avatar's original background by default.
+   Request a transparent background only when the user explicitly
    asks to remove the background or use transparency. Do not ask the user to choose a
    background mode; briefly state the resolved default before submission. An explicit
    user request to preserve or remove the background always wins.
@@ -88,7 +86,7 @@ spoken content unless the user explicitly asks for it.
 The attached video is a prospective avatar source, not a ready `identityId`. Enter
 the video-to-avatar creation flow: prepare a clean representative still, obtain the
 required likeness consent, create the identity, and then reuse that identity for the
-requested generation. Do not show official or saved avatar choices while this
+requested generation. Do not show saved avatar choices while this
 prospective source remains valid. Offer other identities only when the user declines
 to use the person in the video or no eligible face frame can be prepared.
 
@@ -152,24 +150,21 @@ already visible. Call `manage_avatar` for live capabilities before
 offering creation or advanced options.
 
 If the user has neither selected an exact identity nor supplied a prospective
-likeness source, list the current official and saved identities before recommending
-one. Do not infer availability from chat history, examples, or provider knowledge.
-For official avatars, use the live catalog's `tags` as factual selection filters and
-its `description` as recommendation guidance. Match those fields against the user's
-requested presenter and use case, and never infer a missing age, gender, ethnicity,
-role, setting, or capability from the preview's appearance.
-For the empty saved-avatar recommendation state, call the official catalog with
-`limit: 5`; do not page through the catalog or turn a full catalog page into one
-recommendation form.
+likeness source, list the user's current saved identities with `manage_avatar
+action=list` before recommending one. Do not infer availability from chat history,
+examples, or provider knowledge. Official avatars are retired: there is no official
+catalog, so never call a catalog action or recommend a presenter the user has not
+saved.
 
 An avatar attached from ChatCut's Digital Humans library or native visual picker is
 already an exact selection. Reuse its attached ChatCut `avatarId` as `identityId`
-across later confirmation and retry turns. An official attached identity is directly
-usable by `submit_avatar_video`; it does not need to be imported or rediscovered in
-the first catalog page. Before resolving speech for an attached identity, call
+across later confirmation and retry turns. If the server reports that an attached
+identity is a retired official avatar, say it is no longer available and offer the
+user's saved avatars and the create action instead. Before resolving speech for an
+attached identity, call
 `manage_avatar` with `action: get` and that exact ID unless a live result in the
 current turn already supplies its `defaultVoiceRef`. Never reject or replace an
-attached avatar just because it is absent from the five-item recommendation page.
+attached avatar just because it is absent from the recommendation list.
 
 Only use identities and revisions reported as ready. Pending, failed, deleting,
 deleted, or orphaned identities are not valid generation inputs.
@@ -184,13 +179,10 @@ Respect an explicit user choice. Otherwise:
 
 - A person-containing video explicitly or provisionally resolved as the likeness
   source: continue the video-to-avatar creation flow. Do not enter the generic avatar
-  picker and do not ask the user to choose among saved or official identities.
-- No ready saved avatar: show at most five suitable official avatars and include the
-  reserved **create** card in the same choice surface. This is a strict empty-state
-  contract: never render a sixth official recommendation, and never omit the
-  creation option merely because official avatars are available.
-- Ready saved avatars exist: show them first (up to five total cards), then the
-  reserved create card.
+  picker and do not ask the user to choose among saved identities.
+- No ready saved avatar: show the reserved **create** card (plugin hosts also add
+  Other). Never fill the empty state with presenters the user has not saved.
+- Ready saved avatars exist: show up to five of them, then the reserved create card.
 - Exactly one ready saved avatar: offer it first and ask whether to use it.
 - Multiple ready saved avatars: prefer higher live usage count; when counts tie, prefer
   the newest creation. If usage metadata is absent, rank by newest creation only;
@@ -199,17 +191,16 @@ Respect an explicit user choice. Otherwise:
 Avatar identity selection is media-preview-only and is a strict exception to the generic
 single-branch `<choices/>` rule. Always use visual cards through the Widget Forms
 Skill, including when exactly one ready saved avatar exists. Never ask a text-only
-category question such as "use the saved avatar" versus "browse official avatars",
+category question such as "use the saved avatar" versus "create a new one",
 and never use `<choices/>`, `<form-single>`, or label-only identity cards for avatar
-selection. For an avatar card in ChatCut's native widget — official or the user's own
-saved avatar — write only its exact `identityId` as `avatar-id`; the host resolves the
+selection. For an avatar card in ChatCut's native widget — the user's own saved
+avatar — write only its exact `identityId` as `avatar-id`; the host resolves the
 current name, preview video or fallback image, aspect ratio, and submitted value from the live avatar
 identity even when the tool payload does not expose a preview URL. Never copy `value`,
 `name`, `media`, or `aspect-ratio` onto an `avatar-id` option. If the host cannot
 resolve preview media, omit that identity rather than falling back to text. Prefer
 the live preview video when available and use the preview image only as its poster
-or fallback. When
-the user has ready saved avatars, place their cards before official recommendations.
+or fallback.
 Ask one most important missing question at a time and do not repeat answered questions.
 
 The raw tags below are the embedded ChatCut protocol only. In a published Codex or
@@ -217,19 +208,19 @@ Claude Code plugin, the Widget Forms Skill's host adapter takes priority: never 
 raw ChatCut tags. Map each live identity to the host's visual-choice surface using
 `identityId` as its stable value and `name` as its label. In Codex, supply
 `previewVideoUrl` as `previewVideo` and `previewImageUrl` as `preview` so the image is
-the video's poster and failure fallback. Plugin avatar pickers use 4:5 portrait
-framing. Claude uses only the official catalog's returned `widgetPreviewVideoUrl`
-and `widgetPreviewImageUrl` on the public CDN; never embed provider or private
-runtime URLs. Omit identities without public widget media from Claude's media
-cards and say their preview is available in ChatCut.
+the video's poster and failure fallback; the plugin avatar picker uses 4:5 portrait
+framing. Saved-avatar previews are private runtime media, so Claude shows saved
+avatars as label-only cards, never embeds their preview URLs, and says the previews
+are in ChatCut's AI Avatars library; this plugin rule overrides the media-only rule
+above.
 
 After the identity cards, include a localized `create_avatar` action and Other
 with a text entry. Codex uses `id:"__other__"` and `otherPlaceholder`; Claude uses
-the Widget Forms Other control. Keep both even when suitable identities exist.
+the Widget Forms Other control. Keep both even when saved avatars exist.
 `create_avatar` returns to the creation workflow instead of opening ChatCut's
-native dialog automatically. Other returns the presenter requirements for a
-refined live catalog search; it is neither an identity nor permission to create
-an avatar or generate video.
+native dialog automatically. Other returns the presenter the user describes, for
+choosing among saved avatars or creating a new one; it is neither an identity nor
+permission to create an avatar or generate video.
 For a saved identity whose `list` row has no preview URLs, call `manage_avatar
 action=get` for that exact candidate before rendering it; use the selected ready
 revision's returned preview media and do not invent or copy media from another avatar.
@@ -248,13 +239,13 @@ this question's answer with the avatar attached; treat that reply as the avatar
 selection and do not re-ask.
 
 The selection shape is therefore one `<form-visual>` containing up to five avatar
-preview cards (saved first, then official) followed by the creation card. Localize
+preview cards for saved avatars followed by the creation card. Localize
 the visible question and card label to the conversation language:
 
 ```text
 <widget>
   <form-visual id="avatar" question="Please choose an avatar" required="true">
-    <visual-option avatar-id="<saved-or-official-identity-id>"/>
+    <visual-option avatar-id="<saved-identity-id>"/>
     <visual-option value="create_avatar" name="Create your own avatar"/>
   </form-visual>
 </widget>
@@ -292,17 +283,6 @@ returned ChatCut image asset id to `manage_avatar`.
 
 ### Resolve speech only when the requested action needs it
 
-For an official avatar, never silently use its paired voice and never immediately
-open the broader voice catalog. When the live result provides `defaultVoiceRef` and
-the user has not already made this choice, first ask one blocking text-only decision
-in the conversation language: whether to use this avatar's official built-in voice
-or choose another voice. In embedded ChatCut, render that decision with localized
-`<choices options="Use official voice,Choose another voice"/>`, then stop and wait.
-If the user accepts, resolve speech with that exact `defaultVoiceRef` and do not call
-`manage_avatar action=voices`. Call `action=voices` only after the user chooses
-another voice, or when the live identity has no `defaultVoiceRef`. Do not ask for
-language or script and then pre-emptively call `action=voices` in the same turn.
-
 For a saved or newly created avatar, reuse its saved voice binding when present and
 confirm it; otherwise offer available voices. When the user settles on a voice they
 want this avatar to keep, save it with `manage_avatar action=set-default-voice`;
@@ -327,9 +307,9 @@ the generic `<choices/>` rule:
   card. Always append one no-media `<visual-option value="clone_voice"
 name="Clone Voice"/>` action, localized to the conversation language, as the
   final card. This clone option is required on every recommended-voice surface.
-- An official avatar's paired default voice may still be used without listing the
-  broader official voice catalog. Do not show that default voice as an audition
-  card unless an actual audio `previewUrl` was returned for it. Never reuse the
+- An avatar's saved default voice may be used without listing the broader voice
+  catalog. Do not show that default voice as an audition card unless an actual
+  audio `previewUrl` was returned for it. Never reuse the
   avatar image or video URL as a voice preview.
 - Copy each returned `previewUrl` exactly. In particular, keep
   `/voice-samples/...` root-relative; do not expand it to `chatcut.com` or invent
@@ -394,20 +374,12 @@ let the backend resolve it to `auto`. Never use the current project ratio as the
 avatar-video default. If the user explicitly asks for a different ratio, pass that
 request instead.
 
-For an official catalog avatar, resolve the default from the `hasBackground` field
-returned by `manage_avatar action="catalog"`:
-
-- `hasBackground: true` — set `removeBackground: false` and preserve the original
-  scene.
-- `hasBackground: false` — set `removeBackground: true` so the result is a
-  transparent WebM when transparency is supported.
-
-For a saved/custom avatar without catalog metadata, keep `removeBackground: false` as
-the default and preserve the source image background. Set `removeBackground: true`
+Keep `removeBackground: false` as the default and preserve the source image
+background. Set `removeBackground: true`
 only when the user explicitly asks for a transparent background or background removal.
 Do not turn this into a blocking question. Before submission, briefly tell the user
 whether the original scene will be preserved or the result will be transparent. An
-explicit user request overrides the catalog default. If transparency is unsupported,
+explicit user request overrides the default. If transparency is unsupported,
 explain the limitation and keep the original background.
 
 Do not promise crop, background removal, motion control, transparency, resolution,
@@ -454,7 +426,7 @@ or CLI directly from this skill.
 Select only through ChatCut capabilities, catalog results, saved bindings, and the
 native tools. User-facing language is limited to concepts such as:
 
-- **Official avatars** and **My avatars**
+- **My avatars**
 - **Official voices**, **cloned voices**, and **project audio**
 - **Photo avatar** and **synthetic avatar**
 
@@ -532,8 +504,5 @@ alone. If visual inspection is unavailable, say what was structurally verified.
 - Never retry a whole successful batch because one segment failed.
 - Never claim visual quality without inspecting the generated result.
 - Never place media on the timeline or export it unless the task calls for that action.
-- For official catalog avatars, obey the returned `hasBackground` default: preserve a
-  configured scene background and remove a configured absent background. For
-  saved/custom avatars, preserve the source background unless the user explicitly asks
-  for transparency or background removal. Explicit user intent always overrides either
-  default.
+- Preserve the avatar's source background unless the user explicitly asks for
+  transparency or background removal.
