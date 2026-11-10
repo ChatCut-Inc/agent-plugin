@@ -41,13 +41,13 @@
 <p align="center">
   <a href="https://chatcut.io/skills/speech-cleanup?utm_source=github&amp;utm_medium=readme&amp;utm_campaign=agent-plugin"><img src="docs/media/skills/speech-cleanup.jpg" width="260" alt="Speech Cleanup: removes retakes, long pauses and slips"></a>
   <a href="https://chatcut.io/skills/add-captions?utm_source=github&amp;utm_medium=readme&amp;utm_campaign=agent-plugin"><img src="docs/media/skills/add-captions.jpg" width="260" alt="Add captions: readable captions in a style that fits"></a>
+  <a href="https://chatcut.io/skills/recreate-a-video?utm_source=github&amp;utm_medium=readme&amp;utm_campaign=agent-plugin"><img src="docs/media/skills/recreate-a-video.jpg" width="260" alt="Talking-Head Edit Recreation: recreates a reference edit with your footage"></a>
+  <a href="https://chatcut.io/skills/ai-avatar-video?utm_source=github&amp;utm_medium=readme&amp;utm_campaign=agent-plugin"><img src="docs/media/skills/ai-avatar-video.jpg" width="260" alt="AI Avatar Video: a presenter video from a photo and a script"></a>
+  <a href="https://chatcut.io/skills/voice-cloning?utm_source=github&amp;utm_medium=readme&amp;utm_campaign=agent-plugin"><img src="docs/media/skills/voice-cloning.jpg" width="260" alt="Voice Cloning: same voice, new words, from a short sample"></a>
   <a href="https://chatcut.io/viralvideocloner?utm_source=github&amp;utm_medium=readme&amp;utm_campaign=agent-plugin"><img src="docs/media/skills/viral-video-cloner.jpg" width="260" alt="Viral Video Cloner: keeps a viral video's moves, camera work and cuts, and swaps in your own people, product and setting"></a>
+  <a href="https://chatcut.io/skills/mg-packaging-runway-rebel?utm_source=github&amp;utm_medium=readme&amp;utm_campaign=agent-plugin"><img src="docs/media/skills/mg-packaging-runway-rebel.jpg" width="260" alt="Runway Rebel: bold white type with slim yellow numerals"></a>
   <a href="https://chatcut.io/skills/mg-packaging-editorial-explainer?utm_source=github&amp;utm_medium=readme&amp;utm_campaign=agent-plugin"><img src="docs/media/skills/mg-packaging-editorial-explainer.jpg" width="260" alt="Editorial Explainer: news-style motion graphics and data charts"></a>
   <a href="https://chatcut.io/skills/video-translation?utm_source=github&amp;utm_medium=readme&amp;utm_campaign=agent-plugin"><img src="docs/media/skills/video-translation.jpg" width="260" alt="Video Translation: your voice and picture, in another language"></a>
-  <a href="https://chatcut.io/skills/recreate-a-video?utm_source=github&amp;utm_medium=readme&amp;utm_campaign=agent-plugin"><img src="docs/media/skills/recreate-a-video.jpg" width="260" alt="Talking-Head Edit Recreation: recreates a reference edit with your footage"></a>
-  <a href="https://chatcut.io/skills/app-promo-kinetic-type?utm_source=github&amp;utm_medium=readme&amp;utm_campaign=agent-plugin"><img src="docs/media/skills/app-promo-kinetic-type.jpg" width="260" alt="SaaS Kinetic Type Launch: a launch video from your site or screenshots"></a>
-  <a href="https://chatcut.io/skills/animated-explainer-claymotion?utm_source=github&amp;utm_medium=readme&amp;utm_campaign=agent-plugin"><img src="docs/media/skills/animated-explainer-claymotion.jpg" width="260" alt="Claymotion: a narrated clay-animation short from a topic"></a>
-  <a href="https://chatcut.io/skills/tvc-sugar-crystal-storm?utm_source=github&amp;utm_medium=readme&amp;utm_campaign=agent-plugin"><img src="docs/media/skills/tvc-sugar-crystal-storm.jpg" width="260" alt="Sugar Crystal Storm: a candy and snack TV commercial"></a>
 </p>
 
 <div align="center">
@@ -56,13 +56,13 @@
 | --- | --- |
 | [Speech Cleanup](https://chatcut.io/skills/speech-cleanup?utm_source=github&utm_medium=readme&utm_campaign=agent-plugin) | `Clean up my talking-head take` |
 | [Add captions](https://chatcut.io/skills/add-captions?utm_source=github&utm_medium=readme&utm_campaign=agent-plugin) | `Add animated captions to my video` |
+| [Talking-Head Edit Recreation](https://chatcut.io/skills/recreate-a-video?utm_source=github&utm_medium=readme&utm_campaign=agent-plugin) | `Recreate this edit with my talking-head footage` |
+| [AI Avatar Video](https://chatcut.io/skills/ai-avatar-video?utm_source=github&utm_medium=readme&utm_campaign=agent-plugin) | `Turn my photo into a talking presenter video` |
+| [Voice Cloning](https://chatcut.io/skills/voice-cloning?utm_source=github&utm_medium=readme&utm_campaign=agent-plugin) | `Clone my voice and read this script` |
 | [Viral Video Cloner](https://chatcut.io/viralvideocloner?utm_source=github&utm_medium=readme&utm_campaign=agent-plugin) | `Recreate this viral video with my product` |
+| [Runway Rebel](https://chatcut.io/skills/mg-packaging-runway-rebel?utm_source=github&utm_medium=readme&utm_campaign=agent-plugin) | `Package my talking-head video in the Runway Rebel style` |
 | [Editorial Explainer](https://chatcut.io/skills/mg-packaging-editorial-explainer?utm_source=github&utm_medium=readme&utm_campaign=agent-plugin) | `Package my explainer with news-style motion graphics` |
 | [Video Translation](https://chatcut.io/skills/video-translation?utm_source=github&utm_medium=readme&utm_campaign=agent-plugin) | `Translate my video into Spanish` |
-| [Talking-Head Edit Recreation](https://chatcut.io/skills/recreate-a-video?utm_source=github&utm_medium=readme&utm_campaign=agent-plugin) | `Recreate this edit with my talking-head footage` |
-| [SaaS Kinetic Type Launch](https://chatcut.io/skills/app-promo-kinetic-type?utm_source=github&utm_medium=readme&utm_campaign=agent-plugin) | `Turn my app screenshots into a launch video` |
-| [Claymotion](https://chatcut.io/skills/animated-explainer-claymotion?utm_source=github&utm_medium=readme&utm_campaign=agent-plugin) | `Explain my idea as a clay animation` |
-| [Sugar Crystal Storm](https://chatcut.io/skills/tvc-sugar-crystal-storm?utm_source=github&utm_medium=readme&utm_campaign=agent-plugin) | `Make a TV ad for my snack` |
 
 More Skills: [chatcut.io/skills](https://chatcut.io/skills?utm_source=github&utm_medium=readme&utm_campaign=agent-plugin). Not set up yet? Start any request with `Read ChatCut.io/desktop to install ChatCut, then`, and your agent installs ChatCut first.
 
