@@ -20,14 +20,17 @@
 
 **Works with**
 
-[<img src="docs/media/hosts/codex.png" height="20" align="absmiddle" alt="Codex">](https://chatcut.io/chatgpt-plugin)&nbsp;[Codex](https://chatcut.io/chatgpt-plugin) &nbsp;
-[<img src="docs/media/hosts/chatgpt.png" height="20" align="absmiddle" alt="ChatGPT">](https://chatcut.io/chatgpt-plugin)&nbsp;[ChatGPT](https://chatcut.io/chatgpt-plugin) &nbsp;
-[<img src="docs/media/hosts/claude-code.png" height="20" align="absmiddle" alt="Claude Code">](https://chatcut.io/claude-code-plugin)&nbsp;[Claude Code](https://chatcut.io/claude-code-plugin) &nbsp;
-[<img src="docs/media/hosts/grok-bot.png" height="20" align="absmiddle" alt="Grok Bot">](https://chatcut.io/grok-plugin)&nbsp;[Grok Bot](https://chatcut.io/grok-plugin) &nbsp;
-[<img src="docs/media/hosts/antigravity.png" height="20" align="absmiddle" alt="Antigravity">](https://chatcut.io/antigravity-plugin)&nbsp;[Antigravity](https://chatcut.io/antigravity-plugin) &nbsp;
-[<img src="docs/media/hosts/workbuddy.png" height="20" align="absmiddle" alt="WorkBuddy">](https://chatcut.io/workbuddy)&nbsp;[WorkBuddy](https://chatcut.io/workbuddy)
-
-[Cursor](./cursor/README.md) · [Gemini CLI](#hosted-web-plugin) · [Kimi Work](./kimi/README.md) · [Doubao Work](./doubao/README.md) · [Qwen Work](./qwen/README.md)
+[<img src="docs/media/hosts/codex.png" height="28" alt="Codex">](https://chatcut.io/chatgpt-plugin)
+[<img src="docs/media/hosts/chatgpt.png" height="28" alt="ChatGPT">](https://chatcut.io/chatgpt-plugin)
+[<img src="docs/media/hosts/claude-code.png" height="28" alt="Claude Code">](https://chatcut.io/claude-code-plugin)
+[<img src="docs/media/hosts/grok-bot.png" height="28" alt="Grok Bot">](https://chatcut.io/grok-plugin)
+[<img src="docs/media/hosts/antigravity.png" height="28" alt="Google Antigravity">](https://chatcut.io/antigravity-plugin)
+[<img src="docs/media/hosts/workbuddy.png" height="28" alt="WorkBuddy">](https://chatcut.io/workbuddy)
+[<img src="docs/media/hosts/cursor.png" height="28" alt="Cursor">](./cursor/README.md)
+[<img src="docs/media/hosts/gemini-cli.png" height="28" alt="Gemini CLI">](#hosted-web-plugin)
+[<img src="docs/media/hosts/kimi-work.png" height="28" alt="Kimi Work">](./kimi/README.md)
+[<img src="docs/media/hosts/doubao-work.png" height="28" alt="Doubao Work">](./doubao/README.md)
+[<img src="docs/media/hosts/qwen-work.png" height="28" alt="Qwen Work">](./qwen/README.md)
 
 </div>
 
