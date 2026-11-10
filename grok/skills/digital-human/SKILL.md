@@ -40,8 +40,8 @@ video's shots, actions, or timing. For original-content translation use
 
 ## Resolve the character
 
-Reuse the character the user attached through **＋ → 我的资产 → 角色**. Otherwise
-read the context's `<assets>` section or call `manage_character action="list"`.
+Reuse the character the user names or attached in ChatCut. Otherwise read the
+`<assets>` section a ChatCut tool result carries, or call `manage_character action="list"`.
 Use the exact `characterId`; call `manage_character action="get"` for its current
 images, image URLs, description, and voice. Its `presenter` describes talking-head
 preparation state; the submission tool handles that state.
@@ -70,8 +70,8 @@ name and main image, optionally save its selected voice, then submit with the re
 `characterId`. Creating the library entry alone does not request video generation.
 If an existing character has no main image, ask for a clear front-facing portrait
 and save it with `manage_character action="update"` and `addImages` before submission.
-Ask for it with a `<form-files>` upload in Widget Forms and save the submitted project
-asset reference.
+Request the file as Widget Forms describes for this host, import it as a project
+asset, and save that asset reference.
 
 ### A person in an attached video
 
@@ -133,8 +133,8 @@ voices through Widget Forms, with a localized clone-voice action. A `hasPreview`
 flag without a playable `previewUrl` is insufficient. Copy URLs exactly and never
 use a character's image or video as an audio preview.
 
-Embedded voice choices use `<form-visual>` with `media-kind="audio"` on each
-playable option. Do not replace auditions with text-only names. When the script
+Keep each voice's playable preview with its choice; Widget Forms decides how this
+host lets the user audition it. When the script
 also needs confirmation, include the voice selector and script field in one widget.
 An upload or choice is not voice-cloning authorization.
 
