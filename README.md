@@ -20,12 +20,12 @@
 
 **Works with**
 
-[<img src="docs/media/hosts/codex.png" height="20" align="absmiddle" alt="">](https://chatcut.io/chatgpt-plugin)&nbsp;[Codex](https://chatcut.io/chatgpt-plugin) &nbsp;
-[<img src="docs/media/hosts/chatgpt.png" height="20" align="absmiddle" alt="">](https://chatcut.io/chatgpt-plugin)&nbsp;[ChatGPT](https://chatcut.io/chatgpt-plugin) &nbsp;
-[<img src="docs/media/hosts/claude-code.png" height="20" align="absmiddle" alt="">](https://chatcut.io/claude-code-plugin)&nbsp;[Claude Code](https://chatcut.io/claude-code-plugin) &nbsp;
-[<img src="docs/media/hosts/grok-bot.png" height="20" align="absmiddle" alt="">](https://chatcut.io/grok-plugin)&nbsp;[Grok Bot](https://chatcut.io/grok-plugin) &nbsp;
-[<img src="docs/media/hosts/antigravity.png" height="20" align="absmiddle" alt="">](https://chatcut.io/antigravity-plugin)&nbsp;[Antigravity](https://chatcut.io/antigravity-plugin) &nbsp;
-[<img src="docs/media/hosts/workbuddy.png" height="20" align="absmiddle" alt="">](https://chatcut.io/workbuddy)&nbsp;[WorkBuddy](https://chatcut.io/workbuddy)
+[<img src="docs/media/hosts/codex.png" height="20" align="absmiddle" alt="Codex">](https://chatcut.io/chatgpt-plugin)&nbsp;[Codex](https://chatcut.io/chatgpt-plugin) &nbsp;
+[<img src="docs/media/hosts/chatgpt.png" height="20" align="absmiddle" alt="ChatGPT">](https://chatcut.io/chatgpt-plugin)&nbsp;[ChatGPT](https://chatcut.io/chatgpt-plugin) &nbsp;
+[<img src="docs/media/hosts/claude-code.png" height="20" align="absmiddle" alt="Claude Code">](https://chatcut.io/claude-code-plugin)&nbsp;[Claude Code](https://chatcut.io/claude-code-plugin) &nbsp;
+[<img src="docs/media/hosts/grok-bot.png" height="20" align="absmiddle" alt="Grok Bot">](https://chatcut.io/grok-plugin)&nbsp;[Grok Bot](https://chatcut.io/grok-plugin) &nbsp;
+[<img src="docs/media/hosts/antigravity.png" height="20" align="absmiddle" alt="Antigravity">](https://chatcut.io/antigravity-plugin)&nbsp;[Antigravity](https://chatcut.io/antigravity-plugin) &nbsp;
+[<img src="docs/media/hosts/workbuddy.png" height="20" align="absmiddle" alt="WorkBuddy">](https://chatcut.io/workbuddy)&nbsp;[WorkBuddy](https://chatcut.io/workbuddy)
 
 [Cursor](./cursor/README.md) · [Gemini CLI](#hosted-web-plugin) · [Kimi Work](./kimi/README.md) · [Doubao Work](./doubao/README.md) · [Qwen Work](./qwen/README.md)
 
