@@ -4,50 +4,74 @@
 
 [![ChatCut MCP server on Glama](https://glama.ai/mcp/connectors/io.chatcut/chatcut/badges/score.svg)](https://glama.ai/mcp/connectors/io.chatcut/chatcut)
 
-## Ask your agent
+## What you can make
 
-AI video editing for your agent: ask in your own words, and ChatCut makes the edit and hands back an editable timeline. Each example pairs a request you can paste into your agent with the kind of result it produces.
+AI video editing for your agent: ask in your own words, and ChatCut makes the edit and hands back an editable timeline. Each card is a ChatCut Skill. Paste its request into your agent, or open the Skill to watch its preview.
 
 <table>
   <tr>
-    <td width="50%" valign="top">
-      <img src="docs/media/cleanup.gif" width="100%" alt="A talking-head clip: the filler words so, um, like and uh are marked on the timeline and cut out, then captions appear">
-      <br><b>Clean up a talking head</b>
-      <br><code>Clean up this take: cut the ums, long pauses and retakes.</code>
+    <td width="33%" valign="top">
+      <a href="https://chatcut.io/skills/speech-cleanup"><img src="docs/media/skills/speech-cleanup.jpg" width="100%" alt="A talking-head timeline with the filler words so, um, like and uh marked for removal"></a>
+      <br><a href="https://chatcut.io/skills/speech-cleanup"><b>Speech Cleanup</b></a>
+      <br>Removes retakes, long pauses and slips.
+      <br><code>Clean up my talking-head take</code>
     </td>
-    <td width="50%" valign="top">
-      <img src="docs/media/captions.gif" width="100%" alt="A woman talking to camera while the captions switch between several animated styles that highlight each word">
-      <br><b>Add animated captions</b>
-      <br><code>Add captions that highlight each word as it's spoken.</code>
+    <td width="33%" valign="top">
+      <a href="https://chatcut.io/skills/add-captions"><img src="docs/media/skills/add-captions.jpg" width="100%" alt="A woman talking to camera with the bold caption MAKE IT LOUD, the word IT highlighted"></a>
+      <br><a href="https://chatcut.io/skills/add-captions"><b>Add captions</b></a>
+      <br>Readable captions in a style that fits.
+      <br><code>Add animated captions to my video</code>
     </td>
-  </tr>
-  <tr>
-    <td width="50%" valign="top">
-      <img src="docs/media/motion-graphics.gif" width="100%" alt="Before and after: the plain talking-head clip on the left, and on the right the same clip with a Motion Graphics title and an animated bar chart">
-      <br><b>Add motion graphics</b>
-      <br><code>Package this explainer with motion graphics: a title card and an animated chart.</code>
-    </td>
-    <td width="50%" valign="top">
-      <img src="docs/media/shorts.gif" width="100%" alt="A two-person podcast episode is split into several vertical 9:16 clips">
-      <br><b>Turn a long video into shorts</b>
-      <br><code>Find the best moments in this episode and cut them into 9:16 shorts.</code>
+    <td width="33%" valign="top">
+      <a href="https://chatcut.io/skills/long-video-to-shorts"><img src="docs/media/skills/long-video-to-shorts.jpg" width="100%" alt="Long video, short clips: one long recording turned into three vertical clips"></a>
+      <br><a href="https://chatcut.io/skills/long-video-to-shorts"><b>Long Video to Shorts</b></a>
+      <br>Turns the best moments into standalone clips.
+      <br><code>Cut my podcast into shorts</code>
     </td>
   </tr>
   <tr>
-    <td width="50%" valign="top">
-      <img src="docs/media/translation.gif" width="100%" alt="The same speaker in six tiles labeled English, Chinese, Spanish, French, German and Japanese, each dubbed into that language">
-      <br><b>Translate and dub a video</b>
-      <br><code>Translate this video into Chinese, Spanish, French, German and Japanese.</code>
+    <td width="33%" valign="top">
+      <a href="https://chatcut.io/skills/mg-packaging-editorial-explainer"><img src="docs/media/skills/mg-packaging-editorial-explainer.jpg" width="100%" alt="An animated bar chart on grey paper: $96,000 put in grows to $525,000"></a>
+      <br><a href="https://chatcut.io/skills/mg-packaging-editorial-explainer"><b>Editorial Explainer</b></a>
+      <br>News-style motion graphics and data charts.
+      <br><code>Package my explainer with news-style motion graphics</code>
     </td>
-    <td width="50%" valign="top">
-      <img src="docs/media/viral-remake.gif" width="100%" alt="An original UGC ad of a creator holding a yellow tumbler, next to four remakes with different creators and settings">
-      <br><b>Remake a viral ad</b> <i>(Desktop)</i>
-      <br><code>Remake this UGC ad with these four creators: same product, same pitch.</code>
+    <td width="33%" valign="top">
+      <a href="https://chatcut.io/skills/video-translation"><img src="docs/media/skills/video-translation.jpg" width="100%" alt="A speaker next to a language list of English, Spanish, Japanese and Chinese, with the subtitle Now it speaks your language"></a>
+      <br><a href="https://chatcut.io/skills/video-translation"><b>Video Translation</b></a>
+      <br>Your voice and picture, in another language.
+      <br><code>Translate my video into Spanish</code>
+    </td>
+    <td width="33%" valign="top">
+      <a href="https://chatcut.io/skills/recreate-a-video"><img src="docs/media/skills/recreate-a-video.jpg" width="100%" alt="A reference video and the recreated version side by side, captioned Find your focus and Find your flow"></a>
+      <br><a href="https://chatcut.io/skills/recreate-a-video"><b>Recreate a Video</b></a>
+      <br>Matches a reference video with your footage.
+      <br><code>Recreate this video with my footage</code>
+    </td>
+  </tr>
+  <tr>
+    <td width="33%" valign="top">
+      <a href="https://chatcut.io/skills/app-promo-kinetic-type"><img src="docs/media/skills/app-promo-kinetic-type.jpg" width="100%" alt="Kinetic type reading Power Your Business, with photo cards sliding in"></a>
+      <br><a href="https://chatcut.io/skills/app-promo-kinetic-type"><b>SaaS Kinetic Type Launch</b></a>
+      <br>A launch video from your site or screenshots.
+      <br><code>Turn my app screenshots into a launch video</code>
+    </td>
+    <td width="33%" valign="top">
+      <a href="https://chatcut.io/skills/animated-explainer-claymotion"><img src="docs/media/skills/animated-explainer-claymotion.jpg" width="100%" alt="A clay fox under an apple tree in a stop-motion scene"></a>
+      <br><a href="https://chatcut.io/skills/animated-explainer-claymotion"><b>Claymotion</b></a>
+      <br>A narrated clay-animation short from a topic.
+      <br><code>Explain my idea as a clay animation</code>
+    </td>
+    <td width="33%" valign="top">
+      <a href="https://chatcut.io/skills/tvc-sugar-crystal-storm"><img src="docs/media/skills/tvc-sugar-crystal-storm.jpg" width="100%" alt="A bag of lime sour gummy bears surrounded by floating gummies"></a>
+      <br><a href="https://chatcut.io/skills/tvc-sugar-crystal-storm"><b>Sugar Crystal Storm</b></a>
+      <br>A candy and snack TV commercial.
+      <br><code>Make a TV ad for my snack</code>
     </td>
   </tr>
 </table>
 
-Not set up yet? Start any request with `Read ChatCut.io/desktop to install ChatCut, then`, and your agent installs ChatCut first.
+More Skills: [chatcut.io/skills](https://chatcut.io/skills). Not set up yet? Start any request with `Read ChatCut.io/desktop to install ChatCut, then`, and your agent installs ChatCut first.
 
 ## Install
 
@@ -118,7 +142,7 @@ Grok Bot: see [grok/README.md](./grok/README.md). Antigravity Web: see [antigrav
 
 Other MCP clients that support remote servers with OAuth can connect to `https://api.chatcut.io/api/external-mcp/mcp` and sign in with a ChatCut account.
 
-## What you can make
+## Everything ChatCut can make
 
 ChatCut edits your own footage and generates new media, and the result is an editable timeline. Under the hood the plugins import media, change a project timeline, create motion graphics, generate assets, transcribe audio, add captions, export videos, and verify that edits are visible in the editor. Items marked *(Desktop)* need ChatCut Desktop. Generation uses ChatCut credits, and the agent asks before spending them.
 
