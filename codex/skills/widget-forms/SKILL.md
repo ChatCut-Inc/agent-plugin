@@ -140,6 +140,18 @@ with `edit_captions action:"template"`. If the host already applied it, verify
 instead of applying again. Re-preview a changed revision. Other returns a new
 style requirement and applies nothing.
 
+Temporary workaround, to be deleted once the hosted server previews and applies
+project-bound custom styles: an agent-composed caption style (`captionPreview`
+with `kind:"custom"`) is a language sample only. In a form that contains one,
+omit the call's `projectId` and give each caption field a `captionTarget` with
+only `languageCode`, with no `timelineId`, `trackId`, `cardId`, `sourceId` or
+`captionsItemId`; otherwise the preview comes back unavailable. After the user
+picks a custom style, run `read_captions`, then write the same look to the
+caption track with `edit_captions action:"style"`, its `trackId` and the
+current revision, using the tool's documented `captionStyle` fields; do not run
+a returned recipe for it. Forms with only published catalog templates keep the
+project-bound target above.
+
 Do not call `ask_followup_questions` solely to display a `playable_preview`,
 because a passive preview is not a question. Use Codex's supported audio
 attachment/media rendering when available. If this host session has no safe
