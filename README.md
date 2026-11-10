@@ -1,11 +1,33 @@
 <h1 align="center">ChatCut Agent Plugins</h1>
 
+<p align="center">
+  <a href="https://www.producthunt.com/products/chatcut-ai-video-editor?utm_source=badge-top-post-badge&amp;utm_medium=badge&amp;utm_campaign=badge-chatcut-2"><picture><source media="(prefers-color-scheme: dark)" srcset="https://chatcut.io/producthunt/badge-dark.svg"><img src="https://chatcut.io/producthunt/badge-light.svg" alt="ChatCut — #1 Product of the Day on Product Hunt" width="231" height="50"></picture></a>
+</p>
+
+<p align="center">
+  <a href="https://github.com/ChatCut-Inc/agent-plugin"><img src="https://img.shields.io/github/stars/ChatCut-Inc/agent-plugin?style=flat&amp;logo=github&amp;label=stars" alt="GitHub stars"></a>
+  <a href="https://github.com/ChatCut-Inc/agent-plugin/releases/latest"><img src="https://img.shields.io/github/v/release/ChatCut-Inc/agent-plugin?style=flat" alt="Latest release"></a>
+  <a href="https://github.com/ChatCut-Inc/agent-plugin/blob/main/LICENSE"><img src="https://img.shields.io/github/license/ChatCut-Inc/agent-plugin?style=flat" alt="License"></a>
+  <a href="https://discord.com/invite/sMjQPvwZTT"><img src="https://img.shields.io/badge/dynamic/json?style=flat&amp;label=Discord&amp;logo=discord&amp;logoColor=white&amp;color=5865F2&amp;suffix=%20members&amp;query=%24.approximate_member_count&amp;url=https%3A%2F%2Fdiscord.com%2Fapi%2Fv9%2Finvites%2FsMjQPvwZTT%3Fwith_counts%3Dtrue" alt="Discord members"></a>
+  <a href="https://glama.ai/mcp/connectors/io.chatcut/chatcut"><img src="https://glama.ai/mcp/connectors/io.chatcut/chatcut/badges/score.svg" alt="ChatCut MCP server on Glama"></a>
+</p>
+
 <div align="center">
 
-**ChatCut is an AI video editor for agents: an MCP server and plugin that lets Codex, ChatGPT, Claude Code, Cursor, Grok Bot, Gemini CLI, Google Antigravity, Kimi Work, WorkBuddy, Doubao Work and Qwen Work edit your own footage, add captions and subtitles, remove silences and filler words, create motion graphics, generate video, voiceovers and music, and export an editable timeline.**\
-[Website](https://chatcut.io) · [Setup guide](https://chatcut.io/desktop) · [ChatGPT and Codex](https://chatcut.io/chatgpt-plugin) · [Claude Code](https://chatcut.io/claude-code-plugin) · [Pricing](https://chatcut.io/pricing)
+**ChatCut is an AI video editor for agents: an MCP server and plugin that lets Codex, ChatGPT, Claude Code, Cursor, Grok Bot, Gemini CLI, Google Antigravity, Kimi Work, WorkBuddy, Doubao Work and Qwen Work edit your own footage, add captions and subtitles, remove silences and filler words, create motion graphics, generate video, voiceovers and music, and export an editable timeline.**
 
-[![ChatCut MCP server on Glama](https://glama.ai/mcp/connectors/io.chatcut/chatcut/badges/score.svg)](https://glama.ai/mcp/connectors/io.chatcut/chatcut)
+[Website](https://chatcut.io) · [Skills](https://chatcut.io/skills) · [Docs](https://chatcut.io/docs) · [Setup guide](https://chatcut.io/desktop) · [Pricing](https://chatcut.io/pricing) · [Discord](https://discord.com/invite/sMjQPvwZTT) · [X](https://x.com/chatcutapp)
+
+**Works with**
+
+[<img src="docs/media/hosts/codex.png" height="20" align="absmiddle" alt=""> Codex](https://chatcut.io/chatgpt-plugin) &nbsp;
+[<img src="docs/media/hosts/chatgpt.png" height="20" align="absmiddle" alt=""> ChatGPT](https://chatcut.io/chatgpt-plugin) &nbsp;
+[<img src="docs/media/hosts/claude-code.png" height="20" align="absmiddle" alt=""> Claude Code](https://chatcut.io/claude-code-plugin) &nbsp;
+[<img src="docs/media/hosts/grok-bot.png" height="20" align="absmiddle" alt=""> Grok Bot](https://chatcut.io/grok-plugin) &nbsp;
+[<img src="docs/media/hosts/antigravity.png" height="20" align="absmiddle" alt=""> Antigravity](https://chatcut.io/antigravity-plugin) &nbsp;
+[<img src="docs/media/hosts/workbuddy.png" height="20" align="absmiddle" alt=""> WorkBuddy](https://chatcut.io/workbuddy)
+
+[Cursor](./cursor/README.md) · [Gemini CLI](#hosted-web-plugin) · [Kimi Work](./kimi/README.md) · [Doubao Work](./doubao/README.md) · [Qwen Work](./qwen/README.md)
 
 </div>
 
