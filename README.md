@@ -25,7 +25,7 @@
 [<img src="docs/media/hosts/claude-code.png" height="28" alt="Claude Code">](https://chatcut.io/claude-code-plugin)
 [<img src="docs/media/hosts/grok-bot.png" height="28" alt="Grok Bot">](https://chatcut.io/grok-plugin)
 [<img src="docs/media/hosts/antigravity.png" height="28" alt="Google Antigravity">](https://chatcut.io/antigravity-plugin)
-[<img src="docs/media/hosts/workbuddy.png" height="28" alt="WorkBuddy">](https://chatcut.io/workbuddy)
+[<img src="docs/media/hosts/workbuddy.png" height="28" alt="WorkBuddy">](https://chatcut.io/workbuddy)<br>
 [<img src="docs/media/hosts/cursor.png" height="28" alt="Cursor">](./cursor/README.md)
 [<img src="docs/media/hosts/gemini-cli.png" height="28" alt="Gemini CLI">](#hosted-web-plugin)
 [<img src="docs/media/hosts/kimi-work.png" height="28" alt="Kimi Work">](./kimi/README.md)
