@@ -3,7 +3,7 @@
     "chatcut": {
       "http_headers": {
         "x-chatcut-mcp-surface": "codex",
-        "x-chatcut-plugin-version": "1.11.3",
+        "x-chatcut-plugin-version": "1.11.4",
         "x-chatcut-install-source": "official_plugin"
       },
       "oauth_resource": "https://api.chatcut.io/api/external-mcp/mcp",

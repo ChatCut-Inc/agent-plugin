@@ -172,7 +172,7 @@ through the host's supported media surface or ChatCut before applying. Never
 publish user media to the public CDN.
 
 Keep the caller's clone or create action and one Other control in the same
-group for voice, avatar, image and caption choices. Neither action starts
+group for voice, avatar and image choices. Neither action starts
 generation. Localize the labels and placeholder, and put Other's text input
 below the group with `data-for` equal to the group's `data-name`; keep the
 host's `.elicit-submit` flow and add no scripts or handlers:
@@ -200,13 +200,18 @@ the digital-human skill owns the shortlist. End the group with a label-only
 `create_avatar` action and Other. `create_avatar` follows the
 conversation-attachment plus `asset-import` path.
 
-Claude Code does not render `captionPreview`. For a caption style choice, read
-the same live catalog as the Codex section and offer label-only Elicitation
-choices with the exact template names and a labeled Other, keeping each label
-mapped to its `presetId`, `templateId`, `revision` and `languageCode`. Say that
-animation and font previews are reviewed in ChatCut. Never approximate a
-template with CSS or embed its runtime or font URLs. The same selection,
-revision and application rules apply.
+Claude Code does not render `captionPreview`, so a caption style choice is a
+short chat reply, not a form: do not call `show_widget` or
+`ask_followup_questions` for it. Read the same live catalog as the Codex
+section and list a few available templates by their exact returned `name`,
+some static and some `kind:"motion-graphic"` (more animated ones for animated
+or expressive requests). End with one line saying the user can also describe
+the look they want, and say that real fonts and animation are reviewed in
+ChatCut. Keep each listed name mapped to its `presetId`, `templateId`,
+`revision` and `languageCode`. A reply naming a listed template is the
+selection, under the same revision and application rules; a description
+returns to catalog discovery and applies nothing. Never approximate a template
+with CSS or embed preview, runtime or font URLs.
 
 For MG reference choices, look up the exact reference ID in the same manifest
 (`entries[referenceId]`, for example a `mg-reference:style:…` key). An image entry
