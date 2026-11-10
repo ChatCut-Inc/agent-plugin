@@ -1,4 +1,4 @@
-<h1 align="center">ChatCut Agent Plugins</h1>
+<h1 align="center">ChatCut AI Video Editor</h1>
 
 <p align="center">
   <a href="https://www.producthunt.com/products/chatcut-ai-video-editor?utm_source=badge-top-post-badge&amp;utm_medium=badge&amp;utm_campaign=badge-chatcut-2"><picture><source media="(prefers-color-scheme: dark)" srcset="https://chatcut.io/producthunt/badge-dark.svg"><img src="https://chatcut.io/producthunt/badge-light.svg" alt="ChatCut — #1 Product of the Day on Product Hunt" width="231" height="50"></picture></a>
