@@ -41,10 +41,10 @@
 <p align="center">
   <a href="https://chatcut.io/skills/speech-cleanup?utm_source=github&amp;utm_medium=readme&amp;utm_campaign=agent-plugin"><img src="docs/media/skills/speech-cleanup.jpg" width="260" alt="Speech Cleanup: removes retakes, long pauses and slips"></a>
   <a href="https://chatcut.io/skills/add-captions?utm_source=github&amp;utm_medium=readme&amp;utm_campaign=agent-plugin"><img src="docs/media/skills/add-captions.jpg" width="260" alt="Add captions: readable captions in a style that fits"></a>
-  <a href="https://chatcut.io/skills/long-video-to-shorts?utm_source=github&amp;utm_medium=readme&amp;utm_campaign=agent-plugin"><img src="docs/media/skills/long-video-to-shorts.jpg" width="260" alt="Long Video to Shorts: turns the best moments into standalone clips"></a>
+  <a href="https://chatcut.io/skills/long-video-to-shorts?utm_source=github&amp;utm_medium=readme&amp;utm_campaign=agent-plugin"><img src="docs/media/skills/long-video-to-shorts.jpg" width="260" alt="Long video to shorts: turns the best moments into standalone clips"></a>
   <a href="https://chatcut.io/skills/mg-packaging-editorial-explainer?utm_source=github&amp;utm_medium=readme&amp;utm_campaign=agent-plugin"><img src="docs/media/skills/mg-packaging-editorial-explainer.jpg" width="260" alt="Editorial Explainer: news-style motion graphics and data charts"></a>
   <a href="https://chatcut.io/skills/video-translation?utm_source=github&amp;utm_medium=readme&amp;utm_campaign=agent-plugin"><img src="docs/media/skills/video-translation.jpg" width="260" alt="Video Translation: your voice and picture, in another language"></a>
-  <a href="https://chatcut.io/skills/recreate-a-video?utm_source=github&amp;utm_medium=readme&amp;utm_campaign=agent-plugin"><img src="docs/media/skills/recreate-a-video.jpg" width="260" alt="Recreate a Video: matches a reference video with your footage"></a>
+  <a href="https://chatcut.io/skills/recreate-a-video?utm_source=github&amp;utm_medium=readme&amp;utm_campaign=agent-plugin"><img src="docs/media/skills/recreate-a-video.jpg" width="260" alt="Talking-Head Edit Recreation: recreates a reference edit with your footage"></a>
   <a href="https://chatcut.io/skills/app-promo-kinetic-type?utm_source=github&amp;utm_medium=readme&amp;utm_campaign=agent-plugin"><img src="docs/media/skills/app-promo-kinetic-type.jpg" width="260" alt="SaaS Kinetic Type Launch: a launch video from your site or screenshots"></a>
   <a href="https://chatcut.io/skills/animated-explainer-claymotion?utm_source=github&amp;utm_medium=readme&amp;utm_campaign=agent-plugin"><img src="docs/media/skills/animated-explainer-claymotion.jpg" width="260" alt="Claymotion: a narrated clay-animation short from a topic"></a>
   <a href="https://chatcut.io/skills/tvc-sugar-crystal-storm?utm_source=github&amp;utm_medium=readme&amp;utm_campaign=agent-plugin"><img src="docs/media/skills/tvc-sugar-crystal-storm.jpg" width="260" alt="Sugar Crystal Storm: a candy and snack TV commercial"></a>
@@ -56,10 +56,10 @@
 | --- | --- |
 | [Speech Cleanup](https://chatcut.io/skills/speech-cleanup?utm_source=github&utm_medium=readme&utm_campaign=agent-plugin) | `Clean up my talking-head take` |
 | [Add captions](https://chatcut.io/skills/add-captions?utm_source=github&utm_medium=readme&utm_campaign=agent-plugin) | `Add animated captions to my video` |
-| [Long Video to Shorts](https://chatcut.io/skills/long-video-to-shorts?utm_source=github&utm_medium=readme&utm_campaign=agent-plugin) | `Cut my podcast into shorts` |
+| [Long video to shorts](https://chatcut.io/skills/long-video-to-shorts?utm_source=github&utm_medium=readme&utm_campaign=agent-plugin) | `Cut my podcast into shorts` |
 | [Editorial Explainer](https://chatcut.io/skills/mg-packaging-editorial-explainer?utm_source=github&utm_medium=readme&utm_campaign=agent-plugin) | `Package my explainer with news-style motion graphics` |
 | [Video Translation](https://chatcut.io/skills/video-translation?utm_source=github&utm_medium=readme&utm_campaign=agent-plugin) | `Translate my video into Spanish` |
-| [Recreate a Video](https://chatcut.io/skills/recreate-a-video?utm_source=github&utm_medium=readme&utm_campaign=agent-plugin) | `Recreate this video with my footage` |
+| [Talking-Head Edit Recreation](https://chatcut.io/skills/recreate-a-video?utm_source=github&utm_medium=readme&utm_campaign=agent-plugin) | `Recreate this edit with my talking-head footage` |
 | [SaaS Kinetic Type Launch](https://chatcut.io/skills/app-promo-kinetic-type?utm_source=github&utm_medium=readme&utm_campaign=agent-plugin) | `Turn my app screenshots into a launch video` |
 | [Claymotion](https://chatcut.io/skills/animated-explainer-claymotion?utm_source=github&utm_medium=readme&utm_campaign=agent-plugin) | `Explain my idea as a clay animation` |
 | [Sugar Crystal Storm](https://chatcut.io/skills/tvc-sugar-crystal-storm?utm_source=github&utm_medium=readme&utm_campaign=agent-plugin) | `Make a TV ad for my snack` |
