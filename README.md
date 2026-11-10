@@ -16,16 +16,16 @@
 
 **ChatCut is an AI video editor for agents: an MCP server and plugin that lets Codex, ChatGPT, Claude Code, Cursor, Grok Bot, Gemini CLI, Google Antigravity, Kimi Work, WorkBuddy, Doubao Work and Qwen Work edit your own footage, add captions and subtitles, remove silences and filler words, create motion graphics, generate video, voiceovers and music, and export an editable timeline.**
 
-[Website](https://chatcut.io) · [Skills](https://chatcut.io/skills) · [Docs](https://chatcut.io/docs) · [Setup guide](https://chatcut.io/desktop) · [Pricing](https://chatcut.io/pricing) · [Discord](https://discord.com/invite/sMjQPvwZTT) · [X](https://x.com/chatcutapp)
+[Website](https://chatcut.io/?utm_source=github&utm_medium=readme&utm_campaign=agent-plugin) · [Skills](https://chatcut.io/skills?utm_source=github&utm_medium=readme&utm_campaign=agent-plugin) · [Docs](https://chatcut.io/docs?utm_source=github&utm_medium=readme&utm_campaign=agent-plugin) · [Setup guide](https://chatcut.io/desktop?utm_source=github&utm_medium=readme&utm_campaign=agent-plugin) · [Pricing](https://chatcut.io/pricing?utm_source=github&utm_medium=readme&utm_campaign=agent-plugin) · [Discord](https://discord.com/invite/sMjQPvwZTT) · [X](https://x.com/chatcutapp)
 
 **Works with**
 
-[<img src="docs/media/hosts/codex.png" height="28" alt="Codex">](https://chatcut.io/chatgpt-plugin)
-[<img src="docs/media/hosts/chatgpt.png" height="28" alt="ChatGPT">](https://chatcut.io/chatgpt-plugin)
-[<img src="docs/media/hosts/claude-code.png" height="28" alt="Claude Code">](https://chatcut.io/claude-code-plugin)
-[<img src="docs/media/hosts/grok-bot.png" height="28" alt="Grok Bot">](https://chatcut.io/grok-plugin)
-[<img src="docs/media/hosts/antigravity.png" height="28" alt="Google Antigravity">](https://chatcut.io/antigravity-plugin)
-[<img src="docs/media/hosts/workbuddy.png" height="28" alt="WorkBuddy">](https://chatcut.io/workbuddy)<br>
+[<img src="docs/media/hosts/codex.png" height="28" alt="Codex">](https://chatcut.io/chatgpt-plugin?utm_source=github&utm_medium=readme&utm_campaign=agent-plugin)
+[<img src="docs/media/hosts/chatgpt.png" height="28" alt="ChatGPT">](https://chatcut.io/chatgpt-plugin?utm_source=github&utm_medium=readme&utm_campaign=agent-plugin)
+[<img src="docs/media/hosts/claude-code.png" height="28" alt="Claude Code">](https://chatcut.io/claude-code-plugin?utm_source=github&utm_medium=readme&utm_campaign=agent-plugin)
+[<img src="docs/media/hosts/grok-bot.png" height="28" alt="Grok Bot">](https://chatcut.io/grok-plugin?utm_source=github&utm_medium=readme&utm_campaign=agent-plugin)
+[<img src="docs/media/hosts/antigravity.png" height="28" alt="Google Antigravity">](https://chatcut.io/antigravity-plugin?utm_source=github&utm_medium=readme&utm_campaign=agent-plugin)
+[<img src="docs/media/hosts/workbuddy.png" height="28" alt="WorkBuddy">](https://chatcut.io/workbuddy?utm_source=github&utm_medium=readme&utm_campaign=agent-plugin)<br>
 [<img src="docs/media/hosts/cursor.png" height="28" alt="Cursor">](./cursor/README.md)
 [<img src="docs/media/hosts/gemini-cli.png" height="28" alt="Gemini CLI">](#hosted-web-plugin)
 [<img src="docs/media/hosts/kimi-work.png" height="28" alt="Kimi Work">](./kimi/README.md)
@@ -39,32 +39,32 @@
 <p align="center">AI video editing for your agent: ask in your own words, and ChatCut makes the edit and hands back an editable timeline. Each card is a ChatCut Skill: open it to watch its preview, or paste its request from the table into your agent.</p>
 
 <p align="center">
-  <a href="https://chatcut.io/skills/speech-cleanup"><img src="docs/media/skills/speech-cleanup.jpg" width="260" alt="Speech Cleanup: removes retakes, long pauses and slips"></a>
-  <a href="https://chatcut.io/skills/add-captions"><img src="docs/media/skills/add-captions.jpg" width="260" alt="Add captions: readable captions in a style that fits"></a>
-  <a href="https://chatcut.io/skills/long-video-to-shorts"><img src="docs/media/skills/long-video-to-shorts.jpg" width="260" alt="Long Video to Shorts: turns the best moments into standalone clips"></a>
-  <a href="https://chatcut.io/skills/mg-packaging-editorial-explainer"><img src="docs/media/skills/mg-packaging-editorial-explainer.jpg" width="260" alt="Editorial Explainer: news-style motion graphics and data charts"></a>
-  <a href="https://chatcut.io/skills/video-translation"><img src="docs/media/skills/video-translation.jpg" width="260" alt="Video Translation: your voice and picture, in another language"></a>
-  <a href="https://chatcut.io/skills/recreate-a-video"><img src="docs/media/skills/recreate-a-video.jpg" width="260" alt="Recreate a Video: matches a reference video with your footage"></a>
-  <a href="https://chatcut.io/skills/app-promo-kinetic-type"><img src="docs/media/skills/app-promo-kinetic-type.jpg" width="260" alt="SaaS Kinetic Type Launch: a launch video from your site or screenshots"></a>
-  <a href="https://chatcut.io/skills/animated-explainer-claymotion"><img src="docs/media/skills/animated-explainer-claymotion.jpg" width="260" alt="Claymotion: a narrated clay-animation short from a topic"></a>
-  <a href="https://chatcut.io/skills/tvc-sugar-crystal-storm"><img src="docs/media/skills/tvc-sugar-crystal-storm.jpg" width="260" alt="Sugar Crystal Storm: a candy and snack TV commercial"></a>
+  <a href="https://chatcut.io/skills/speech-cleanup?utm_source=github&amp;utm_medium=readme&amp;utm_campaign=agent-plugin"><img src="docs/media/skills/speech-cleanup.jpg" width="260" alt="Speech Cleanup: removes retakes, long pauses and slips"></a>
+  <a href="https://chatcut.io/skills/add-captions?utm_source=github&amp;utm_medium=readme&amp;utm_campaign=agent-plugin"><img src="docs/media/skills/add-captions.jpg" width="260" alt="Add captions: readable captions in a style that fits"></a>
+  <a href="https://chatcut.io/skills/long-video-to-shorts?utm_source=github&amp;utm_medium=readme&amp;utm_campaign=agent-plugin"><img src="docs/media/skills/long-video-to-shorts.jpg" width="260" alt="Long Video to Shorts: turns the best moments into standalone clips"></a>
+  <a href="https://chatcut.io/skills/mg-packaging-editorial-explainer?utm_source=github&amp;utm_medium=readme&amp;utm_campaign=agent-plugin"><img src="docs/media/skills/mg-packaging-editorial-explainer.jpg" width="260" alt="Editorial Explainer: news-style motion graphics and data charts"></a>
+  <a href="https://chatcut.io/skills/video-translation?utm_source=github&amp;utm_medium=readme&amp;utm_campaign=agent-plugin"><img src="docs/media/skills/video-translation.jpg" width="260" alt="Video Translation: your voice and picture, in another language"></a>
+  <a href="https://chatcut.io/skills/recreate-a-video?utm_source=github&amp;utm_medium=readme&amp;utm_campaign=agent-plugin"><img src="docs/media/skills/recreate-a-video.jpg" width="260" alt="Recreate a Video: matches a reference video with your footage"></a>
+  <a href="https://chatcut.io/skills/app-promo-kinetic-type?utm_source=github&amp;utm_medium=readme&amp;utm_campaign=agent-plugin"><img src="docs/media/skills/app-promo-kinetic-type.jpg" width="260" alt="SaaS Kinetic Type Launch: a launch video from your site or screenshots"></a>
+  <a href="https://chatcut.io/skills/animated-explainer-claymotion?utm_source=github&amp;utm_medium=readme&amp;utm_campaign=agent-plugin"><img src="docs/media/skills/animated-explainer-claymotion.jpg" width="260" alt="Claymotion: a narrated clay-animation short from a topic"></a>
+  <a href="https://chatcut.io/skills/tvc-sugar-crystal-storm?utm_source=github&amp;utm_medium=readme&amp;utm_campaign=agent-plugin"><img src="docs/media/skills/tvc-sugar-crystal-storm.jpg" width="260" alt="Sugar Crystal Storm: a candy and snack TV commercial"></a>
 </p>
 
 <div align="center">
 
 | Skill | Paste this into your agent |
 | --- | --- |
-| [Speech Cleanup](https://chatcut.io/skills/speech-cleanup) | `Clean up my talking-head take` |
-| [Add captions](https://chatcut.io/skills/add-captions) | `Add animated captions to my video` |
-| [Long Video to Shorts](https://chatcut.io/skills/long-video-to-shorts) | `Cut my podcast into shorts` |
-| [Editorial Explainer](https://chatcut.io/skills/mg-packaging-editorial-explainer) | `Package my explainer with news-style motion graphics` |
-| [Video Translation](https://chatcut.io/skills/video-translation) | `Translate my video into Spanish` |
-| [Recreate a Video](https://chatcut.io/skills/recreate-a-video) | `Recreate this video with my footage` |
-| [SaaS Kinetic Type Launch](https://chatcut.io/skills/app-promo-kinetic-type) | `Turn my app screenshots into a launch video` |
-| [Claymotion](https://chatcut.io/skills/animated-explainer-claymotion) | `Explain my idea as a clay animation` |
-| [Sugar Crystal Storm](https://chatcut.io/skills/tvc-sugar-crystal-storm) | `Make a TV ad for my snack` |
+| [Speech Cleanup](https://chatcut.io/skills/speech-cleanup?utm_source=github&utm_medium=readme&utm_campaign=agent-plugin) | `Clean up my talking-head take` |
+| [Add captions](https://chatcut.io/skills/add-captions?utm_source=github&utm_medium=readme&utm_campaign=agent-plugin) | `Add animated captions to my video` |
+| [Long Video to Shorts](https://chatcut.io/skills/long-video-to-shorts?utm_source=github&utm_medium=readme&utm_campaign=agent-plugin) | `Cut my podcast into shorts` |
+| [Editorial Explainer](https://chatcut.io/skills/mg-packaging-editorial-explainer?utm_source=github&utm_medium=readme&utm_campaign=agent-plugin) | `Package my explainer with news-style motion graphics` |
+| [Video Translation](https://chatcut.io/skills/video-translation?utm_source=github&utm_medium=readme&utm_campaign=agent-plugin) | `Translate my video into Spanish` |
+| [Recreate a Video](https://chatcut.io/skills/recreate-a-video?utm_source=github&utm_medium=readme&utm_campaign=agent-plugin) | `Recreate this video with my footage` |
+| [SaaS Kinetic Type Launch](https://chatcut.io/skills/app-promo-kinetic-type?utm_source=github&utm_medium=readme&utm_campaign=agent-plugin) | `Turn my app screenshots into a launch video` |
+| [Claymotion](https://chatcut.io/skills/animated-explainer-claymotion?utm_source=github&utm_medium=readme&utm_campaign=agent-plugin) | `Explain my idea as a clay animation` |
+| [Sugar Crystal Storm](https://chatcut.io/skills/tvc-sugar-crystal-storm?utm_source=github&utm_medium=readme&utm_campaign=agent-plugin) | `Make a TV ad for my snack` |
 
-More Skills: [chatcut.io/skills](https://chatcut.io/skills). Not set up yet? Start any request with `Read ChatCut.io/desktop to install ChatCut, then`, and your agent installs ChatCut first.
+More Skills: [chatcut.io/skills](https://chatcut.io/skills?utm_source=github&utm_medium=readme&utm_campaign=agent-plugin). Not set up yet? Start any request with `Read ChatCut.io/desktop to install ChatCut, then`, and your agent installs ChatCut first.
 
 </div>
 
@@ -74,15 +74,15 @@ More Skills: [chatcut.io/skills](https://chatcut.io/skills). Not set up yet? Sta
 
 | Agent | Paste this into your agent, or do this | Guide |
 | --- | --- | --- |
-| Codex | `Read ChatCut.io/desktop to install ChatCut` | [chatcut.io/chatgpt-plugin](https://chatcut.io/chatgpt-plugin) |
-| ChatGPT | `Read ChatCut.io/desktop to install ChatCut` in the desktop app, or open **Plugins** in the sidebar, search for **ChatCut** and select **Install** | [chatcut.io/chatgpt-plugin](https://chatcut.io/chatgpt-plugin) |
-| Claude Code | `Read ChatCut.io/desktop to install ChatCut` | [chatcut.io/claude-code-plugin](https://chatcut.io/claude-code-plugin) |
+| Codex | `Read ChatCut.io/desktop to install ChatCut` | [chatcut.io/chatgpt-plugin](https://chatcut.io/chatgpt-plugin?utm_source=github&utm_medium=readme&utm_campaign=agent-plugin) |
+| ChatGPT | `Read ChatCut.io/desktop to install ChatCut` in the desktop app, or open **Plugins** in the sidebar, search for **ChatCut** and select **Install** | [chatcut.io/chatgpt-plugin](https://chatcut.io/chatgpt-plugin?utm_source=github&utm_medium=readme&utm_campaign=agent-plugin) |
+| Claude Code | `Read ChatCut.io/desktop to install ChatCut` | [chatcut.io/claude-code-plugin](https://chatcut.io/claude-code-plugin?utm_source=github&utm_medium=readme&utm_campaign=agent-plugin) |
 | Cursor *(Web)* | Add **ChatCut** from Cursor's plugin marketplace and sign in | [cursor/README.md](./cursor/README.md) |
-| Grok Bot *(Web)* | `Read ChatCut.io/grok to connect the ChatCut app` | [chatcut.io/grok-plugin](https://chatcut.io/grok-plugin) |
+| Grok Bot *(Web)* | `Read ChatCut.io/grok to connect the ChatCut app` | [chatcut.io/grok-plugin](https://chatcut.io/grok-plugin?utm_source=github&utm_medium=readme&utm_campaign=agent-plugin) |
 | Gemini CLI *(Web)* | `gemini extensions install https://github.com/ChatCut-Inc/agent-plugin` | [Hosted Web plugin](#hosted-web-plugin) |
-| Google Antigravity | `Read ChatCut.io/antigravity to install ChatCut` | [chatcut.io/antigravity-plugin](https://chatcut.io/antigravity-plugin) |
+| Google Antigravity | `Read ChatCut.io/antigravity to install ChatCut` | [chatcut.io/antigravity-plugin](https://chatcut.io/antigravity-plugin?utm_source=github&utm_medium=readme&utm_campaign=agent-plugin) |
 | Kimi Work *(Web)* | Import the package with Kimi Work's plugin installer, then select **Login** on the ChatCut connector card | [kimi/README.md](./kimi/README.md) |
-| WorkBuddy | `Read ChatCut.io/desktop to install ChatCut`, or add the ChatCut expert from WorkBuddy's experts page *(Web)* | [chatcut.io/workbuddy](https://chatcut.io/workbuddy) · [workbuddy/README.md](./workbuddy/README.md) |
+| WorkBuddy | `Read ChatCut.io/desktop to install ChatCut`, or add the ChatCut expert from WorkBuddy's experts page *(Web)* | [chatcut.io/workbuddy](https://chatcut.io/workbuddy?utm_source=github&utm_medium=readme&utm_campaign=agent-plugin) · [workbuddy/README.md](./workbuddy/README.md) |
 | Doubao Work (豆包工作) | Add **ChatCut** in Doubao Work and ask for an edit. It connects to ChatCut Desktop through a local connector and installs Desktop if needed | [doubao/README.md](./doubao/README.md) |
 | Qwen Work (千问办公) *(Web)* | Turn on **ChatCut** under **Extensions → Connectors** (扩展 → 连接器) and sign in | [qwen/README.md](./qwen/README.md) |
 
@@ -110,7 +110,7 @@ agy plugin install https://github.com/ChatCut-Inc/agent-plugin/tree/main/antigra
 
 Use this for existing ChatCut Web projects or Web-only use.
 
-Claude Code (`claude mcp login` needs Claude Code 2.1.210 or newer; [full guide](https://chatcut.io/web-plugin/claude)):
+Claude Code (`claude mcp login` needs Claude Code 2.1.210 or newer; [full guide](https://chatcut.io/web-plugin/claude?utm_source=github&utm_medium=readme&utm_campaign=agent-plugin)):
 
 ```sh
 claude plugin marketplace add https://github.com/ChatCut-Inc/agent-plugin.git#main
@@ -118,7 +118,7 @@ claude plugin install chatcut@chatcut-inc
 claude mcp login plugin:chatcut:chatcut
 ```
 
-Codex CLI (in the Codex desktop app, use its bundled Codex CLI; [full guide](https://chatcut.io/web-plugin/chatgpt)):
+Codex CLI (in the Codex desktop app, use its bundled Codex CLI; [full guide](https://chatcut.io/web-plugin/chatgpt?utm_source=github&utm_medium=readme&utm_campaign=agent-plugin)):
 
 ```sh
 codex plugin marketplace add https://github.com/ChatCut-Inc/agent-plugin.git --ref main
@@ -218,9 +218,9 @@ ChatCut edits your own footage and generates new media, and the result is an edi
 
 ## Install ChatCut Desktop (recommended)
 
-Ask your agent to read the complete [ChatCut Desktop setup guide](https://chatcut.io/desktop) using `curl -fsSL https://chatcut.io/desktop` (`curl.exe` on Windows), then install ChatCut and connect the current agent. The official macOS and Windows installers do not need Node.js or npm. Desktop owns its local tools and Skills. Run setup on a supported macOS or Windows computer with a graphical desktop. Linux and remote agents without access to that computer cannot install Desktop there; continue in a local agent on the supported computer.
+Ask your agent to read the complete [ChatCut Desktop setup guide](https://chatcut.io/desktop?utm_source=github&utm_medium=readme&utm_campaign=agent-plugin) using `curl -fsSL https://chatcut.io/desktop` (`curl.exe` on Windows), then install ChatCut and connect the current agent. The official macOS and Windows installers do not need Node.js or npm. Desktop owns its local tools and Skills. Run setup on a supported macOS or Windows computer with a graphical desktop. Linux and remote agents without access to that computer cannot install Desktop there; continue in a local agent on the supported computer.
 
-To recreate a reference video with your person or product while retaining its motion and timing, use Desktop’s bundled `video-gen` Skill and `submit_video_remake`. See the [video recreation guide](https://chatcut.io/viralvideocloner). Quotes use current account access and require approval before spending credits.
+To recreate a reference video with your person or product while retaining its motion and timing, use Desktop’s bundled `video-gen` Skill and `submit_video_remake`. See the [video recreation guide](https://chatcut.io/viralvideocloner?utm_source=github&utm_medium=readme&utm_campaign=agent-plugin). Quotes use current account access and require approval before spending credits.
 
 The hosted packages below remain available for existing Web projects and explicit Web-only use. Web projects and original media remain separate and are not automatically migrated. Connecting Desktop to the same agent may disable or replace its conflicting hosted connection; do not promise that both connections stay active.
 
@@ -269,7 +269,7 @@ https://api.chatcut.io/api/external-mcp/mcp
 
 The host handles authentication when the plugin is installed or first used (`codex mcp login chatcut`, or `claude mcp login plugin:chatcut:chatcut` in Claude Code). Grok Bot and Cursor users complete the authorization flow from the host's Plugins screen. Antigravity users select **Customizations → Authenticate** next to the ChatCut MCP server. Follow the sign-in flow to connect your ChatCut account.
 
-Install instructions per host: [Codex Web guide](https://chatcut.io/web-plugin/chatgpt) for Codex, [Claude Code Web guide](https://chatcut.io/web-plugin/claude) for Claude Code (agent-executable copy in [./docs/claude-code-web-install.md](./docs/claude-code-web-install.md)), [./grok/README.md](./grok/README.md) for Grok Bot, [./cursor/README.md](./cursor/README.md) for Cursor, and [./antigravity/README.md](./antigravity/README.md) for Antigravity.
+Install instructions per host: [Codex Web guide](https://chatcut.io/web-plugin/chatgpt?utm_source=github&utm_medium=readme&utm_campaign=agent-plugin) for Codex, [Claude Code Web guide](https://chatcut.io/web-plugin/claude?utm_source=github&utm_medium=readme&utm_campaign=agent-plugin) for Claude Code (agent-executable copy in [./docs/claude-code-web-install.md](./docs/claude-code-web-install.md)), [./grok/README.md](./grok/README.md) for Grok Bot, [./cursor/README.md](./cursor/README.md) for Cursor, and [./antigravity/README.md](./antigravity/README.md) for Antigravity.
 
 ## Example Prompts
 
@@ -291,7 +291,7 @@ https://github.com/ChatCut-Inc/agent-plugin.git
 
 ## Support
 
-For product information, visit [chatcut.io](https://chatcut.io).
+For product information, visit [chatcut.io](https://chatcut.io/?utm_source=github&utm_medium=readme&utm_campaign=agent-plugin).
 
 ## License
 
