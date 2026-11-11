@@ -7,7 +7,9 @@ description: Use when a Grok Bot user wants a finished file from a ChatCut proje
 
 Export only when the user asks for a finished file. A review checkpoint stays as an editable ChatCut timeline; check your work with `preview_timeline` instead of exporting.
 
-Video and audio can render in the cloud or locally in a ChatCut browser. The `submit_export` description says which one is used when `renderMode` is omitted: omit it unless the user picks one, and pass `renderMode:"local"` for 4K. Name `projectId` and `timelineId` explicitly and do not guess a non-active timeline. Check every returned `renderId` with `track_export`, one status read per call, waiting `checkBackAfterSeconds` between reads.
+Video and audio can render in the cloud or locally in a ChatCut browser. When the user does not say which, call `submit_export` without `renderMode`: the tool then uses its current default, which its description names. Pass `renderMode:"local"` when the user asks for a local export or for 4K (cloud stops at 1080p), and `renderMode:"cloud"` when they ask for cloud.
+
+Name `projectId` and `timelineId` explicitly on every export, and do not guess which timeline the user means when it is not the active one. Check every returned `renderId` with `track_export`, one status read per call, waiting `checkBackAfterSeconds` between reads.
 
 ## Cloud export
 
