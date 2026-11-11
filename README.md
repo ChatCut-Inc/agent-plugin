@@ -34,13 +34,15 @@
 
 </div>
 
+<!-- Hero demo video: once it is uploaded, put its GitHub user-attachments URL on its own line here. -->
+
 <p align="center">
   <a href="https://chatcut.io/skills/speech-cleanup?utm_source=github&amp;utm_medium=readme&amp;utm_campaign=agent-plugin"><img src="docs/media/skills/speech-cleanup.jpg" width="260" alt="Speech Cleanup: removes retakes, long pauses and slips"></a>
   <a href="https://chatcut.io/viralvideocloner?utm_source=github&amp;utm_medium=readme&amp;utm_campaign=agent-plugin"><img src="docs/media/skills/viral-video-cloner.jpg" width="260" alt="Viral Video Cloner: keeps a viral video's moves, camera work and cuts, and swaps in your own people, product and setting"></a>
   <a href="https://chatcut.io/skills/add-captions?utm_source=github&amp;utm_medium=readme&amp;utm_campaign=agent-plugin"><img src="docs/media/skills/add-captions.jpg" width="260" alt="Add captions: readable captions in a style that fits"></a>
   <a href="https://chatcut.io/skills/recreate-a-video?utm_source=github&amp;utm_medium=readme&amp;utm_campaign=agent-plugin"><img src="docs/media/skills/recreate-a-video.jpg" width="260" alt="Talking-Head Edit Recreation: recreates a reference edit with your footage"></a>
-  <a href="https://chatcut.io/skills/mg-packaging-runway-rebel?utm_source=github&amp;utm_medium=readme&amp;utm_campaign=agent-plugin"><img src="docs/media/skills/mg-packaging-runway-rebel.jpg" width="260" alt="MG Packaging · Runway Rebel: bold white type with slim yellow numerals"></a>
-  <a href="https://chatcut.io/skills/mg-packaging-editorial-explainer?utm_source=github&amp;utm_medium=readme&amp;utm_campaign=agent-plugin"><img src="docs/media/skills/mg-packaging-editorial-explainer.jpg" width="260" alt="MG Packaging · Editorial Explainer: news-style motion graphics and data charts"></a>
+  <a href="https://chatcut.io/skills/mg-packaging-runway-rebel?utm_source=github&amp;utm_medium=readme&amp;utm_campaign=agent-plugin"><img src="docs/media/skills/mg-packaging-runway-rebel.jpg" width="260" alt="MG Packaging · Runway Rebel: packages your talking-head video in bold white type and slim yellow numerals"></a>
+  <a href="https://chatcut.io/skills/mg-packaging-editorial-explainer?utm_source=github&amp;utm_medium=readme&amp;utm_campaign=agent-plugin"><img src="docs/media/skills/mg-packaging-editorial-explainer.jpg" width="260" alt="MG Packaging · Editorial Explainer: packages your talking-head video with news-style motion graphics and data charts"></a>
 </p>
 
 ## Install
