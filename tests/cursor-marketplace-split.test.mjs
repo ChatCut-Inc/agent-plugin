@@ -94,5 +94,5 @@ test("cursor/skills/ shares every Grok skill except the Grok-only export guidanc
   const cursorExport = await readFile(new URL("cursor/skills/export/SKILL.md", root), "utf8");
   const grokExport = await readFile(new URL("grok/skills/export/SKILL.md", root), "utf8");
   assert.match(cursorExport, /Video and audio default to `renderMode:"local"`/);
-  assert.match(grokExport, /In Grok, video and audio render in the cloud by default/);
+  assert.match(grokExport, /without `renderMode` to take that default/);
 });

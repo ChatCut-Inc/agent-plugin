@@ -9,18 +9,21 @@ Export only when the user asks for a render, download, or final standalone deliv
 
 Use `submit_export` with the current tool schema. Confirm the target timeline, range, resolution, codec, and format from project state and user intent; do not guess a non-active timeline. Record every returned `renderId`.
 
-In Grok, video and audio render in the cloud by default: call `submit_export`
-without `renderMode` and ChatCut renders on its servers (up to 1080p), so no
-browser tab has to stay connected. The project's media must already be in
-ChatCut: files sent through the ChatCut upload page already are; for files you
-imported with the upload helper, wait until `track_progress` with
-`target:"upload"` reports them uploaded. Follow Cloud Rendering for the quote and
-Delivery for the finished file.
+For video and audio, the ChatCut server sets Grok's default render path and
+states it in the `submit_export` description and the connector's MEDIA EXPORT
+instructions; do not assume local or cloud from this skill. Call `submit_export`
+without `renderMode` to take that default, and pass `renderMode` only when the
+user explicitly chooses local or cloud (4K needs local).
 
-Use `renderMode:"local"` only when the user explicitly asks for a local export
-or for 4K. The connected ChatCut editor tab then renders the timeline: open the
-returned editor URL, activate the requested timeline, and keep that tab open
-through completion. With `delivery:"host"` (Grok's default) it uploads the
+A cloud render runs on ChatCut's servers (up to 1080p), so no browser tab has to
+stay connected. It needs the project's media already in ChatCut: files sent
+through the ChatCut upload page already are; for files you imported with the
+upload helper, wait until `track_progress` with `target:"upload"` reports them
+uploaded. Follow Cloud Rendering for the quote and Delivery for the finished file.
+
+A local export renders in the connected ChatCut editor tab: open the returned
+editor URL, activate the requested timeline, and keep that tab open through
+completion. With `delivery:"host"` (Grok's default) it uploads the
 finished file for you to fetch instead of downloading it on the cloud computer.
 
 For a local export, a server-side active-timeline result does not prove that an
@@ -56,7 +59,7 @@ Use Desktop `track_progress` with `target:"export"` and `exportTaskIds` set to t
 
 Deliver according to the completed result:
 
-- A completed cloud result with a `downloadUrl` (the default): fetch it into
+- A completed cloud result with a `downloadUrl`: fetch it into
   your own workspace with `curl -fL -o "<file name>" "<downloadUrl>"`, check the
   saved file is `outputSizeBytes` bytes when reported, and send that file to the
   user in this conversation as the result, following `cloudDownloadGuidance`. If
@@ -95,7 +98,7 @@ returned render ids.
 
 ## Cloud Rendering
 
-Cloud is Grok's default for video and audio: omit `renderMode` (or pass `"cloud"`). It renders up to 1080p; 4K needs a local export the user asks for. Do not require a Desktop attempt or invent account entitlements.
+Cloud renders up to 1080p; 4K needs a local export. Do not require a Desktop attempt or invent account entitlements.
 
 When `submit_export` returns `CLOUD_EXPORT_QUOTE_REQUIRED` with `details.quote`, it has not accepted a render. Tell the user the quoted duration, free allowance and `estimatedCredits`. A free quote (`requiresConfirmation:false`, within the account's remaining free cloud export allowance) can be retried right away with `cloudQuoteId` set to that quote's `id`. For a nonzero charge, obtain one explicit confirmation of that quoted amount, then retry with `cloudQuoteId` and `confirmCloudCharge:true`; a general export request does not approve an unknown charge. If the account cannot cover it, follow the billing recovery the error returns. Use the account policy returned by the server rather than assuming a free allowance or changing old benefits.
 
