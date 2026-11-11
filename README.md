@@ -36,7 +36,7 @@
 
 <h2 align="center">What you can make</h2>
 
-<p align="center">AI video editing for your agent: ask in your own words, and ChatCut makes the edit and hands back an editable timeline. Each card is a ChatCut Skill: open it to watch its preview, or paste its request from the table into your agent.</p>
+<p align="center">AI video editing for your agent: ask in your own words, and ChatCut makes the edit and hands back an editable timeline. Each card is a ChatCut Skill: open it to watch its preview.</p>
 
 <p align="center">
   <a href="https://chatcut.io/skills/speech-cleanup?utm_source=github&amp;utm_medium=readme&amp;utm_campaign=agent-plugin"><img src="docs/media/skills/speech-cleanup.jpg" width="260" alt="Speech Cleanup: removes retakes, long pauses and slips"></a>
@@ -51,18 +51,6 @@
 </p>
 
 <div align="center">
-
-| Skill | Paste this into your agent |
-| --- | --- |
-| [Speech Cleanup](https://chatcut.io/skills/speech-cleanup?utm_source=github&utm_medium=readme&utm_campaign=agent-plugin) | `Clean up my talking-head take` |
-| [Add captions](https://chatcut.io/skills/add-captions?utm_source=github&utm_medium=readme&utm_campaign=agent-plugin) | `Add animated captions to my video` |
-| [Talking-Head Edit Recreation](https://chatcut.io/skills/recreate-a-video?utm_source=github&utm_medium=readme&utm_campaign=agent-plugin) | `Recreate this edit with my talking-head footage` |
-| [AI Avatar Video](https://chatcut.io/skills/ai-avatar-video?utm_source=github&utm_medium=readme&utm_campaign=agent-plugin) | `Turn my photo into a talking presenter video` |
-| [Voice Cloning](https://chatcut.io/skills/voice-cloning?utm_source=github&utm_medium=readme&utm_campaign=agent-plugin) | `Clone my voice and read this script` |
-| [Viral Video Cloner](https://chatcut.io/viralvideocloner?utm_source=github&utm_medium=readme&utm_campaign=agent-plugin) | `Recreate this viral video with my product` |
-| [Runway Rebel](https://chatcut.io/skills/mg-packaging-runway-rebel?utm_source=github&utm_medium=readme&utm_campaign=agent-plugin) | `Package my talking-head video in the Runway Rebel style` |
-| [Editorial Explainer](https://chatcut.io/skills/mg-packaging-editorial-explainer?utm_source=github&utm_medium=readme&utm_campaign=agent-plugin) | `Package my explainer with news-style motion graphics` |
-| [Video Translation](https://chatcut.io/skills/video-translation?utm_source=github&utm_medium=readme&utm_campaign=agent-plugin) | `Translate my video into Spanish` |
 
 More Skills: [chatcut.io/skills](https://chatcut.io/skills?utm_source=github&utm_medium=readme&utm_campaign=agent-plugin). Not set up yet? Start any request with `Read ChatCut.io/desktop to install ChatCut, then`, and your agent installs ChatCut first.
 
