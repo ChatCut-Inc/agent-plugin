@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { readdir, readFile, readlink, stat } from "node:fs/promises";
+import { lstat, readdir, readFile, readlink, stat } from "node:fs/promises";
 import test from "node:test";
 
 const root = new URL("../", import.meta.url);
@@ -57,20 +57,42 @@ const listFiles = async (dir) => {
   return files.sort();
 };
 
+const sameFiles = async (a, b) => {
+  const files = await listFiles(a);
+  assert.deepEqual(await listFiles(b), files);
+  for (const file of files) {
+    assert.ok(
+      (await readFile(new URL(`${a}${file}`, root))).equals(await readFile(new URL(`${b}${file}`, root))),
+      `${b}${file} differs from ${a}${file}`,
+    );
+  }
+};
+
 // Until Cursor gets its own host adapters, share the directories directly so
 // the two listings cannot drift apart.
-for (const dir of ["skills/", "assets/"]) {
-  test(`cursor/${dir} mirrors grok/${dir}`, async () => {
-    assert.equal(await readlink(new URL(`cursor/${dir.slice(0, -1)}`, root)), `../grok/${dir.slice(0, -1)}`);
-    const grokFiles = await listFiles(`grok/${dir}`);
-    assert.deepEqual(await listFiles(`cursor/${dir}`), grokFiles);
-    for (const file of grokFiles) {
-      assert.ok(
-        (await readFile(new URL(`grok/${dir}${file}`, root))).equals(
-          await readFile(new URL(`cursor/${dir}${file}`, root)),
-        ),
-        `cursor/${dir}${file} differs from grok/${dir}${file}`,
-      );
+test("cursor/assets/ mirrors grok/assets/", async () => {
+  assert.equal(await readlink(new URL("cursor/assets", root)), "../grok/assets");
+  await sameFiles("grok/assets/", "cursor/assets/");
+});
+
+// Grok Bot's cloud-computer browser drops too often for local renders, so only
+// Grok's export guidance is cloud-first; Cursor keeps its own browser-first copy.
+const grokOnlySkills = ["chatcut-plugin-basics", "export"];
+
+test("cursor/skills/ shares every Grok skill except the Grok-only export guidance", async () => {
+  const grokSkills = (await readdir(new URL("grok/skills/", root))).sort();
+  assert.deepEqual((await readdir(new URL("cursor/skills/", root))).sort(), grokSkills);
+  for (const skill of grokSkills) {
+    const cursorSkill = new URL(`cursor/skills/${skill}`, root);
+    if (grokOnlySkills.includes(skill)) {
+      assert.ok((await lstat(cursorSkill)).isDirectory(), `cursor/skills/${skill} is Cursor's own copy`);
+    } else {
+      assert.equal(await readlink(cursorSkill), `../../grok/skills/${skill}`);
+      await sameFiles(`grok/skills/${skill}/`, `cursor/skills/${skill}/`);
     }
-  });
-}
+  }
+  const cursorExport = await readFile(new URL("cursor/skills/export/SKILL.md", root), "utf8");
+  const grokExport = await readFile(new URL("grok/skills/export/SKILL.md", root), "utf8");
+  assert.match(cursorExport, /Video and audio default to `renderMode:"local"`/);
+  assert.match(grokExport, /Video and audio can render in the cloud or locally/);
+});

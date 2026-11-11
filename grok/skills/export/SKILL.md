@@ -1,68 +1,36 @@
 ---
 name: export
-description: Hosted ChatCut plugin sessions only (the `chatcut` MCP server). If the conversation is driving ChatCut Desktop (a `chatcut_desktop*` MCP server), load this skill only when the user explicitly chooses the plugin/web surface — desktop sessions otherwise ship their own instructions and tools. Export or deliver a ChatCut project through the hosted connector, including video, audio, subtitles, XML, and render-status checks.
+description: Use when a Grok Bot user wants a finished file from a ChatCut project, such as exporting or rendering a video or audio, downloading or sending the result in chat, exporting subtitles (SRT) or NLE XML, or checking an export's progress. Covers cloud and browser-local export and how to deliver the file back into the chat. Hosted ChatCut plugin (`chatcut` MCP server) only; when the conversation drives ChatCut Desktop (`chatcut_desktop*`), follow Desktop's own instructions instead.
 ---
 
 # Export
 
-Export only when the user asks for a render, download, or final standalone deliverable. A review checkpoint normally stays as an editable ChatCut timeline.
+Export only when the user asks for a finished file. A review checkpoint stays as an editable ChatCut timeline; check your work with `preview_timeline` instead of exporting.
 
-Use `submit_export` with the current tool schema. Confirm the target timeline, range, resolution, codec, and format from project state and user intent; do not guess a non-active timeline. Record every returned `renderId`.
+Video and audio can render in the cloud or locally in a ChatCut browser. Name `projectId` and `timelineId` explicitly on every export, and do not guess which timeline the user means when it is not the active one. Check every returned `renderId` with `track_export`, one status read per call, waiting `checkBackAfterSeconds` between reads.
 
-Video and audio default to `renderMode:"local"`: the connected ChatCut editor
-tab renders the timeline. Open the returned editor URL, activate the requested
-timeline, and keep that tab open through completion. If no capable editor is
-connected, resolve that error before retrying. There is no automatic cloud retry.
-Media already readable by that editor does not need another upload for this route.
-If the user explicitly chooses cloud, use that choice directly without requiring
-browser or Desktop setup first.
+## Cloud export
 
-A server-side active-timeline result does not prove that an already-open browser
-tab switched timelines. Confirm the intended timeline in that tab, or ask the
-user to select it, and pass its explicit ID when submitting the export.
+ChatCut renders on its servers (up to 1080p; 4K needs a local export), so no browser has to stay open. The project's media must already be in ChatCut: files sent through the ChatCut upload page are; for files you imported with the upload helper, wait until `track_progress` with `target:"upload"` reports them uploaded.
 
-Use `track_export` for browser and cloud export status; do not use
-generation/transcription `track_progress`. Pass the returned `renderId` for an
-accepted job. A `wait` call is a single status read; honor its check-back guidance.
-If submission timed out, follow Local Export Recovery before resubmitting to
-avoid duplicate jobs.
+1. The first call returns `CLOUD_EXPORT_QUOTE_REQUIRED` with `details.quote` and starts nothing. Tell the user its duration, free allowance and credits.
+2. A free quote (`requiresConfirmation:false`) can be retried right away with `cloudQuoteId` set to the quote's `id`. A credit charge needs the user to confirm that exact amount first; then retry with `cloudQuoteId` and `confirmCloudCharge:true`. If the account cannot cover it, follow the billing recovery the error returns. Keep the same project, timeline, range and settings; an expired quote needs a fresh one, and a larger charge needs new consent.
+3. When `track_export` reports it complete, fetch `downloadUrl` into your workspace with `curl -fL -o "<file name>" "<downloadUrl>"`, check the file is `outputSizeBytes` bytes, and send the file in this chat. If the download fails, call `track_export` once more and retry with its link; if you cannot attach the file, give the user `downloadUrl`.
 
-## Local Export Recovery
+## Local export
 
-For video/audio recovery, consume `details.exportRequest` and `details.recovery` from the tool error when present. Keep the exact project, timeline, full or partial range, format, codec, resolution, output frame rate, and existing request/render identifiers. Do not substitute the visible project or another timeline. `details.exportRequest.range` describes the entire timeline, source-timeline frames, or seconds; it is metadata, not a `submit_export` argument. Frame bounds use the timeline rate, not output `fps`. If an older server returns only an error and hint, preserve those details and read the intended scope from the original request.
+The timeline renders in a ChatCut editor tab in your browser on Grok Bot's cloud computer. That browser must be signed in to the user's ChatCut account and connected as the renderer.
 
-Follow the reported recovery action: `restore_local`, `wait_for_capacity`, `check_existing_export`, or `resolve_export_error`. When `details.recovery.track` is present, call `details.recovery.track.tool` with `details.recovery.track.arguments`; do not replace them with an unrelated latest export or the new request's key. A legacy `details.requestId` is a correlation ID, not a `renderId` or protocol-v2 `idempotencyKey`. A busy browser needs time to finish its accepted work. An uncertain acknowledgement needs the original export's outcome known before another local, Desktop, or cloud submission. Missing or unreadable media needs its reported source issue resolved; do not upload files or switch renderers without addressing that issue. These cases do not justify an automatic cloud retry.
+1. Before exporting, open the project's `browserHandoff.url` once in your browser. It signs that browser in and makes it the connected ChatCut renderer. Never show that URL to the user. If it has expired, call `get_editor_url` for a fresh one. If there is no handoff URL and no browser is connected, ask the user to open the editor link and sign in.
+2. Confirm the requested timeline in that tab; a server-side switch does not prove the open tab switched. Keep the tab open until the export completes.
+3. With `delivery:"host"`, the browser uploads the finished file instead of downloading it. When `track_export` shows `delivery.status:"ready"`, fetch `delivery.downloadUrl` the same way, check the file is `delivery.sizeBytes` bytes, and send the file in this chat; `uploading` or `queued` is still in progress. If you cannot attach the file, give the user `delivery.downloadUrl` and say it works until `delivery.retainedUntil`.
+4. Without host delivery, the browser downloads the file onto Grok Bot's cloud computer, not the user's device, and there is no link to send. If the user needs the file in this chat, offer a cloud export with its quote.
 
-When browser-local export is unavailable, explain the specific blocker briefly. If this host exposes ChatCut Desktop tools or the user has a suitable computer, offer the existing Desktop path as a local alternative. Cloud remains available when no usable local path exists or the user chooses it, provided the original request permits cloud rendering. Call `details.recovery.cloudFallback.tool` with `details.recovery.cloudFallback.arguments` when supplied; do not pass the descriptive `exportRequest` object as tool arguments. Follow Cloud Rendering to disclose the actual quote; a free cloud quote needs no extra confirmation and a nonzero charge needs one explicit confirmation. Honor explicit local-only, no-upload, and other original constraints; do not require Desktop installation or a failed Desktop attempt. If recovery instead reports `cloudLimitation`, explain it rather than inventing a fallback or changing the requested range, format, or quality. For an older server without recovery metadata, use the current tool schema and preserved request with `renderMode:"cloud"` only after establishing the same local-unavailability and authorization conditions. Never select cloud merely to obtain a download URL.
+## If a call fails
 
-For a Desktop handoff, honor `details.recovery.desktopLimitation`. Desktop video supports H.264 MP4, not VP8/WebM: keep VP8 in a supported Browser/cloud path rather than silently changing its format. `details.recovery.desktopExportSettings`, when present, contains only compatible output settings, not a complete callable request. For H.264 use `videoProfile:"sdr_h264"` and `videoBitrateMode:"recommended"` so old Desktop export preferences do not change the handoff. For audio use `format:"audio",codec:"mp3"` without video fps, resolution or profile. Older servers without these fields require the same compatibility checks against the actual Desktop schema.
+Follow the error's `details.exportRequest` and `details.recovery`. Busy capacity waits for existing jobs; an uncertain acknowledgement needs the original export checked with `track_export` before any retry; missing media needs its source uploaded or restored. Never duplicate a job. If the browser cannot render locally, explain the blocker and offer cloud with its quote rather than switching on your own.
 
-Use `details.recovery.desktopUrl` when returned for a compatible Desktop handoff; otherwise use Desktop's existing project library only after checking that it can produce the requested output. `details.recovery.editorUrl` opens the browser project. Hosted `submit_export(renderMode:"local")` renders in a browser; it does not become a Desktop tool. Open the source project in Desktop with an account that can access it and wait for the required media to be readable. An existing local project with the same ID may contain older or different edits: check the intended content and never overwrite that copy automatically.
-
-If actual Desktop tools are available, call `target_project` with the preserved `projectId` and `openWindow:true`, then `read_project` to confirm the local content and target timeline. Name the same `projectId` on every Desktop read/export/track call; targeting does not replace that per-call scope. Call Desktop `export` with the intended `timelineId`, compatible output settings and an appropriate path on that computer. Preserve the video resolution and desired output fps explicitly when its schema accepts them. Desktop fps accepts 24, 25, 30, 50 and 60; omission inherits Desktop's current export preference, not necessarily the source rate. Never pass an unsupported fps such as 29.97 or silently round it to 30: retain Browser/cloud or verify a matching manual Desktop output.
-
-For a partial range, read the actual local project `frameRate` before converting the source-frame or seconds boundaries. Desktop frame bounds use that local rate, independently of output fps; Web summaries' inclusive end needs +1 before mapping to `endFrameExclusive`. A full export omits both bounds. Check the intended content, dimensions and range before exporting; an old local copy must not become a different export just because its range was clamped.
-
-Use Desktop `track_progress` with `target:"export"` and `exportTaskIds` set to the returned task ID. A queued `outputPath` is not a completed file. Wait for a successful terminal result and verify the file on that computer. If this host cannot call Desktop tools, provide the project-opening action and a concise export summary for the user to complete in Desktop's existing UI or Agent; do not promise remote control or file access on another device.
-
-## Delivery
-
-Deliver according to the completed result:
-
-- `source:"browser"`: relay `statusMessage`, filename, and available metadata.
-  The rendering tab downloads the file on its computer or writes to the chosen
-  file. This result has no `downloadUrl` or verified filesystem path. A tab on
-  Grok Bot's cloud computer downloads there, not to the user's laptop. Attach a
-  file only after the host locates and reads it; otherwise link the editor and
-  explain where to check its Export queue.
-- A completed result with a `downloadUrl`: use the host's normal file/link
-  delivery. Download it only through a permitted host route when a local artifact
-  is needed. Do not invent a download URL for a browser export.
-
-Queued or running exports are not delivered. Report any render warnings and
-their effect on the output.
-
-## Other Formats
+## Subtitles
 
 For subtitle export, first use `manage_timelines` to confirm the agent's active
 timeline. If it differs from the requested timeline, use its `action:"switch"`
@@ -75,19 +43,10 @@ text and timing before delivery. If captions are readable but export still
 reports none after alignment, report the failure instead of regenerating captions
 or constructing a replacement SRT and calling it a successful tool export.
 
-For NLE XML export, use the corresponding `submit_export` format and report
-warnings about unsupported or dropped elements. `fcp_xml` is legacy `xmeml`, not
-modern `.fcpxml`; do not promise a lossless project round trip or target-NLE
-compatibility without testing it. For transparent Motion Graphic delivery, use
-the dedicated MG export tool exposed by the current manifest and track the
-returned render ids.
+## NLE XML and Motion Graphics
 
-## Cloud Rendering
-
-Use `renderMode:"cloud"` when the user asks for it or no usable local path exists and the original request permits it, following Local Export Recovery above. Cloud remains a supported fallback. Do not require a Desktop attempt or invent account entitlements.
-
-When `submit_export` returns `CLOUD_EXPORT_QUOTE_REQUIRED` with `details.quote`, it has not accepted a render. Tell the user the quoted duration, free allowance and `estimatedCredits` before starting. Retry the same export with `cloudQuoteId` set to that quote's `id`. A zero-credit quote starts directly without another confirmation. For a nonzero charge, obtain one explicit confirmation of that quoted amount, then set `confirmCloudCharge:true`; choosing cloud alone does not approve an unknown charge. Use the account policy returned by the server rather than assuming a free allowance or changing old benefits.
-
-Keep the same project, timeline, range, format and output settings for that quote. If it expires or the service requires a new quote, preserve the request and omit the stale `cloudQuoteId` to request a fresh quote. A larger charge needs new consent. If submission was accepted or uncertain, check the original job before retrying; never obtain a new quote to duplicate an in-progress export.
-
-If cloud rendering is blocked by media that is not remotely readable, use `asset-import` when the user permits upload, or report the blocker. Do not flatten or substitute the edit, upload sources, or switch a local export to cloud merely to obtain a download URL.
+For NLE XML, report warnings about unsupported or dropped elements. `fcp_xml` is
+legacy `xmeml`, not modern `.fcpxml`; do not promise a lossless project round
+trip or target-NLE compatibility without testing it. For transparent Motion
+Graphic delivery, use the dedicated MG export tool exposed by the current
+manifest and track the returned render ids.
