@@ -94,5 +94,5 @@ test("cursor/skills/ shares every Grok skill except the Grok-only export guidanc
   const cursorExport = await readFile(new URL("cursor/skills/export/SKILL.md", root), "utf8");
   const grokExport = await readFile(new URL("grok/skills/export/SKILL.md", root), "utf8");
   assert.match(cursorExport, /Video and audio default to `renderMode:"local"`/);
-  assert.match(grokExport, /The ChatCut server owns the export flow/);
+  assert.match(grokExport, /Video and audio can render in the cloud or locally/);
 });

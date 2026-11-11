@@ -35,20 +35,22 @@ test("export delivers the downloaded file and keeps cloud fallback scoped", () =
   assert.doesNotMatch(codexExport, /return its `downloadUrl`/);
 });
 
-// The hosted connector owns Grok's export flow and default (cloud while Grok
-// Bot's cloud-computer browser is unreliable). The skill keeps only what the
-// server does not say, so switching back needs no plugin release.
-test("Grok export skill defers to the server and keeps only its own guards", async () => {
-  assert.match(grokExport, /The ChatCut server owns the export flow/);
-  assert.match(grokExport, /`renderMode` to take the server's default/);
-  assert.match(grokExport, /`details.recovery`/);
+// Grok's default render path is set by the hosted connector (cloud while Grok
+// Bot's cloud-computer browser is unreliable). The skill explains both paths and
+// their delivery but never states the default, so switching needs no release.
+test("Grok export skill covers both paths without stating the default", async () => {
+  assert.match(grokExport, /^description: Use when a Grok Bot user wants a finished file/m);
+  assert.match(grokExport, /The `submit_export` description says which one is used when `renderMode` is omitted/);
+  assert.match(grokExport, /`requiresConfirmation:false`/);
+  assert.match(grokExport, /`curl -fL -o "<file name>" "<downloadUrl>"`/);
+  assert.match(grokExport, /open the project's `browserHandoff.url` once/);
+  assert.match(grokExport, /fetch `delivery.downloadUrl` the same way/);
+  assert.match(grokExport, /`target:"upload"` reports them uploaded/);
   assert.match(grokExport, /reads captions from the agent's active timeline/);
-  assert.match(grokExport, /`fcp_xml` is\nlegacy `xmeml`/);
-  assert.doesNotMatch(grokExport, /## Local Export Recovery|## Cloud Rendering|## Delivery/);
-  assert.doesNotMatch(grokExport, /cloud by default|Cloud is Grok's default/);
-  assert.doesNotMatch(grokExport, /Video and audio default to `renderMode:"local"`/);
+  assert.doesNotMatch(grokExport, /cloud by default|Cloud is Grok's default|default to `renderMode:"local"`/);
+  assert.doesNotMatch(grokExport, /## Local Export Recovery|desktopExportSettings/);
   const grokBasics = await read("grok/skills/chatcut-plugin-basics/SKILL.md");
-  assert.match(grokBasics, /`submit_export` without `renderMode` unless the user chooses one/);
+  assert.match(grokBasics, /Both cloud and browser-local export are supported/);
   assert.doesNotMatch(grokBasics, /cloud by default/);
   assert.doesNotMatch(grokBasics, /The default browser export downloads on/);
 });

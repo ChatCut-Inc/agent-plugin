@@ -1,24 +1,34 @@
 ---
 name: export
-description: Hosted ChatCut plugin sessions only (the `chatcut` MCP server). If the conversation is driving ChatCut Desktop (a `chatcut_desktop*` MCP server), load this skill only when the user explicitly chooses the plugin/web surface — desktop sessions otherwise ship their own instructions and tools. Export or deliver a ChatCut project through the hosted connector, including video, audio, subtitles, XML, and render-status checks.
+description: Use when a Grok Bot user wants a finished file from a ChatCut project, such as exporting or rendering a video or audio, downloading or sending the result in chat, exporting subtitles (SRT) or NLE XML, or checking an export's progress. Covers cloud and browser-local export and how to deliver the file back into the chat. Hosted ChatCut plugin (`chatcut` MCP server) only; when the conversation drives ChatCut Desktop (`chatcut_desktop*`), follow Desktop's own instructions instead.
 ---
 
 # Export
 
-Export only when the user asks for a render, download, or final standalone
-deliverable. A review checkpoint normally stays as an editable ChatCut timeline.
+Export only when the user asks for a finished file. A review checkpoint stays as an editable ChatCut timeline; check your work with `preview_timeline` instead of exporting.
 
-The ChatCut server owns the export flow. Follow the `submit_export` description
-and the connector's MEDIA EXPORT instructions for the default render path, cloud
-quotes, status checks and delivery, and follow the guidance and
-`details.recovery` that each result returns. Call `submit_export` without
-`renderMode` to take the server's default; pass it only when the user explicitly
-chooses local or cloud. Name `projectId` and `timelineId` explicitly and do not
-guess a non-active timeline.
+Video and audio can render in the cloud or locally in a ChatCut browser. The `submit_export` description says which one is used when `renderMode` is omitted: omit it unless the user picks one, and pass `renderMode:"local"` for 4K. Name `projectId` and `timelineId` explicitly and do not guess a non-active timeline. Check every returned `renderId` with `track_export`, one status read per call, waiting `checkBackAfterSeconds` between reads.
 
-Deliver only a completed export, as the actual file in this conversation, and
-never invent a download URL. A browser download without host delivery lands on
-Grok Bot's cloud computer, not on the user's device.
+## Cloud export
+
+ChatCut renders on its servers (up to 1080p), so no browser has to stay open. The project's media must already be in ChatCut: files sent through the ChatCut upload page are; for files you imported with the upload helper, wait until `track_progress` with `target:"upload"` reports them uploaded.
+
+1. The first call returns `CLOUD_EXPORT_QUOTE_REQUIRED` with `details.quote` and starts nothing. Tell the user its duration, free allowance and credits.
+2. A free quote (`requiresConfirmation:false`) can be retried right away with `cloudQuoteId` set to the quote's `id`. A credit charge needs the user to confirm that exact amount first; then retry with `cloudQuoteId` and `confirmCloudCharge:true`. If the account cannot cover it, follow the billing recovery the error returns. Keep the same project, timeline, range and settings; an expired quote needs a fresh one, and a larger charge needs new consent.
+3. When `track_export` reports it complete, fetch `downloadUrl` into your workspace with `curl -fL -o "<file name>" "<downloadUrl>"`, check the file is `outputSizeBytes` bytes, and send the file in this chat. If the download fails, call `track_export` once more and retry with its link; if you cannot attach the file, give the user `downloadUrl`.
+
+## Local export
+
+The timeline renders in a ChatCut editor tab in your browser on Grok Bot's cloud computer. That browser must be signed in to the user's ChatCut account and connected as the renderer.
+
+1. Before exporting, open the project's `browserHandoff.url` once in your browser. It signs that browser in and makes it the connected ChatCut renderer. Never show that URL to the user. If it has expired, call `get_editor_url` for a fresh one. If there is no handoff URL and no browser is connected, ask the user to open the editor link and sign in.
+2. Confirm the requested timeline in that tab; a server-side switch does not prove the open tab switched. Keep the tab open until the export completes.
+3. With `delivery:"host"`, the browser uploads the finished file instead of downloading it. When `track_export` shows `delivery.status:"ready"`, fetch `delivery.downloadUrl` the same way, check the file is `delivery.sizeBytes` bytes, and send the file in this chat; `uploading` or `queued` is still in progress. If you cannot attach the file, give the user `delivery.downloadUrl` and say it works until `delivery.retainedUntil`.
+4. Without host delivery, the browser downloads the file onto Grok Bot's cloud computer, not the user's device, and there is no link to send. If the user needs the file in this chat, offer a cloud export with its quote.
+
+## If a call fails
+
+Follow the error's `details.exportRequest` and `details.recovery`. Busy capacity waits for existing jobs; an uncertain acknowledgement needs the original export checked with `track_export` before any retry; missing media needs its source uploaded or restored. Never duplicate a job. If the browser cannot render locally, explain the blocker and offer cloud with its quote rather than switching on your own.
 
 ## Subtitles
 

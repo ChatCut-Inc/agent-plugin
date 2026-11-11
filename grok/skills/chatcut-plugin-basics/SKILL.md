@@ -53,10 +53,10 @@ Visual understanding has two distinct surfaces:
 - To inspect raw imported or attached source media, use host-native visual/file capabilities on the source bytes when available. Do not create a temporary timeline just to inspect source assets.
 - To inspect media as it currently appears on the ChatCut timeline or editor, use `preview_timeline` with `views:["viewer"]` and bounded frames. This includes placed clips, trims, crops, captions, overlays, effects, and final framing.
 
-Export is a connector boundary in plugin sessions: load `export` and call
-`submit_export` without `renderMode` unless the user chooses one, so the
-server's current default applies. Follow the tool description and each result's
-guidance through `track_export`, and deliver only the actual completed file.
+Export is a connector boundary in plugin sessions: load `export` before calling
+`submit_export`. Both cloud and browser-local export are supported; omit
+`renderMode` unless the user chooses one, and deliver only the actual completed
+file in this chat.
 
 ## Data Model
 
