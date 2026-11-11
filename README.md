@@ -26,8 +26,8 @@
 [<img src="docs/media/hosts/grok-bot.png" height="28" alt="Grok Bot">](https://chatcut.io/grok-plugin?utm_source=github&utm_medium=readme&utm_campaign=agent-plugin)
 [<img src="docs/media/hosts/antigravity.png" height="28" alt="Google Antigravity">](https://chatcut.io/antigravity-plugin?utm_source=github&utm_medium=readme&utm_campaign=agent-plugin)
 [<img src="docs/media/hosts/workbuddy.png" height="28" alt="WorkBuddy">](https://chatcut.io/workbuddy?utm_source=github&utm_medium=readme&utm_campaign=agent-plugin)<br>
-[<img src="docs/media/hosts/cursor.png" height="28" alt="Cursor">](./cursor/README.md)
-[<img src="docs/media/hosts/gemini-cli.png" height="28" alt="Gemini CLI">](#install-the-web-plugin)
+[<img src="docs/media/hosts/cursor.png" height="28" alt="Cursor">](#web-setup)
+[<img src="docs/media/hosts/gemini-cli.png" height="28" alt="Gemini CLI">](#web-setup)
 [<img src="docs/media/hosts/kimi-work.png" height="28" alt="Kimi Work">](./kimi/README.md)
 [<img src="docs/media/hosts/doubao-work.png" height="28" alt="Doubao Work">](./doubao/README.md)
 [<img src="docs/media/hosts/qwen-work.png" height="28" alt="Qwen Work">](./qwen/README.md)
@@ -47,23 +47,23 @@
 
 ## Install
 
-ChatCut comes as two plugins. The **Desktop plugin** (recommended) connects your agent to ChatCut Desktop on your computer: your media stays local, and you get the fullest features and steadiest performance. The **Web plugin** connects to hosted ChatCut Web, for hosts that can't run Desktop, such as Grok Bot, Cursor, Kimi Work and Qwen Work, or for Web-only use.
+ChatCut's plugin (MCP) comes in two forms: Desktop and Web. **Desktop** (recommended) connects your agent to ChatCut Desktop on your computer: your media stays local, and you get the fullest features and steadiest performance. **Web** connects to hosted ChatCut Web, for hosts that can't run Desktop, such as Grok Bot, Cursor, Kimi Work and Qwen Work, or for Web-only use.
 
-| Agent | Plugin | How to install | Setup guide |
+| Agent | Form | How to install | Setup guide |
 | --- | --- | --- | --- |
 | Codex | Desktop | `Read ChatCut.io/desktop to install ChatCut` | [Codex guide](https://chatcut.io/chatgpt-plugin?utm_source=github&utm_medium=readme&utm_campaign=agent-plugin) |
 | ChatGPT | Desktop | `Read ChatCut.io/desktop to install ChatCut` in the desktop app, or open **Plugins** in the sidebar, search for **ChatCut** and select **Install** | [ChatGPT guide](https://chatcut.io/chatgpt-plugin?utm_source=github&utm_medium=readme&utm_campaign=agent-plugin) |
 | Claude Code | Desktop | `Read ChatCut.io/desktop to install ChatCut` | [Claude Code guide](https://chatcut.io/claude-code-plugin?utm_source=github&utm_medium=readme&utm_campaign=agent-plugin) |
-| Cursor | Web | Add **ChatCut** from Cursor's plugin marketplace and sign in | [Cursor guide](./cursor/README.md) |
+| Cursor | Web | Add ChatCut's MCP server to `~/.cursor/mcp.json` and sign in. ChatCut isn't in Cursor's marketplace yet | [Cursor guide](#web-setup) |
 | Grok Bot | Web | `Read ChatCut.io/grok to connect the ChatCut app` | [Grok Bot guide](https://chatcut.io/grok-plugin?utm_source=github&utm_medium=readme&utm_campaign=agent-plugin) |
-| Gemini CLI | Web | `gemini extensions install https://github.com/ChatCut-Inc/agent-plugin` | [Gemini CLI guide](#install-the-web-plugin) |
+| Gemini CLI | Web | `gemini extensions install https://github.com/ChatCut-Inc/agent-plugin` | [Gemini CLI guide](#web-setup) |
 | Google Antigravity | Desktop | `Read ChatCut.io/antigravity to install ChatCut` | [Antigravity guide](https://chatcut.io/antigravity-plugin?utm_source=github&utm_medium=readme&utm_campaign=agent-plugin) |
-| Kimi Work | Web | Import the package with Kimi Work's plugin installer, then select **Login** on the ChatCut connector card | [Kimi Work guide](./kimi/README.md) |
+| Kimi Work | Web | Type `/`, choose **Plugin Builder** and send it `https://github.com/ChatCut-Inc/agent-plugin/tree/main/kimi`. Install it under **Plugins → Personal** (插件 → 个人), then select **Login** on the ChatCut connector card | [Kimi Work guide](./kimi/README.md) |
 | WorkBuddy | Desktop or Web | Desktop: `Read ChatCut.io/desktop to install ChatCut`. Web: add the ChatCut expert from WorkBuddy's experts page | [WorkBuddy guide](https://chatcut.io/workbuddy?utm_source=github&utm_medium=readme&utm_campaign=agent-plugin) · [WorkBuddy Web guide](./workbuddy/README.md) |
-| Doubao Work (豆包工作) | Desktop | Add **ChatCut** in Doubao Work and ask for an edit. It connects through a local connector and installs Desktop if needed | [Doubao Work guide](./doubao/README.md) |
-| Qwen Work (千问办公) | Web | Turn on **ChatCut** under **Extensions → Connectors** (扩展 → 连接器) and sign in | [Qwen Work guide](./qwen/README.md) |
+| Doubao Work (豆包工作) | Desktop | Add **ChatCut** from Doubao Work's plugin marketplace, then ask for an edit. It installs ChatCut Desktop if needed | [Doubao Work guide](./doubao/README.md) |
+| Qwen Work (千问办公) | Web | Turn on **ChatCut** from the connector market under **Extensions → Connectors** (扩展 → 连接器) and sign in | [Qwen Work guide](./qwen/README.md) |
 
-### Install the Desktop plugin
+### Desktop setup
 
 In Codex, the ChatGPT desktop app, Claude Code or another local agent, paste `Read ChatCut.io/desktop to install ChatCut`. The agent installs ChatCut Desktop, opens sign-in and connects itself to Desktop's local `chatcut_desktop` MCP server.
 
@@ -87,7 +87,7 @@ agy plugin install https://github.com/ChatCut-Inc/agent-plugin/tree/main/antigra
 
 Video recreation needs Desktop: its bundled `video-gen` Skill calls `submit_video_remake` to keep a reference video's motion and timing with your person or product, and asks before spending credits ([guide](https://chatcut.io/viralvideocloner?utm_source=github&utm_medium=readme&utm_campaign=agent-plugin)).
 
-### Install the Web plugin
+### Web setup
 
 Web projects and their media aren't migrated to Desktop, and connecting Desktop to the same agent may replace its hosted connection.
 
@@ -114,7 +114,19 @@ Gemini CLI:
 gemini extensions install https://github.com/ChatCut-Inc/agent-plugin
 ```
 
-Grok Bot and Antigravity Web: see the [Grok Bot Web guide](./grok/README.md) and the [Antigravity Web guide](./antigravity/README.md). Grok Bot and Cursor sign in from the host's Plugins screen; in Antigravity, select **Customizations → Authenticate** next to the ChatCut MCP server.
+Cursor: ChatCut isn't in Cursor's marketplace yet, so add the server to `~/.cursor/mcp.json` and sign in when Cursor asks:
+
+```json
+{
+  "mcpServers": {
+    "chatcut": {
+      "url": "https://api.chatcut.io/api/external-mcp/mcp"
+    }
+  }
+}
+```
+
+Grok Bot and Antigravity Web: see the [Grok Bot Web guide](./grok/README.md) and the [Antigravity Web guide](./antigravity/README.md). Grok Bot signs in from its Plugins screen; in Antigravity, select **Customizations → Authenticate** next to the ChatCut MCP server.
 
 Other MCP clients that support remote servers with OAuth can connect to `https://api.chatcut.io/api/external-mcp/mcp` and sign in with a ChatCut account.
 
