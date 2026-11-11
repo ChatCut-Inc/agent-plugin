@@ -34,10 +34,6 @@
 
 </div>
 
-<h2 align="center">What you can make</h2>
-
-<p align="center">AI video editing for your agent: ask in your own words, and ChatCut makes the edit and hands back an editable timeline. Each card is a ChatCut Skill: open it to watch its preview.</p>
-
 <p align="center">
   <a href="https://chatcut.io/skills/speech-cleanup?utm_source=github&amp;utm_medium=readme&amp;utm_campaign=agent-plugin"><img src="docs/media/skills/speech-cleanup.jpg" width="260" alt="Speech Cleanup: removes retakes, long pauses and slips"></a>
   <a href="https://chatcut.io/skills/add-captions?utm_source=github&amp;utm_medium=readme&amp;utm_campaign=agent-plugin"><img src="docs/media/skills/add-captions.jpg" width="260" alt="Add captions: readable captions in a style that fits"></a>
@@ -49,12 +45,6 @@
   <a href="https://chatcut.io/skills/mg-packaging-editorial-explainer?utm_source=github&amp;utm_medium=readme&amp;utm_campaign=agent-plugin"><img src="docs/media/skills/mg-packaging-editorial-explainer.jpg" width="260" alt="Editorial Explainer: news-style motion graphics and data charts"></a>
   <a href="https://chatcut.io/skills/video-translation?utm_source=github&amp;utm_medium=readme&amp;utm_campaign=agent-plugin"><img src="docs/media/skills/video-translation.jpg" width="260" alt="Video Translation: your voice and picture, in another language"></a>
 </p>
-
-<div align="center">
-
-More Skills: [chatcut.io/skills](https://chatcut.io/skills?utm_source=github&utm_medium=readme&utm_campaign=agent-plugin). Not set up yet? Start any request with `Read ChatCut.io/desktop to install ChatCut, then`, and your agent installs ChatCut first.
-
-</div>
 
 ## Install
 
