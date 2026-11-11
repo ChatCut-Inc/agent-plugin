@@ -40,7 +40,8 @@ test("export delivers the downloaded file and keeps cloud fallback scoped", () =
 // their delivery but never states the default, so switching needs no release.
 test("Grok export skill covers both paths without stating the default", async () => {
   assert.match(grokExport, /^description: Use when a Grok Bot user wants a finished file/m);
-  assert.match(grokExport, /call `submit_export` without `renderMode`: the tool then uses its current default/);
+  assert.match(grokExport, /Video and audio can render in the cloud or locally/);
+  assert.match(grokExport, /4K needs a local export/);
   assert.match(grokExport, /`requiresConfirmation:false`/);
   assert.match(grokExport, /`curl -fL -o "<file name>" "<downloadUrl>"`/);
   assert.match(grokExport, /open the project's `browserHandoff.url` once/);

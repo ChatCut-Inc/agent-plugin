@@ -54,9 +54,8 @@ Visual understanding has two distinct surfaces:
 - To inspect media as it currently appears on the ChatCut timeline or editor, use `preview_timeline` with `views:["viewer"]` and bounded frames. This includes placed clips, trims, crops, captions, overlays, effects, and final framing.
 
 Export is a connector boundary in plugin sessions: load `export` before calling
-`submit_export`. Both cloud and browser-local export are supported; omit
-`renderMode` unless the user chooses one, and deliver only the actual completed
-file in this chat.
+`submit_export`. Both cloud and browser-local export are supported; deliver only
+the actual completed file in this chat.
 
 ## Data Model
 

@@ -7,13 +7,11 @@ description: Use when a Grok Bot user wants a finished file from a ChatCut proje
 
 Export only when the user asks for a finished file. A review checkpoint stays as an editable ChatCut timeline; check your work with `preview_timeline` instead of exporting.
 
-Video and audio can render in the cloud or locally in a ChatCut browser. When the user does not say which, call `submit_export` without `renderMode`: the tool then uses its current default, which its description names. Pass `renderMode:"local"` when the user asks for a local export or for 4K (cloud stops at 1080p), and `renderMode:"cloud"` when they ask for cloud.
-
-Name `projectId` and `timelineId` explicitly on every export, and do not guess which timeline the user means when it is not the active one. Check every returned `renderId` with `track_export`, one status read per call, waiting `checkBackAfterSeconds` between reads.
+Video and audio can render in the cloud or locally in a ChatCut browser. Name `projectId` and `timelineId` explicitly on every export, and do not guess which timeline the user means when it is not the active one. Check every returned `renderId` with `track_export`, one status read per call, waiting `checkBackAfterSeconds` between reads.
 
 ## Cloud export
 
-ChatCut renders on its servers (up to 1080p), so no browser has to stay open. The project's media must already be in ChatCut: files sent through the ChatCut upload page are; for files you imported with the upload helper, wait until `track_progress` with `target:"upload"` reports them uploaded.
+ChatCut renders on its servers (up to 1080p; 4K needs a local export), so no browser has to stay open. The project's media must already be in ChatCut: files sent through the ChatCut upload page are; for files you imported with the upload helper, wait until `track_progress` with `target:"upload"` reports them uploaded.
 
 1. The first call returns `CLOUD_EXPORT_QUOTE_REQUIRED` with `details.quote` and starts nothing. Tell the user its duration, free allowance and credits.
 2. A free quote (`requiresConfirmation:false`) can be retried right away with `cloudQuoteId` set to the quote's `id`. A credit charge needs the user to confirm that exact amount first; then retry with `cloudQuoteId` and `confirmCloudCharge:true`. If the account cannot cover it, follow the billing recovery the error returns. Keep the same project, timeline, range and settings; an expired quote needs a fresh one, and a larger charge needs new consent.
