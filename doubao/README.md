@@ -25,7 +25,7 @@ The Doubao Work package is a single Skill, **ChatCut 视频剪辑专家** (`chat
 
 From the Skill's own instructions:
 
-1. Add ChatCut in Doubao Work. The listing binds the `chatcut_desktop` connector to this Skill, and Doubao Work starts it when a task begins.
+1. In Doubao Work's sidebar, open **Plugins · Skills** (插件 · 技能) → **Plugins** (插件), search **ChatCut** and open it, select **Install** (安装) on its ChatCut connector, then **Use in chat** (在对话中使用). The listing binds the `chatcut_desktop` connector to this Skill, and Doubao Work starts it when a task begins.
 2. Ask for a video edit. If ChatCut Desktop is missing, the Skill installs the official build for the computer from `https://api.chatcut.io/desktop/download/...`: macOS 13 or newer (Apple Silicon or Intel) or Windows x64. On macOS it verifies the disk image, code signature and notarization before installing. Linux is not supported.
 3. If ChatCut asks you to sign in, do it in the ChatCut window. The Skill never asks for passwords, verification codes or tokens.
 4. If the connector failed to start because Desktop was not installed yet, the agent asks you to retry the ChatCut connector once in Doubao Work, then continues the original request. The connection counts as working only after a successful `get_active_project` call inside the Doubao Work task.
