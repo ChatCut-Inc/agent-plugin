@@ -85,8 +85,6 @@ Google Antigravity can also install the Desktop package directly. Then ask “In
 agy plugin install https://github.com/ChatCut-Inc/agent-plugin/tree/main/antigravity-desktop
 ```
 
-Video recreation needs Desktop: its bundled `video-gen` Skill calls `submit_video_remake` to keep a reference video's motion and timing with your person or product, and asks before spending credits ([guide](https://chatcut.io/viralvideocloner?utm_source=github&utm_medium=readme&utm_campaign=agent-plugin)).
-
 ### Web setup
 
 Web projects and their media aren't migrated to Desktop, and connecting Desktop to the same agent may replace its hosted connection.
