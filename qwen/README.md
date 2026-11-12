@@ -13,7 +13,7 @@ The Qwen Work package is an expert kit, **ChatCut 视频剪辑师 / ChatCut Vide
 
 From the kit's `CONNECTORS.md` and `references/connector-readiness.md`:
 
-1. In Qwen Work, open **Extensions → Connectors** (「扩展 → 连接器」), turn on **ChatCut** from the market, and sign in to your own ChatCut account with OAuth. The kit's details page also links there through **Data connections** (「数据连接」). An existing authorization is reused.
+1. In Qwen Work, open **Skills & extensions → Connectors → Market**, select **+** next to **ChatCut**, then **Install ChatCut**, and sign in to your own ChatCut account with OAuth. The kit's details page also links there through **Data connections** (「数据连接」). An existing authorization is reused.
 2. Use the same ChatCut account in the web editor.
 3. Start from one of the entry Skills, 口播精剪 (`talking-head-guide`), 制作 MG 动画 (`create-motion-graphics`) or 制作产品 / App 宣传片 (`app-promo-guide`), or describe the video in your own words.
 

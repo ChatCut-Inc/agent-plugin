@@ -59,9 +59,9 @@ ChatCut's plugin (MCP) works with ChatCut Desktop on your computer (recommended;
 | Gemini CLI | `gemini extensions install https://github.com/ChatCut-Inc/agent-plugin` | [Gemini CLI guide](#web-setup) |
 | Google Antigravity | `Read ChatCut.io/antigravity to install ChatCut` | [Antigravity guide](https://chatcut.io/antigravity-plugin?utm_source=github&utm_medium=readme&utm_campaign=agent-plugin) |
 | Kimi Work | Type `/`, choose **Plugin Builder** and send it `https://github.com/ChatCut-Inc/agent-plugin/tree/main/kimi`. Install it under **Plugins → Personal** (插件 → 个人), then select **Login** on the ChatCut connector card | [Kimi Work guide](./kimi/README.md) |
-| WorkBuddy | `Read ChatCut.io/desktop to install ChatCut`, or add the ChatCut expert from WorkBuddy's experts page | [WorkBuddy guide](https://chatcut.io/workbuddy?utm_source=github&utm_medium=readme&utm_campaign=agent-plugin) · [WorkBuddy expert guide](./workbuddy/README.md) |
-| Doubao Work (豆包工作) | Add **ChatCut** from Doubao Work's plugin marketplace, then ask for an edit. It installs ChatCut Desktop if needed | [Doubao Work guide](./doubao/README.md) |
-| Qwen Work (千问办公) | Turn on **ChatCut** from the connector market under **Extensions → Connectors** (扩展 → 连接器) and sign in | [Qwen Work guide](./qwen/README.md) |
+| WorkBuddy | `Read ChatCut.io/desktop to install ChatCut`, or open **Experts · Skills · Connectors** (专家·技能·连接器) → **Experts** (专家), search **ChatCut**, open the official **ChatCut 视频剪辑师** expert and select **Summon** (召唤) | [WorkBuddy guide](https://chatcut.io/workbuddy?utm_source=github&utm_medium=readme&utm_campaign=agent-plugin) · [WorkBuddy expert guide](./workbuddy/README.md) |
+| Doubao Work (豆包工作) | In the sidebar, open **Plugins · Skills** (插件 · 技能) → **Plugins** (插件), search **ChatCut** and open it, select **Install** (安装) on its ChatCut connector, then **Use in chat** (在对话中使用). It installs ChatCut Desktop if needed | [Doubao Work guide](./doubao/README.md) |
+| Qwen Work (千问办公) | Open **Skills & extensions → Connectors → Market**, select **+** next to **ChatCut**, then **Install ChatCut** | [Qwen Work guide](./qwen/README.md) |
 
 ### Desktop setup
 

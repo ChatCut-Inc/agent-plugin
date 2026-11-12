@@ -1,6 +1,6 @@
 # ChatCut for WorkBuddy
 
-The WorkBuddy package is a ChatCut expert agent, shown in WorkBuddy as **All-in-one video creation expert** (一站式视频创作专家, profession: ChatCut Video Editor). It works in real, editable ChatCut timelines through the hosted ChatCut MCP server: media import, talking-head cleanup, captions, B-roll, transitions, effects and color, motion graphics, generated video, images, music, sound effects and voiceovers, and export of finished video, audio, subtitles, or Premiere Pro and DaVinci Resolve-compatible project files.
+The WorkBuddy package is a ChatCut expert agent, shown in WorkBuddy as **ChatCut 视频剪辑师** (ChatCut Video Editor), subtitled 一站式视频创作专家 (all-in-one video creation expert). It works in real, editable ChatCut timelines through the hosted ChatCut MCP server: media import, talking-head cleanup, captions, B-roll, transitions, effects and color, motion graphics, generated video, images, music, sound effects and voiceovers, and export of finished video, audio, subtitles, or Premiere Pro and DaVinci Resolve-compatible project files.
 
 This folder is the expert package listed on WorkBuddy's official experts page, version **1.0.6**.
 
@@ -15,7 +15,7 @@ This folder is the expert package listed on WorkBuddy's official experts page, v
 
 From the package's own instructions:
 
-1. Add ChatCut from WorkBuddy's experts page, or install the package ZIP in WorkBuddy.
+1. Open **Experts · Skills · Connectors** (专家·技能·连接器) → **Experts** (专家), search **ChatCut**, open the official **ChatCut 视频剪辑师** expert and select **Summon** (召唤). The search also lists other experts with ChatCut in their names that ChatCut doesn't publish. You can also install the package ZIP in WorkBuddy.
 2. The first time you call the expert, sign in and authorize ChatCut in the inline connection card.
 3. Pick an existing project or ask the expert to create one. The expert asks WorkBuddy to open the project in its built-in browser and always adds a plain "Open ChatCut editor" link as a fallback.
 4. Provide your media and goal. The expert builds an editable timeline and exports only when you ask.
