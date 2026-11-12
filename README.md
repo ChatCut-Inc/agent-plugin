@@ -34,7 +34,7 @@
 
 </div>
 
-https://github.com/user-attachments/assets/6db1a571-7f13-4291-a9ce-70e28ac7e2b7
+<p align="center"><img src="docs/media/hero-demo.gif" width="720" alt="ChatCut demo: Viral Video Cloner, Speech Cleanup, Add captions, Talking-Head Edit Recreation and two MG Packaging styles"></p>
 
 <p align="center">
   <a href="https://chatcut.io/skills/speech-cleanup?utm_source=github&amp;utm_medium=readme&amp;utm_campaign=agent-plugin"><img src="docs/media/skills/speech-cleanup.jpg" width="260" alt="Speech Cleanup: removes retakes, long pauses and slips"></a>
