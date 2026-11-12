@@ -15,7 +15,7 @@ This folder is the expert package listed on WorkBuddy's official experts page, v
 
 From the package's own instructions:
 
-1. Open **Experts · Skills · Connectors** (专家·技能·连接器) → **Experts** (专家), search **ChatCut**, open the official **ChatCut 视频剪辑师** expert and select **Summon** (召唤). The search also lists other experts with ChatCut in their names that ChatCut doesn't publish. You can also install the package ZIP in WorkBuddy.
+1. Open **Experts · Skills · Connectors** (专家·技能·连接器) → **Experts** (专家), search **ChatCut**, open the official **ChatCut 视频剪辑师** expert and select **Summon** (召唤). You can also install the package ZIP in WorkBuddy.
 2. The first time you call the expert, sign in and authorize ChatCut in the inline connection card.
 3. Pick an existing project or ask the expert to create one. The expert asks WorkBuddy to open the project in its built-in browser and always adds a plain "Open ChatCut editor" link as a fallback.
 4. Provide your media and goal. The expert builds an editable timeline and exports only when you ask.
