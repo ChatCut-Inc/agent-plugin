@@ -129,8 +129,8 @@ ChatCut edits your own footage and generates new media, and the result is an edi
 
 **Saved across projects**
 
-- Characters: people you feature again, with photos, a description and a voice, for consistent generated shots and presenter videos *(Desktop)*.
-- Products: photos, selling points, price and specs for product ads, so scripts stick to what you saved *(Desktop)*.
+- Characters: people you feature again, with photos, a description and a voice, for consistent generated shots and presenter videos.
+- Products: photos, selling points, price and specs for product ads, so scripts stick to what you saved.
 - Memory of your preferences, and Workflow Skills that save a working editing process for reuse.
 
 **Writing and planning** *(Desktop)*

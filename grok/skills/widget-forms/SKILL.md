@@ -9,9 +9,9 @@ Use ordinary chat text for questions and choices. Use chat image bubbles only fo
 
 ## Stable visual-preview path
 
-The only media-preview path to rely on is a normal chat image bubble, and only for Motion Graphic references or Design Style preset thumbnails.
+The only media-preview path to rely on is a normal chat image bubble, and only for Motion Graphic references, Design Style preset thumbnails or character photos.
 
-For an MG reference or Design Style choice:
+For an MG reference, Design Style or character choice:
 
 1. Select a small relevant set, normally 3–6 options.
 2. Obtain each returned thumbnail or preview-image URL from the live tool result or the pinned widget-media manifest. Never invent or rewrite the URL.
@@ -20,7 +20,7 @@ For an MG reference or Design Style choice:
 5. Immediately follow them with concise localized choices, using either Grok Bot's native option cards or ordinary text options. Keep every visible label mapped to the exact returned preset or reference id.
 6. Stop and wait for the user's selection. If an image cannot be downloaded or displayed, omit that bubble and keep the corresponding choice; do not expose the source URL.
 
-Do not use this image-bubble path for avatars, voices, audio samples, generated project video, or general project preview.
+A character choice uses this path too, with each character's main image URL from `manage_character get` and its `characterId` as the stable id. Do not use it for voices, audio samples, generated project video, or general project preview.
 
 ## Text questions and choices
 
@@ -30,7 +30,6 @@ For every other question, ask only the minimum blocking question. Use either Gro
 - `single_choice`: use short native option cards or ordinary text choices; accept the selected label.
 - `explicit_consent`: quote the caller's full consent statement and require an explicit affirmative response. Never infer consent from an attachment or another answer.
 - `audio_reference`: ask the user to attach the source file in the conversation, then load `asset-import`. Return the imported ChatCut audio `assetId`; never treat a local path, attachment URL, or raw bytes as an asset id.
-- `avatar_choice`: show names and concise returned descriptions as text. Tell the user that visual previews are available in ChatCut's Digital Humans library when previewing matters.
 - `voice_choice`: show names and concise returned traits as text. Tell the user to audition voices in the ChatCut editor or voice library before choosing when sound matters.
 
 ## Widget requests from other workflows
@@ -51,8 +50,9 @@ stop-and-wait points, and present each control this way:
 - `playable_single_choice` or another playable picker: `voice_choice` above.
 - `playable_preview` for a newly cloned voice: the cloned-voice handling under
   Audio and video restrictions below.
-- `<form-visual>` or an avatar picker: `avatar_choice` above, unless the choice
-  is an MG reference or Design Style preset, which uses the visual-preview path.
+- `<form-visual>` with images, such as a character, MG reference or Design
+  Style preset: the visual-preview path above. With audio options:
+  `voice_choice` above.
 - `<clone-voice/>` and other editor actions: unavailable here; follow the
   workflow's external-host branch instead.
 

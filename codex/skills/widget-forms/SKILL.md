@@ -66,13 +66,11 @@ and localizing the labels:
 The Other answer returns to discovery, without applying a style or
 starting production. Keep the image-option IDs unchanged in the next step.
 
-Map an AI-avatar identity choice to one `single` field with `variant:"visual"`.
-Use the live `identityId` as the option id, the returned `name` as its label,
-`previewVideoUrl` as `previewVideo`, and `previewImageUrl` as `preview`. The
-image remains the poster and automatic fallback if video loading fails. Keep
-`create_avatar` as a label-only option. Selecting it returns that value to the
-workflow; it does not open ChatCut's native avatar dialog, so request the source
-attachment separately and use `asset-import`.
+Map a character choice to one `single` field with `variant:"visual"`. Use the
+`characterId` as the option id, the returned `name` as its label, and the
+character's main image URL from `manage_character get` as `preview`. A
+new-character option is label-only; selecting it returns to the workflow, so
+request the portrait attachment separately and use `asset-import`.
 
 Do not call `ask_followup_questions` solely to display a `playable_preview`,
 because a passive preview is not a question. Use Codex's supported audio
@@ -103,13 +101,12 @@ key. Runtime media URLs are not in the bundled manifest: do not embed them in
 Elicitation HTML. Present them through the host's normal safe link/audio
 surface, then use a label-only confirmation control.
 
-AI-avatar previews are runtime catalog media and are not bundled in the plugin
-manifest. Keep each authoritative `identityId` mapped to its returned `name`,
-use label-only selectable cards in Elicitation, and tell the user that live
-video previews are available in ChatCut's AI Avatars library. Never embed or
-print the provider preview URL. A `create_avatar` selection returns to the
-workflow and then follows the normal conversation-attachment plus
-`asset-import` path.
+Character images are runtime media and are not in the bundled manifest. Keep
+each `characterId` mapped to its returned `name`, use label-only selectable
+cards in Elicitation, and tell the user they can see each character's photos in
+ChatCut's My Assets. Never embed or print the image URL. A new-character
+selection returns to the workflow and then follows the normal
+conversation-attachment plus `asset-import` path.
 
 For MG reference choices, look up the exact reference ID in the same manifest
 (`entries[referenceId]`, for example a `mg-reference:style:…` key). An image entry
