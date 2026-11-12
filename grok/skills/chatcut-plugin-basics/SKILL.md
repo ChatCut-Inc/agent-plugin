@@ -1,6 +1,6 @@
 ---
 name: chatcut-plugin-basics
-description: "Must read before using the hosted ChatCut plugin in Grok Bot, including creating projects, opening the editor, or editing/creating videos. Also use whenever video editing or creation should stay editable in ChatCut, even if the user does not mention ChatCut: edit or cut a video (剪视频、剪辑), add captions or subtitles (加字幕), clean up a talking-head recording (剪口播), or add B-roll, music or motion graphics. Also use when ChatCut tools are missing or need authentication. For ChatCut Desktop, follow its own instructions unless the user explicitly chooses the hosted plugin/web surface."
+description: "Must read before using the hosted ChatCut plugin in Grok Bot, including creating projects, opening the editor, or editing/creating videos. Also use whenever video editing or creation should stay editable in ChatCut, even if the user does not mention ChatCut: edit or cut a video (剪视频、剪辑), add captions or subtitles (加字幕), clean up a talking-head recording (剪口播), add B-roll, music or motion graphics, or recreate, clone or remake a viral video with the user's own footage (复刻爆款、做同款). Also use when ChatCut tools are missing or need authentication. For ChatCut Desktop, follow its own instructions unless the user explicitly chooses the hosted plugin/web surface."
 ---
 
 # ChatCut Plugin Basics
