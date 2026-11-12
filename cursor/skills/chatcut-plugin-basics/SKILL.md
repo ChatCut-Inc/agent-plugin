@@ -224,10 +224,6 @@ The editor is a live workbench, not a popup-preview contract. Before long-runnin
 
 If a ChatCut tool returns a pricing or billing URL, present it as an external browser link via `open <url>` / system browser. Do not treat billing as an editor handoff.
 
-## Recreating A Viral Video
-
-Requests to recreate, clone, or remake a viral or reference video with the user's own people, product, or footage (复刻爆款、做同款) happen in the ChatCut Desktop app, and generating them needs a membership; this host cannot install it. Say so plainly and give the user https://chatcut.io/viralvideocloner, which has the download and a message they can send to a local agent such as Codex or Claude Code. Keep using the hosted tools for any ordinary editing in the same request. Work only with media the user owns or is licensed to use.
-
 ## Connector Boundaries
 
 ChatCut plugin access is based on connector authentication and the user's accessible projects. Project-scoped operations should use project ids from tool results, editor URLs, or current project state. Do not guess hidden ids.
