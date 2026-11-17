@@ -7,7 +7,7 @@ graphics, generate media, and export finished work. Available tools and generati
 models depend on the connected ChatCut account and its current access.
 
 This is the Cursor listing of the ChatCut plugin. Grok Bot uses the separate
-`grok/` listing in the same repository. The two listings share the same skills and
+`grok/` listing in the same repository. The two listings share most editing skills and the
 hosted MCP server; each one declares its own host in the `x-chatcut-mcp-client`
 header and is hidden from the other host with `minClientVersions`.
 
@@ -24,8 +24,7 @@ header and is hidden from the other host with `minClientVersions`.
 
 ## Install and connect
 
-After marketplace approval, add **ChatCut** from Cursor's plugin marketplace and
-complete ChatCut sign-in in the browser when Cursor asks for authorization.
+Use the ChatCut for Cursor installation guide supplied with the plugin. Cursor supports local plugins; the package must include the resolved shared assets and skills, not broken symlinks. When prompted, click **Authenticate** in the conversation and complete ChatCut sign-in. Return to the same Agent chat.
 
 The plugin connects to:
 
@@ -49,7 +48,7 @@ Authentication uses OAuth. No API key or access token is stored in this reposito
 ```text
 .cursor-plugin/plugin.json   Cursor plugin manifest
 mcp.json                     Hosted ChatCut MCP connection
-skills/                      Symlink to ../grok/skills
+skills/                      Cursor adapters and shared editing skills
 assets/                      Symlink to ../grok/assets
 LICENSE                      Apache License 2.0
 ```

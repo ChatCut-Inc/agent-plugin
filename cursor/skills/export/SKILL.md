@@ -49,12 +49,7 @@ Use Desktop `track_progress` with `target:"export"` and `exportTaskIds` set to t
 
 Deliver according to the completed result:
 
-- `source:"browser"`: relay `statusMessage`, filename, and available metadata.
-  The rendering tab downloads the file on its computer or writes to the chosen
-  file. This result has no `downloadUrl` or verified filesystem path. A tab on
-  Grok Bot's cloud computer downloads there, not to the user's laptop. Attach a
-  file only after the host locates and reads it; otherwise link the editor and
-  explain where to check its Export queue.
+- For a completed browser render, inspect the actual returned delivery fields. If a download is supplied, retrieve the file and verify its size/duration before attaching it or linking the workspace path. If there is no download URL, the renderer saved the file on its computer; report the actual filename and editor Export queue. Never substitute a project preview widget or the source file for the completed export.
 - A completed result with a `downloadUrl`: use the host's normal file/link
   delivery. Download it only through a permitted host route when a local artifact
   is needed. Do not invent a download URL for a browser export.
