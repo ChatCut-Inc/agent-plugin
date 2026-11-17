@@ -25,12 +25,13 @@ Load the configuration snapshot required by the installed `manus-config` CLI. Sa
 
 Run `manus-config connector create --file <draft.json>` once. Keep the UID from the successful creation receipt. Run `manus-config connector ensure --uid <new-uid>` to present the native recommendation for that exact connector. The user's action on the recommendation is **Connect**. Creation may already have displayed a **Log in** card. Keep that card available. Use the new UID for every subsequent step, even if other ChatCut connectors are attached.
 
-## Authorize and verify the read
+## Refresh this task after Connect or Log in
 
-1. Discover `list_projects` on the selected connector. If OAuth is pending at creation, discovery, or the read, use the native **Log in** card for this UID. Request native login once if no card is already present.
-2. Leave the task running while the user acts. Use a native wait or resume-on-authorization action if available. If login returns `waiting` and the turn can run tools, immediately wait 20 seconds in the terminal and retry read-only discovery on the same UID. Repeat for up to two minutes. Keep the original login card and let it serve as the only authorization prompt. Do not ask for a chat reply or a separate **Continue** or **Apply** confirmation after **Connect**.
-3. As soon as discovery succeeds, call `list_projects` with `limit: 1` and `query: "ChatCut connection check"`. Report whether the connector was added or reused and the actual matching count, then finish. Zero matches is a successful read. Keep project names and identifiers private. A login success message alone does not verify the read.
+1. Keep the selected UID. If it needs OAuth, use the native **Log in** card for that UID. Request login once only if Manus has not already shown the card. Keep the task running while the user acts. Stop if the user explicitly skips or cancels.
+2. When the native action returns or the task resumes, run `manus-config config load` to refresh this task's configuration, then `manus-config connector get <uid>` with the saved UID. Do this even when the recommendation says **Applied** or the earlier ensure receipt said **not enabled**. Use read-only tool discovery on the runtime server for that enabled UID. Confirm the binding in the refreshed configuration if other saved connectors are also called ChatCut.
+3. If OAuth is pending, the UID still looks disabled, or discovery returns `server 'chatcut' not found`, give the original card time to complete. Use a native wait if available, or wait 20 seconds in the terminal. Repeat **both** the configuration refresh and tool discovery in this turn for up to two minutes. Keep using the same UID and card. Do not create, enable, or authorize a second connector or ask for a separate confirmation.
+4. As soon as this connector exposes `list_projects`, call it with `limit: 1` and `query: "ChatCut connection check"`. Report whether the connector was added or reused and the returned match count. Zero matches confirms a successful read. Keep project names and identifiers private.
 
-If the host suspends the task, allow its native action to resume it. If the bounded checks expire or a tool fails, report the last actual result and leave the read unverified.
+If the host suspends the task, repeat the refresh when it resumes. If the turn ends before a read succeeds, report the last observed state. The user can continue in this same conversation with “Refresh the ChatCut connection you just used and retry the project list.” On that follow-up, resume at step 2 with the original UID.
 
 [Manus connector settings](https://manus.im/app/plugins#settings/connectors) · [Manus custom MCP documentation](https://manus.im/docs/integrations/custom-mcp)
