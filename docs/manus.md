@@ -1,19 +1,36 @@
-# Connect ChatCut to this Manus conversation
+# Connect ChatCut to this Manus task
 
-When someone asks Manus to connect ChatCut, finish the connection check in the same task. The connector display name for this guide is **ChatCut**.
+Finish by reading the signed-in user's ChatCut project list in this task. Use the official HTTP MCP endpoint `https://api.chatcut.io/api/external-mcp/mcp` and the display name **ChatCut**.
 
-1. Find the connector by that display name. Reuse it when it exists. If it needs attaching to the current task, use the native Manus connector picker and let the user click **Apply**. To add it for the first time, use Manus's custom MCP setup with the same display name, HTTP transport, and `https://api.chatcut.io/api/external-mcp/mcp`. Use the server's OAuth defaults and leave custom headers empty.
-2. Discover the connector's `list_projects` tool. A login request can appear during setup, tool discovery, or the read itself, including for a **saved** connector. Whenever this happens, follow the authorization step below, then return to the point that required authorization in this task.
-3. Call `list_projects` through the connector with `limit: 1` and `query: "ChatCut connection check"`. Once it returns, report whether the connector was added or reused and the matching count. Zero matches is a successful read. Keep project names and identifiers private.
+## Choose the connection
 
-## While authorization is pending
+If the user asks to **create a new private ChatCut connector**, create it directly, even if a saved connector has the same name. Otherwise, look for a saved ChatCut connector with this exact name and endpoint. Reuse its UID if identified, or create a connector if none exists. Leave existing connectors intact. Use the native **Apply** action when Manus needs the user to attach a saved connection.
 
-Present the native **Log in** card once and keep the task in progress. The user's action is to complete that card. A login tool result such as “waiting” indicates pending authorization. A final chat reply at this point ends the turn before the user can return. Leave the login card as the user-facing prompt.
+## Create a new private connector
 
-Use only the native login card for ordinary OAuth. Do not open a separate blocking question (ask-user, ask-choice, or a Continue button), send a final notification, or request a chat reply. After `auth.login` returns `waiting`, if the current turn can still use tools, make your very next action a native wait for authorization or a 20-second terminal sleep followed by read-only tool discovery for this connector. Leave the login card clickable while tools run. Repeat within the two-minute bound. If authorization already completed, proceed directly to the read. A separate user question pauses execution and cannot serve as a timed wait.
+Load the configuration snapshot required by the installed `manus-config` CLI. Save the following JSON as a draft file. Set the top-level `mode` to `"url"` explicitly. Omit `note` and `headers` entirely, including empty values. The endpoint supplies OAuth. Manus handles the website icon.
 
-If Manus offers a native wait or resume-on-authorization action, use it. Otherwise, while this task can still run, give the user time to approve and recheck the **same connector** using an available read-only discovery action. For example, wait 20 seconds between checks for up to two minutes. Use an ordinary timed wait in the task's terminal if needed. Reuse the original card throughout. Once discovery succeeds, read `list_projects` as above, even if the authorization card itself already says **Login successful**.
+```json
+{
+  "mode": "url",
+  "name": "ChatCut",
+  "description": "Read your ChatCut project list to verify your connection.",
+  "mcpServers": {
+    "ChatCut": {
+      "url": "https://api.chatcut.io/api/external-mcp/mcp"
+    }
+  }
+}
+```
 
-If Manus forcibly suspends execution or the bounded checks expire, preserve the pending state and report the actual tool result and last check if a status is required. Let the native authorization action resume the task when the host supports that. Keep credentials in the authorization screen.
+Run `manus-config connector create --file <draft.json>` once. Keep the UID from the successful creation receipt. Run `manus-config connector ensure --uid <new-uid>` to present the native recommendation for that exact connector. The user's action on the recommendation is **Connect**. Creation may already have displayed a **Log in** card. Keep that card available. Use the new UID for every subsequent step, even if other ChatCut connectors are attached.
+
+## Authorize and verify the read
+
+1. Discover `list_projects` on the selected connector. If OAuth is pending at creation, discovery, or the read, use the native **Log in** card for this UID. Request native login once if no card is already present.
+2. Leave the task running while the user acts. Use a native wait or resume-on-authorization action if available. If login returns `waiting` and the turn can run tools, immediately wait 20 seconds in the terminal and retry read-only discovery on the same UID. Repeat for up to two minutes. Keep the original login card and let it serve as the only authorization prompt. Do not ask for a chat reply or a separate **Continue** or **Apply** confirmation after **Connect**.
+3. As soon as discovery succeeds, call `list_projects` with `limit: 1` and `query: "ChatCut connection check"`. Report whether the connector was added or reused and the actual matching count, then finish. Zero matches is a successful read. Keep project names and identifiers private. A login success message alone does not verify the read.
+
+If the host suspends the task, allow its native action to resume it. If the bounded checks expire or a tool fails, report the last actual result and leave the read unverified.
 
 [Manus connector settings](https://manus.im/app/plugins#settings/connectors) · [Manus custom MCP documentation](https://manus.im/docs/integrations/custom-mcp)
