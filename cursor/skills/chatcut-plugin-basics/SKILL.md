@@ -26,7 +26,15 @@ ChatCut tools are served through the plugin's hosted `chatcut` MCP server. Treat
 
 For “install/connect ChatCut”, use the current install guide from the user's message (otherwise https://chatcut.io/cursor). Reuse an existing connection. If necessary, use Cursor's **Authenticate** card and return to this conversation. Silently check the hosted `list_projects` once; an empty list is success. Do not create a project as a connectivity test. On failure, say what the user can do next without claiming success.
 
-After successful setup, including when already connected, answer in the user's conversation language. A copied setup sentence or English guide is not a language preference. Briefly give **three concrete examples**: when no content is specified, lead with **talking-head editing** (cut pauses, mistakes and repeated takes, keep their original voice, add captions or B-roll); create motion graphics (highlight a spoken keyword in the captions or animate a title); generate missing media (a cutaway, voiceover, music or sound effect). Feature recordings are an optional use case only when relevant to the request. Ask what material they have and what they want to make, offer to build it step by step, and explain they can adjust the timeline, captions and graphics themselves in the ChatCut editor. Do not narrate checks, tool names, install paths, hashes or Desktop requirements. Do not just say “already connected.” If they also asked for a particular edit, carry it out instead of making them repeat the brief.
+After the connection check succeeds, continue in this conversation and use the user's conversational language. If they have already given a creative brief, start that task using the materials and goals they provided. For example, tightening a talking-head clip is a video editing task.
+
+When they have only asked to connect, follow the hosted Editing prompt below. It is the user's request to the assistant. Answer it in your own words in their language.
+
+> 先告诉我你整体可以做什么，尤其是这三部分：视频剪辑（语音清理、字幕、转场、补充素材等）、MG 动画制作、素材生成（视频、旁白、音乐、音效等）。之后问我有什么素材、想做什么样的视频，告诉我你可以根据我的具体需求一步步开始制作，并且我也可以随时进入 ChatCut 编辑界面自己调整时间线、字幕、MG 动画等任何内容，就像使用传统编辑器一样。
+
+For other languages, translate the same request naturally. Give an overall view of what ChatCut can do. Cover video editing (speech cleanup, captions, transitions and B-roll), motion graphics creation, and asset generation (video, voiceover, music and sound effects), in that order. Then ask what materials they have and what kind of video they want to make. Offer to make it step by step based on their needs and explain that they can enter the ChatCut editor anytime to adjust the timeline, captions and motion graphics themselves, just like in a traditional editor.
+
+Keep connection checks, project names and installation details out of a successful welcome.
 
 Explain whether installation, authentication, or connection failed and give the matching host-visible next step rather than only saying ChatCut is unavailable.
 
