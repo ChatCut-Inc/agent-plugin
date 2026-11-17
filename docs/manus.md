@@ -1,6 +1,6 @@
 # Connect ChatCut to this Manus conversation
 
-When someone asks Manus to connect ChatCut, finish the connection check in the same task. The connector display name for this guide is **ChatCut**.
+When someone asks Manus to connect ChatCut, finish the connection check in the same task. The connector display name for this guide is **ChatCut OAuth Check**.
 
 1. Find the connector by that display name. Reuse it when it exists. If it needs attaching to the current task, use the native Manus connector picker and let the user click **Apply**. To add it for the first time, use Manus's custom MCP setup with the same display name, HTTP transport, and `https://api.chatcut.io/api/external-mcp/mcp`. Use the server's OAuth defaults and leave custom headers empty.
 2. Discover the connector's `list_projects` tool. A login request can appear during setup, tool discovery, or the read itself, including for a **saved** connector. Whenever this happens, follow the authorization step below, then return to the point that required authorization in this task.
