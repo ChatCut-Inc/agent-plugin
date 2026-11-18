@@ -77,14 +77,14 @@ test("cursor/assets/ mirrors grok/assets/", async () => {
 
 // Grok Bot's cloud-computer browser drops too often for local renders, so only
 // Grok's export guidance is cloud-first; Cursor keeps its own browser-first copy.
-const grokOnlySkills = ["chatcut-plugin-basics", "export"];
+const hostSpecificSkills = ["chatcut-plugin-basics", "export", "widget-forms"];
 
-test("cursor/skills/ shares every Grok skill except the Grok-only export guidance", async () => {
+test("cursor/skills/ shares common skills and keeps Cursor-specific host adapters separate", async () => {
   const grokSkills = (await readdir(new URL("grok/skills/", root))).sort();
   assert.deepEqual((await readdir(new URL("cursor/skills/", root))).sort(), grokSkills);
   for (const skill of grokSkills) {
     const cursorSkill = new URL(`cursor/skills/${skill}`, root);
-    if (grokOnlySkills.includes(skill)) {
+    if (hostSpecificSkills.includes(skill)) {
       assert.ok((await lstat(cursorSkill)).isDirectory(), `cursor/skills/${skill} is Cursor's own copy`);
     } else {
       assert.equal(await readlink(cursorSkill), `../../grok/skills/${skill}`);

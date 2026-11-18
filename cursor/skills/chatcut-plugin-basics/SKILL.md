@@ -1,13 +1,13 @@
 ---
 name: chatcut-plugin-basics
-description: "Must read before using the hosted ChatCut plugin in Grok Bot, including creating projects, opening the editor, or editing/creating videos. Also use whenever video editing or creation should stay editable in ChatCut, even if the user does not mention ChatCut: edit or cut a video (剪视频、剪辑), add captions or subtitles (加字幕), clean up a talking-head recording (剪口播), add B-roll, music or motion graphics, or recreate, clone or remake a viral video with the user's own footage (复刻爆款、做同款). Also use when ChatCut tools are missing or need authentication. For ChatCut Desktop, follow its own instructions unless the user explicitly chooses the hosted plugin/web surface."
+description: "Must read before using the hosted ChatCut plugin in Cursor Agent, including connecting ChatCut, opening an editable project, and editing or exporting videos. Also use whenever video editing or creation should stay editable in ChatCut, even if the user does not mention ChatCut: edit or cut a video (剪视频、剪辑), add captions or subtitles (加字幕), clean up a talking-head recording (剪口播), add B-roll, music or motion graphics, or recreate, clone or remake a viral video with the user's own footage (复刻爆款、做同款). Also use when ChatCut tools are missing or need authentication. For ChatCut Desktop, follow its own instructions unless the user explicitly chooses the hosted plugin/web surface."
 ---
 
 # ChatCut Plugin Basics
 
 ## Purpose
 
-Host scope: this skill is written for Grok Bot using the Cursor-compatible plugin format. Use the host's native plugin authentication, browser, attachment, ordinary-chat, and image-bubble capabilities within the limits defined by `widget-forms`.
+Host: Cursor Agent on the user's computer. Use Cursor's own MCP authentication, normal chat, readable workspace files and built-in Browser. For how to show a project, follow the Cursor editor handoff below.
 
 Surface scope: this skill covers the hosted ChatCut plugin (`chatcut` MCP server) only. When the conversation uses ChatCut Desktop (`chatcut_desktop*` servers), follow the desktop server's own instructions and skip this skill unless the user explicitly chooses the plugin/web surface — desktop media is registered locally (no uploads) and delivery happens in the ChatCut Desktop window, not a browser.
 
@@ -24,7 +24,17 @@ tools are missing or unauthenticated.
 
 ChatCut tools are served through the plugin's hosted `chatcut` MCP server. Treat the active MCP manifest and returned tool schemas as the runtime contract; do not assume a host-specific tool-name prefix.
 
-If the tools are available and authenticated, continue normally without discussing installation. If ChatCut is not installed, ask the user to add ChatCut from Grok Bot's **Connect apps** (sidebar on a computer; avatar at the top left, then Connect apps, in the phone app), or from Cursor's plugin marketplace when running in Cursor. If authentication is required, ask the user to use the host's Authorize or Authenticate control and complete ChatCut OAuth in the browser; if the host shows Waiting for authorization, use Reopen on the in-chat card or Reconnect on the installed app. If the plugin is installed but tools remain unavailable after authorization, start a fresh conversation and inspect the host's plugin/MCP connection status. Do not register a duplicate server, run another host's CLI, store tokens in configuration, or install ChatCut Desktop as a workaround.
+For “install/connect ChatCut”, use the current install guide from the user's message (otherwise https://chatcut.io/cursor). Reuse an existing connection. If necessary, use Cursor's **Authenticate** card and return to this conversation. Silently check the hosted `list_projects` once; an empty list is success. Do not create a project as a connectivity test. On failure, say what the user can do next without claiming success.
+
+After the connection check succeeds, continue in this conversation and use the user's conversational language. If they have already given a creative brief, start that task using the materials and goals they provided. For example, tightening a talking-head clip is a video editing task.
+
+When they have only asked to connect, follow the hosted Editing prompt below. It is the user's request to the assistant. Answer it in your own words in their language.
+
+> 先告诉我你整体可以做什么，尤其是这三部分：视频剪辑（语音清理、字幕、转场、补充素材等）、MG 动画制作、素材生成（视频、旁白、音乐、音效等）。之后问我有什么素材、想做什么样的视频，告诉我你可以根据我的具体需求一步步开始制作，并且我也可以随时进入 ChatCut 编辑界面自己调整时间线、字幕、MG 动画等任何内容，就像使用传统编辑器一样。
+
+For other languages, translate the same request naturally. Give an overall view of what ChatCut can do. Cover video editing (speech cleanup, captions, transitions and B-roll), motion graphics creation, and asset generation (video, voiceover, music and sound effects), in that order. Then ask what materials they have and what kind of video they want to make. Offer to make it step by step based on their needs and explain that they can enter the ChatCut editor anytime to adjust the timeline, captions and motion graphics themselves, just like in a traditional editor.
+
+Keep connection checks, project names and installation details out of a successful welcome.
 
 Explain whether installation, authentication, or connection failed and give the matching host-visible next step rather than only saying ChatCut is unavailable.
 
@@ -55,7 +65,7 @@ Visual understanding has two distinct surfaces:
 
 Export is a connector boundary in plugin sessions: load `export`, call
 `submit_export`, then use `track_export`. The default browser export downloads on
-the rendering computer and has no `downloadUrl`; deliver only the actual completed
+the rendering computer; inspect actual delivery metadata and return only the completed
 result according to the export Skill.
 
 ## Data Model
@@ -135,7 +145,7 @@ Proceed without a new alignment round when the user already gave a clear brief w
 
 Ask only for load-bearing information. Do not run a fixed checklist. Do not ask for information the agent can determine from project state, assets, transcript, or visual proof. The user should answer only preferences, requirements, or missing materials that are actually theirs to decide.
 
-When structured input would reduce friction, load `widget-forms`. Use Grok Bot's native option cards or concise ordinary text choices. The only media-choice enhancement is downloaded image bubbles for MG references or Design Style thumbnails, followed by those choices. Ask for missing source media separately through a supported import path or the host's readable-file import path (see `asset-import`).
+Use Cursor chat for short questions and choices. When a shared workflow requests a form or preview, load Cursor's `widget-forms` adapter. Use the readable-file import path for the user's selected workspace media.
 
 Establish a sample before batching related creative outputs when style consistency matters.
 
@@ -198,27 +208,15 @@ First action for a new ChatCut task: use `list_projects`, `create_project`, `tar
 
 If a ChatCut project is already available from an editor URL, read the `projectId` from the `/editor/<projectId>` URL and pass it directly to project-scoped tools.
 
-If `chatcut` asks for authentication or project access, ask the user to select Reconnect on ChatCut under Grok Bot's Connect apps (or re-authorize ChatCut in Cursor's plugin settings), then retry with the exact `projectId` from the editor URL.
+If the connector needs authorization, use Cursor's Authenticate action. If only a browser tab needs sign-in, use the same ChatCut account in that browser; a working MCP connection does not need to be reinstalled.
 
-### Open the visible editor
+### Open and review a project in Cursor
 
-Surfacing the editor link early is part of the user experience: the user can open the NLE, media pool, transcription, generation, and timeline placement while work continues.
+For a created, targeted or user-selected project, use the returned clean `editorUrl` as a named **editable project** link. If needed, call `get_editor_url` with that exact project ID. Do not pick an existing project or open a blank editor just to finish setup.
 
-`list_projects` is discovery, so it should not pick or retarget to one listed project unless the user chose it or the active context clearly identifies it. Once a specific project is created, targeted, or chosen for visible work, always present the clean project/editor URL returned by the tool as a named link. Do not depend on a preview tool, popup, card, or browser handoff opening automatically.
-
-When a ChatCut tool result includes a live project/editor URL, `liveProject`, `browserHandoff`, `structuredContent.browserHandoff.required=true`, or `browserHandoff.required=true`, use the clean returned `editorUrl` for the user-facing named link. A browser-control capability may additionally open the handoff URL, but that is optional and never replaces sending the clean editor link.
-
-ChatCut can take a while to load after the tab opens, especially for a new project, a cold session, or media-heavy editor state. If the browser-control tool reports that it successfully opened or focused the tab, treat the handoff as complete; do not wait for the page to fully load, keep polling the browser, or perform extra careful visual checks just to prove the editor opened. Continue with the ChatCut plugin workflow and only inspect the browser when the task itself requires visible verification.
-
-Present the clean `editorUrl` as a named link whether or not browser or computer-control tools are available. Preserve all query parameters only in an internal handoff URL when they are needed for opening the browser; do not copy short-lived authentication or editor boot tokens into the user-facing link, and do not replace the returned URL with a guessed generic ChatCut URL.
-
-When sending or opening any editor URL, localize the editor-site path based on the language the user is using. Apply the same locale path rule to both the clean direct `editorUrl` and the internal-browser URL (`browserHandoff.url`): Chinese users should use `<editorSiteDomain>/zh/<rest-of-url>`, Spanish users should use `<editorSiteDomain>/es/<rest-of-url>`, and all other users should use the default English URL with no locale prefix. Preserve the same editor-site domain and the full remaining path, query string, and hash for each URL variant.
-
-Use the exact browser handoff or editor URL returned by the tools. Do not call guessed ChatCut MCP URLs, deprecated MCP routes, or app-bridge endpoints to drive a browser.
-
-### Keep the visible editor aligned
-
-The editor is a live workbench, not a popup-preview contract. Before long-running visible work such as import, transcription waiting, generation, timeline assembly, export preparation, or final visual verification, ensure the clean editor link still targets the latest project id. Internal preview tools remain valid for agent verification, but final delivery must include the clean editor link and must not claim that a preview automatically opened.
+- If the server returns an explicit `browserHandoff.url` for the project and Cursor exposes its built-in Browser, open that URL exactly in the Browser. Keep it private; never paste it in chat, logs, or a user-facing link. Verify the editor or timeline is visible before saying it opened. Navigation success alone is insufficient.
+- If the server returns only a clean URL or offers an external browser mode, give the named clean link. If the user asks to open it inside Cursor, use the built-in Browser with that exact clean link. A sign-in screen means that Browser is not signed into ChatCut: explain that once and offer the link in their signed-in browser. Never synthesize an authenticated link, transfer cookies, or borrow another client's identity.
+- Cursor's chat project preview card can remain on “Loading ChatCut preview…”. Do not call `show_preview`, display an embedded project widget, or use a loading card to claim a result. For internal verification, read the timeline and inspect composed frames via `preview_timeline` when available. For user delivery, give the clean editor link and, if they requested an export, the actual completed media file or returned download link. Do not export an extra video merely to replace the card.
 
 ### Billing and pricing exception
 
