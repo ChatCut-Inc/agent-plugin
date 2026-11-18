@@ -9,9 +9,9 @@ Antigravity has no documented native option-card widget. Use concise ordinary te
 
 ## Stable visual-preview path
 
-When the host can display images in chat, use normal chat image bubbles only for Motion Graphic references or Design Style preset thumbnails. Otherwise present text descriptions with the same choices.
+When the host can display images in chat, use normal chat image bubbles only for Motion Graphic references, Design Style preset thumbnails or character photos. Otherwise present text descriptions with the same choices.
 
-For an MG reference or Design Style choice:
+For an MG reference, Design Style or character choice:
 
 1. Select a small relevant set, normally 3–6 options.
 2. Obtain each returned thumbnail or preview-image URL from the live tool result or the pinned widget-media manifest. Never invent or rewrite the URL.
@@ -20,7 +20,7 @@ For an MG reference or Design Style choice:
 5. Immediately follow them with concise localized choices, using concise ordinary text choices. Keep every visible label mapped to the exact returned preset or reference id.
 6. Stop and wait for the user's selection. If an image cannot be downloaded or displayed, omit that bubble and keep the corresponding choice; do not expose the source URL.
 
-Do not use this image-bubble path for avatars, voices, audio samples, generated project video, or general project preview.
+A character choice uses this path too, with each character's main image URL from `manage_character get` and its `characterId` as the stable id. Do not use it for voices, audio samples, generated project video, or general project preview.
 
 ## Text questions and choices
 
@@ -30,7 +30,6 @@ For every other question, ask only the minimum blocking question. Use concise or
 - `single_choice`: use concise ordinary text choices; accept the selected label.
 - `explicit_consent`: quote the caller's full consent statement and require an explicit affirmative response. Never infer consent from an attachment or another answer.
 - `audio_reference`: ask the user to attach the source file in the conversation, then load `asset-import`. Return the imported ChatCut audio `assetId`; never treat a local path, attachment URL, or raw bytes as an asset id.
-- `avatar_choice`: show names and concise returned descriptions as text. Tell the user that visual previews are available in ChatCut's Digital Humans library when previewing matters.
 - `voice_choice`: show names and concise returned traits as text. Provide the clean ChatCut editor link supplied by the project workflow and tell the user to audition voices there or in its voice library before choosing when sound matters.
 
 ## Audio and video restrictions
@@ -46,5 +45,5 @@ This adapter implements the caller's host-neutral input contract; it does not de
 - `playable_single_choice`: present localized text choices with stable values mapped internally; users audition samples through the clean ChatCut editor link. Preserve every caller-provided voice id, label, traits and preview association internally; do not print raw sample URLs or pretend chat audio is playable.
 - `playable_preview`: tell the user the caller-provided preview is ready in ChatCut and provide the clean editor link. This is display-only; collect the caller's branch decision separately after listening. Never emit raw audio HTML or expose the runtime media URL.
 - MG reference choices: map labels to exact reference ids and retain one localized `__other__` choice accepting a new preference or another batch, with no separate Show more option. Other returns to discovery, not style application. Return the selected reference id to the caller; never bind `apply_preset` directly to it. Resolve bundled images through `assets/widget-media/manifest.json` relative to the plugin root; absent previews use text, never guessed CDN paths.
-- Avatar choices: map each returned name to the exact `identityId`. Use names and returned descriptions in text; previews are available in ChatCut's Digital Humans library. Preserve `create_avatar` as a separate value returned to the caller, then request the attachment and use `asset-import`; it does not open a native dialog automatically.
+- Character choices: map each returned name to the exact `characterId` and use the visual-preview path. A new-character option is a separate value returned to the caller; then request the portrait attachment and use `asset-import`.
 - Voice/clone actions: preserve `clone_voice`, `Retry`, `Apply`, and any other caller-provided stable values. A selection is not consent to cloning or a paid action; request the caller's full explicit authorization separately when required.

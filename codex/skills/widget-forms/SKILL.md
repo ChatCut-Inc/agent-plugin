@@ -70,19 +70,16 @@ and localizing the labels:
 The Other answer returns to discovery, without applying a style or
 starting production. Keep the image-option IDs unchanged in the next step.
 
-Map an AI-avatar identity choice to one `single` field with `variant:"visual"`
-and `id:"avatar"`. Official avatars are retired, so the cards are only the
-user's ready saved avatars, if any. Use each live `identityId` as the option id,
-the returned `name` as its label, `previewVideoUrl` as `previewVideo`, and
-`previewImageUrl` as `preview`. The image remains the poster and automatic
-fallback if video loading fails. After the saved-avatar cards, add a localized
-no-media `create_avatar` option and one `__other__` option with
-`otherPlaceholder` for the presenter the user wants; the host recognizes this
-picker and frames it 4:5. `create_avatar` returns to the creation workflow; it
-does not open ChatCut's native avatar dialog, so request the source attachment
-separately and use `asset-import`. Other returns the described presenter for
-choosing among saved avatars or creating one. Neither is an identity or consent
-to generate video.
+Map a character choice to one `single` field with `variant:"visual"` and
+`id:"avatar"`, which retains the host's 4:5 portrait framing. Use the exact
+`characterId` as the option id, the returned `name` as its label, and the
+character's main image URL from `manage_character get` as `preview`. Keep the
+user's saved characters, then a localized no-media `create_character` action
+and one `__other__` option with `otherPlaceholder` for the person the user
+wants. Creation returns to the workflow, so request the portrait attachment
+separately and use `asset-import`; it does not open a native dialog. Other
+returns to character discovery or creation. Neither action is a character ID,
+likeness consent, or permission to generate video.
 
 Map a caption style choice (the user asks to see, compare, or choose caption
 looks) to one `single` field with `variant:"visual"`. A simple "add captions"
@@ -186,7 +183,7 @@ through the host's supported media surface or ChatCut before applying. Never
 publish user media to the public CDN.
 
 Keep the caller's clone or create action and one Other control in the same
-group for voice, avatar and image choices. Neither action starts
+group for voice, character and image choices. Neither action starts
 generation. Localize the labels and placeholder, and put Other's text input
 below the group with `data-for` equal to the group's `data-name`; keep the
 host's `.elicit-submit` flow and add no scripts or handlers:
@@ -199,15 +196,15 @@ host's `.elicit-submit` flow and add no scripts or handlers:
 <input type="text" class="elicit-other" data-for="voice" placeholder="Describe what you want" hidden>
 ```
 
-For AI-avatar choices, official avatars are retired, so the choices are only
-the user's ready saved avatars, if any. Their previews are private runtime
-media and are not in the manifest: keep each live `identityId` mapped to its
-`name`, use label-only selectable cards, and say that video previews are in
-ChatCut's AI Avatars library. Never embed or print saved, provider or private
-preview URLs, invent CDN paths, or hardcode identities; the digital-human
-skill owns the shortlist. End the group with a label-only `create_avatar`
-action and Other. `create_avatar` follows the conversation-attachment plus
-`asset-import` path.
+Character images are private runtime media and are not in the bundled
+manifest. Keep each exact `characterId` mapped to its returned `name`, use
+label-only selectable cards in Elicitation, and tell the user they can see
+each character's photos in ChatCut's My Assets. Never embed or print image or
+private preview URLs, invent CDN paths, or hardcode characters; the
+digital-human skill owns the shortlist. End the group with a label-only
+`create_character` action and Other using the control above. Creation follows
+the normal conversation-attachment plus `asset-import` path; Other returns
+the person's requirements to discovery without creating or generating.
 
 Claude Code does not render `captionPreview`, so a caption style choice is a
 short chat reply, not a form: do not call `show_widget` or
