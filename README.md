@@ -164,7 +164,7 @@ ChatCut edits your own footage and generates new media, and the result is an edi
 - Talking-photo presenter videos (digital human / AI avatar).
 - Lip sync for existing footage.
 - Video translation and dubbing into other languages, with or without lip sync.
-- Viral video remakes that keep a reference video's motion and timing with your own person or product *(Desktop)*.
+- Viral video remakes that keep a reference video's motion and timing with your own person or product.
 - Batches of up to 50 image, video, voice, music and sound jobs in one step *(Desktop)*.
 
 **Motion graphics and design**
