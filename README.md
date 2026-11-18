@@ -1,22 +1,73 @@
-# ChatCut Agent Plugins
-**ChatCut is an AI video editor for agents: an MCP server and plugin that lets Codex, ChatGPT, Claude Code, Cursor, Grok Bot, Gemini CLI, Google Antigravity, Kimi Work, WorkBuddy, Doubao Work and Qwen Work edit your own footage, add captions and subtitles, remove silences and filler words, create motion graphics, generate video, voiceovers and music, and export an editable timeline.**\
-[Website](https://chatcut.io) · [Setup guide](https://chatcut.io/desktop) · [ChatGPT and Codex](https://chatcut.io/chatgpt-plugin) · [Claude Code](https://chatcut.io/claude-code-plugin) · [Pricing](https://chatcut.io/pricing)
+<h1 align="center"><picture><source media="(prefers-color-scheme: dark)" srcset="docs/media/brand/chatcut-logotype-dark-mode.svg"><img src="docs/media/brand/chatcut-logotype-light-mode.svg" alt="ChatCut" height="26"></picture> AI&nbsp;Video&nbsp;Editor</h1>
 
-[![ChatCut MCP server on Glama](https://glama.ai/mcp/connectors/io.chatcut/chatcut/badges/score.svg)](https://glama.ai/mcp/connectors/io.chatcut/chatcut)
+<p align="center">
+  <a href="https://www.producthunt.com/products/chatcut-ai-video-editor?utm_source=badge-top-post-badge&amp;utm_medium=badge&amp;utm_campaign=badge-chatcut-2"><picture><source media="(prefers-color-scheme: dark)" srcset="https://chatcut.io/producthunt/badge-dark.svg"><img src="https://chatcut.io/producthunt/badge-light.svg" alt="ChatCut — #1 Product of the Day on Product Hunt" width="231" height="50"></picture></a>
+</p>
 
-AI video editing for your agent. The ChatCut Agent Plugins connect Codex, Claude Code, Grok Bot, Cursor, Google Antigravity, Kimi Work, WorkBuddy, Doubao Work and Qwen Work to ChatCut, so you can ask your agent to edit a video, add captions, clean up a talking-head recording, or recreate a viral video with your own footage, and get an editable timeline back.
+<p align="center">
+  <a href="https://github.com/ChatCut-Inc/agent-plugin"><img src="https://img.shields.io/github/stars/ChatCut-Inc/agent-plugin?style=flat&amp;logo=github&amp;label=stars" alt="GitHub stars"></a>
+  <a href="https://github.com/ChatCut-Inc/agent-plugin/releases/latest"><img src="https://img.shields.io/github/v/release/ChatCut-Inc/agent-plugin?style=flat" alt="Latest release"></a>
+  <a href="https://github.com/ChatCut-Inc/agent-plugin/blob/main/LICENSE"><img src="https://img.shields.io/github/license/ChatCut-Inc/agent-plugin?style=flat" alt="License"></a>
+  <a href="https://discord.com/invite/sMjQPvwZTT"><img src="https://img.shields.io/badge/dynamic/json?style=flat&amp;label=Discord&amp;logo=discord&amp;logoColor=white&amp;color=5865F2&amp;suffix=%20members&amp;query=%24.approximate_member_count&amp;url=https%3A%2F%2Fdiscord.com%2Fapi%2Fv9%2Finvites%2FsMjQPvwZTT%3Fwith_counts%3Dtrue" alt="Discord members"></a>
+  <a href="https://glama.ai/mcp/connectors/io.chatcut/chatcut"><img src="https://glama.ai/mcp/connectors/io.chatcut/chatcut/badges/score.svg" alt="ChatCut MCP server on Glama"></a>
+</p>
 
-Under the hood the plugins import media, change a project timeline, create motion graphics, generate assets, transcribe audio, add captions, export videos, and verify that edits are visible in the editor.
+**ChatCut is an AI video editor for agents: an MCP server and plugin that lets Codex, ChatGPT, Claude Code, Cursor, Grok Bot, Gemini CLI, Google Antigravity, Kimi Work, WorkBuddy, Doubao Work and Qwen Work edit your own footage, add captions and subtitles, remove silences and filler words, create motion graphics, generate video, voiceovers and music, and export an editable timeline.**
 
-## Quick install
+<div align="center">
 
-**ChatCut Desktop (recommended).** Paste this into Codex, the ChatGPT desktop app, Claude Code or another local agent. The agent installs ChatCut Desktop, opens sign-in, and connects itself to Desktop's local `chatcut_desktop` MCP server:
+[Website](https://chatcut.io/?utm_source=github&utm_medium=readme&utm_campaign=agent-plugin) · [Skills](https://chatcut.io/skills?utm_source=github&utm_medium=readme&utm_campaign=agent-plugin) · [Docs](https://chatcut.io/docs?utm_source=github&utm_medium=readme&utm_campaign=agent-plugin) · [Setup guide](https://chatcut.io/desktop?utm_source=github&utm_medium=readme&utm_campaign=agent-plugin) · [Pricing](https://chatcut.io/pricing?utm_source=github&utm_medium=readme&utm_campaign=agent-plugin) · [Discord](https://discord.com/invite/sMjQPvwZTT) · [X](https://x.com/chatcutapp)
 
-```text
-Read ChatCut.io/desktop to install ChatCut
-```
+**Works with**
 
-Or run the official installer yourself:
+[<img src="docs/media/hosts/codex.png" height="28" alt="Codex">](https://chatcut.io/chatgpt-plugin?utm_source=github&utm_medium=readme&utm_campaign=agent-plugin)
+[<img src="docs/media/hosts/chatgpt.png" height="28" alt="ChatGPT">](https://chatcut.io/chatgpt-plugin?utm_source=github&utm_medium=readme&utm_campaign=agent-plugin)
+[<img src="docs/media/hosts/claude-code.png" height="28" alt="Claude Code">](https://chatcut.io/claude-code-plugin?utm_source=github&utm_medium=readme&utm_campaign=agent-plugin)
+[<img src="docs/media/hosts/grok-bot.png" height="28" alt="Grok Bot">](https://chatcut.io/grok-plugin?utm_source=github&utm_medium=readme&utm_campaign=agent-plugin)
+[<img src="docs/media/hosts/antigravity.png" height="28" alt="Google Antigravity">](https://chatcut.io/antigravity-plugin?utm_source=github&utm_medium=readme&utm_campaign=agent-plugin)
+[<img src="docs/media/hosts/workbuddy.png" height="28" alt="WorkBuddy">](https://chatcut.io/workbuddy?utm_source=github&utm_medium=readme&utm_campaign=agent-plugin)<br>
+[<img src="docs/media/hosts/cursor.png" height="28" alt="Cursor">](#web-setup)
+[<img src="docs/media/hosts/gemini-cli.png" height="28" alt="Gemini CLI">](#web-setup)
+[<img src="docs/media/hosts/kimi-work.png" height="28" alt="Kimi Work">](./kimi/README.md)
+[<img src="docs/media/hosts/doubao-work.png" height="28" alt="Doubao Work">](./doubao/README.md)
+[<img src="docs/media/hosts/qwen-work.png" height="28" alt="Qwen Work">](./qwen/README.md)
+
+</div>
+
+<p align="center"><img src="docs/media/hero-demo.gif" width="788" alt="ChatCut demo: Viral Video Cloner, Speech Cleanup, Add captions, Talking-Head Edit Recreation and two MG Packaging styles"></p>
+
+<p align="center">
+  <a href="https://chatcut.io/skills/speech-cleanup?utm_source=github&amp;utm_medium=readme&amp;utm_campaign=agent-plugin"><img src="docs/media/skills/speech-cleanup.jpg" width="260" alt="Speech Cleanup: removes retakes, long pauses and slips"></a>
+  <a href="https://chatcut.io/viralvideocloner?utm_source=github&amp;utm_medium=readme&amp;utm_campaign=agent-plugin"><img src="docs/media/skills/viral-video-cloner.jpg" width="260" alt="Viral Video Cloner: keeps a viral video's moves, camera work and cuts, and swaps in your own people, product and setting"></a>
+  <a href="https://chatcut.io/skills/add-captions?utm_source=github&amp;utm_medium=readme&amp;utm_campaign=agent-plugin"><img src="docs/media/skills/add-captions.jpg" width="260" alt="Add captions: readable captions in a style that fits"></a>
+  <a href="https://chatcut.io/skills/recreate-a-video?utm_source=github&amp;utm_medium=readme&amp;utm_campaign=agent-plugin"><img src="docs/media/skills/recreate-a-video.jpg" width="260" alt="Talking-Head Edit Recreation: recreates a reference edit with your footage"></a>
+  <a href="https://chatcut.io/skills/mg-packaging-runway-rebel?utm_source=github&amp;utm_medium=readme&amp;utm_campaign=agent-plugin"><img src="docs/media/skills/mg-packaging-runway-rebel.jpg" width="260" alt="MG Packaging · Runway Rebel: packages your talking-head video in bold white type and slim yellow numerals"></a>
+  <a href="https://chatcut.io/skills/mg-packaging-editorial-explainer?utm_source=github&amp;utm_medium=readme&amp;utm_campaign=agent-plugin"><img src="docs/media/skills/mg-packaging-editorial-explainer.jpg" width="260" alt="MG Packaging · Editorial Explainer: packages your talking-head video with news-style motion graphics and data charts"></a>
+</p>
+
+## Install
+
+ChatCut's plugin (MCP) works with ChatCut Desktop on your computer (recommended; your media stays local) or with hosted ChatCut Web. Find your agent below and follow its row.
+
+| Agent | How to install | Setup guide |
+| --- | --- | --- |
+| Codex | `Read ChatCut.io/desktop to install ChatCut` | [Codex guide](https://chatcut.io/chatgpt-plugin?utm_source=github&utm_medium=readme&utm_campaign=agent-plugin) |
+| ChatGPT | `Read ChatCut.io/desktop to install ChatCut` in the desktop app, or open **Plugins** in the sidebar, search for **ChatCut** and select **Install** | [ChatGPT guide](https://chatcut.io/chatgpt-plugin?utm_source=github&utm_medium=readme&utm_campaign=agent-plugin) |
+| Claude Code | `Read ChatCut.io/desktop to install ChatCut` | [Claude Code guide](https://chatcut.io/claude-code-plugin?utm_source=github&utm_medium=readme&utm_campaign=agent-plugin) |
+| Cursor | Add ChatCut's MCP server to `~/.cursor/mcp.json` and sign in | [Cursor guide](#web-setup) |
+| Grok Bot | `Read ChatCut.io/grok to connect the ChatCut app` | [Grok Bot guide](https://chatcut.io/grok-plugin?utm_source=github&utm_medium=readme&utm_campaign=agent-plugin) |
+| Gemini CLI | `gemini extensions install https://github.com/ChatCut-Inc/agent-plugin` | [Gemini CLI guide](#web-setup) |
+| Google Antigravity | `Read ChatCut.io/antigravity to install ChatCut` | [Antigravity guide](https://chatcut.io/antigravity-plugin?utm_source=github&utm_medium=readme&utm_campaign=agent-plugin) |
+| Kimi Work | Type `/`, choose **Plugin Builder** and send it `https://github.com/ChatCut-Inc/agent-plugin/tree/main/kimi`. Install it under **Plugins → Personal** (插件 → 个人), then select **Login** on the ChatCut connector card | [Kimi Work guide](./kimi/README.md) |
+| WorkBuddy | `Read ChatCut.io/desktop to install ChatCut`, or open **Experts · Skills · Connectors** (专家·技能·连接器) → **Experts** (专家), search **ChatCut**, open the official **ChatCut 视频剪辑师** expert and select **Summon** (召唤) | [WorkBuddy guide](https://chatcut.io/workbuddy?utm_source=github&utm_medium=readme&utm_campaign=agent-plugin) · [WorkBuddy expert guide](./workbuddy/README.md) |
+| Doubao Work (豆包工作) | In the sidebar, open **Plugins · Skills** (插件 · 技能) → **Plugins** (插件), search **ChatCut** and open it, select **Install** (安装) on its ChatCut connector, then **Use in chat** (在对话中使用). It installs ChatCut Desktop if needed | [Doubao Work guide](./doubao/README.md) |
+| Qwen Work (千问办公) | Open **Skills & extensions → Connectors → Market**, select **+** next to **ChatCut**, then **Install ChatCut** | [Qwen Work guide](./qwen/README.md) |
+
+### Desktop setup
+
+In Codex, the ChatGPT desktop app, Claude Code or another local agent, paste `Read ChatCut.io/desktop to install ChatCut`. The agent installs ChatCut Desktop, opens sign-in and connects itself to Desktop's local `chatcut_desktop` MCP server.
+
+To install Desktop yourself, run the official installer on the macOS or Windows computer. It needs a graphical desktop but not Node.js or npm, so a Linux or remote agent can't install Desktop there:
 
 ```sh
 # macOS 13 or newer (Apple Silicon or Intel)
@@ -28,19 +79,17 @@ curl -fsSL https://chatcut.io/install.sh | sh
 irm https://chatcut.io/install.ps1 | iex
 ```
 
-In the ChatGPT or Codex desktop app you can also open **Plugins** in the sidebar, search for **ChatCut**, and select **Install**.
-
-Doubao Work (豆包工作) connects to ChatCut Desktop through a local connector: see [doubao/README.md](./doubao/README.md).
-
-Google Antigravity: install the Desktop package, then ask “Install ChatCut on this computer”. It installs and connects ChatCut Desktop only; see [antigravity-desktop/README.md](./antigravity-desktop/README.md).
+Google Antigravity can also install the Desktop package directly. Then ask “Install ChatCut on this computer”. It installs and connects ChatCut Desktop only; see the [Antigravity Desktop guide](./antigravity-desktop/README.md).
 
 ```sh
 agy plugin install https://github.com/ChatCut-Inc/agent-plugin/tree/main/antigravity-desktop
 ```
 
-**Hosted Web plugin.** Use this for existing ChatCut Web projects or Web-only use.
+### Web setup
 
-Claude Code (`claude mcp login` needs Claude Code 2.1.210 or newer; [full guide](https://chatcut.io/web-plugin/claude)):
+Web projects and their media aren't migrated to Desktop, and connecting Desktop to the same agent may replace its hosted connection.
+
+Claude Code (`claude mcp login` needs Claude Code 2.1.210 or newer; [full guide](https://chatcut.io/web-plugin/claude?utm_source=github&utm_medium=readme&utm_campaign=agent-plugin), [agent-executable copy](./docs/claude-code-web-install.md)):
 
 ```sh
 claude plugin marketplace add https://github.com/ChatCut-Inc/agent-plugin.git#main
@@ -48,7 +97,7 @@ claude plugin install chatcut@chatcut-inc
 claude mcp login plugin:chatcut:chatcut
 ```
 
-Codex CLI (in the Codex desktop app, use its bundled Codex CLI; [full guide](https://chatcut.io/web-plugin/chatgpt)):
+Codex CLI (in the Codex desktop app, use its bundled Codex CLI; [full guide](https://chatcut.io/web-plugin/chatgpt?utm_source=github&utm_medium=readme&utm_campaign=agent-plugin)):
 
 ```sh
 codex plugin marketplace add https://github.com/ChatCut-Inc/agent-plugin.git --ref main
@@ -63,13 +112,25 @@ Gemini CLI:
 gemini extensions install https://github.com/ChatCut-Inc/agent-plugin
 ```
 
-Grok Bot: see [grok/README.md](./grok/README.md). Cursor: see [cursor/README.md](./cursor/README.md). Antigravity Web: see [antigravity/README.md](./antigravity/README.md). Kimi Work: see [kimi/README.md](./kimi/README.md). WorkBuddy: see [workbuddy/README.md](./workbuddy/README.md). Qwen Work (千问办公): see [qwen/README.md](./qwen/README.md).
+Cursor: add the server to `~/.cursor/mcp.json` and sign in when Cursor asks:
+
+```json
+{
+  "mcpServers": {
+    "chatcut": {
+      "url": "https://api.chatcut.io/api/external-mcp/mcp"
+    }
+  }
+}
+```
+
+Grok Bot and Antigravity Web: see the [Grok Bot Web guide](./grok/README.md) and the [Antigravity Web guide](./antigravity/README.md). Grok Bot signs in from its Plugins screen; in Antigravity, select **Customizations → Authenticate** next to the ChatCut MCP server.
 
 Other MCP clients that support remote servers with OAuth can connect to `https://api.chatcut.io/api/external-mcp/mcp` and sign in with a ChatCut account.
 
-## What you can make
+## Everything ChatCut can make
 
-ChatCut edits your own footage and generates new media, and the result is an editable timeline. Items marked *(Desktop)* need ChatCut Desktop. Generation uses ChatCut credits, and the agent asks before spending them.
+ChatCut edits your own footage and generates new media, and the result is an editable timeline. Under the hood the plugins import media, change a project timeline, create motion graphics, generate assets, transcribe audio, add captions, export videos, and verify that edits are visible in the editor. Items marked *(Desktop)* need ChatCut Desktop. Generation uses ChatCut credits, and the agent asks before spending them.
 
 **Editing**
 
@@ -146,14 +207,6 @@ ChatCut edits your own footage and generates new media, and the result is an edi
 
 **Video types:** talking-head videos, podcasts and interviews, tutorials and lectures, product demos and app promos, UGC-style product ads, short-form videos, viral video remakes, presenter and avatar videos, screen-recorded demos *(Desktop)*, multicam shoots, music videos cut to the beat *(Desktop)* and translated videos.
 
-## Install ChatCut Desktop (recommended)
-
-Ask your agent to read the complete [ChatCut Desktop setup guide](https://chatcut.io/desktop) using `curl -fsSL https://chatcut.io/desktop` (`curl.exe` on Windows), then install ChatCut and connect the current agent. The official macOS and Windows installers do not need Node.js or npm. Desktop owns its local tools and Skills. Run setup on a supported macOS or Windows computer with a graphical desktop. Linux and remote agents without access to that computer cannot install Desktop there; continue in a local agent on the supported computer.
-
-To recreate a reference video with your person or product while retaining its motion and timing, use Desktop’s bundled `video-gen` Skill and `submit_video_remake`. See the [video recreation guide](https://chatcut.io/viralvideocloner). Quotes use current account access and require approval before spending credits.
-
-The hosted packages below remain available for existing Web projects and explicit Web-only use. Web projects and original media remain separate and are not automatically migrated. Connecting Desktop to the same agent may disable or replace its conflicting hosted connection; do not promise that both connections stay active.
-
 ## What Is Included
 
 - `codex/` - the Codex plugin package.
@@ -189,18 +242,6 @@ Clone the complete repository with symlink support. When distributing a standalo
 - Codex with plugin support, Claude Code 2.x (CLI or desktop app), Grok Bot, Cursor, Google Antigravity (App, CLI, or IDE), Kimi Work, WorkBuddy, Doubao Work or Qwen Work.
 - Access to a ChatCut project you want to edit.
 
-## Optional hosted Web plugin authentication
-
-The plugin connects to ChatCut through the hosted ChatCut MCP endpoint:
-
-```text
-https://api.chatcut.io/api/external-mcp/mcp
-```
-
-The host handles authentication when the plugin is installed or first used (`codex mcp login chatcut`, or `claude mcp login plugin:chatcut:chatcut` in Claude Code). Grok Bot and Cursor users complete the authorization flow from the host's Plugins screen. Antigravity users select **Customizations → Authenticate** next to the ChatCut MCP server. Follow the sign-in flow to connect your ChatCut account.
-
-Install instructions per host: [Codex Web guide](https://chatcut.io/web-plugin/chatgpt) for Codex, [Claude Code Web guide](https://chatcut.io/web-plugin/claude) for Claude Code (agent-executable copy in [./docs/claude-code-web-install.md](./docs/claude-code-web-install.md)), [./grok/README.md](./grok/README.md) for Grok Bot, [./cursor/README.md](./cursor/README.md) for Cursor, and [./antigravity/README.md](./antigravity/README.md) for Antigravity.
-
 ## Example Prompts
 
 After installing and authenticating the plugin, ask in your own words, for example:
@@ -221,7 +262,7 @@ https://github.com/ChatCut-Inc/agent-plugin.git
 
 ## Support
 
-For product information, visit [chatcut.io](https://chatcut.io).
+For product information, visit [chatcut.io](https://chatcut.io/?utm_source=github&utm_medium=readme&utm_campaign=agent-plugin).
 
 ## License
 

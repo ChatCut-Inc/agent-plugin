@@ -11,6 +11,8 @@ description: Hosted ChatCut plugin sessions only (the `chatcut` MCP server). If 
 4. Use `find_transcript` for timestamped text lookup.
 5. Use the current caption tools to enable, inspect, translate, or style captions only after transcription is ready.
 
+For a simple "add captions" request, enable captions directly using any saved project style preference; no chooser is needed. When the user asks to see, compare, or choose caption styles, load `widget-forms` and follow its caption style choice before changing the project. Previewing published templates needs no transcription; apply only the selected template after the user answers.
+
 Do not call a transcription stuck from one pending status. Treat an explicit failed terminal state immediately; otherwise allow at least `max(5 minutes, min(60 minutes, 2 x asset duration))`, or at least 10 minutes across multiple checks when duration is unknown.
 
 `no_audio` / no-speech is a successful terminal analysis result: the media is usable, but there is no transcript to read or caption. Do not report it as a transcription failure or retry it unless the user says the media contains speech that should have been detected.

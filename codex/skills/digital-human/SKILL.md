@@ -49,11 +49,20 @@ Use the exact `characterId`; call `manage_character action="get"` for its curren
 images, image URLs, description, and voice. Its `presenter` describes talking-head
 preparation state; the submission tool handles that state.
 
-When several characters could fit, ask the user to choose. Widget Forms can show
-image choices using each candidate's main image URL from `manage_character get`,
-or ask a concise text question. Keep each ID, name, and image from the same returned
-character. An already attached character does not need another selection step.
-If there are no saved characters, offer to create one from the user's portrait.
+When several characters could fit, ask the user to choose through Widget Forms
+using each candidate's main image URL from `manage_character get`. Keep each ID,
+name, and image from the same returned character. The host adapter owns preview
+rendering: Codex uses portrait cards; Claude Code uses label-only cards for private
+character photos and directs the user to My Assets. Do not embed private media in
+a host that cannot display it safely. An already attached character does not need
+another selection step.
+
+When offering character choices, retain a localized new-character action and one
+Other choice with text entry after the saved characters, even when characters
+exist. Other returns the person's requirements for choosing or creating a character;
+it is not a character ID, consent, or permission to create or generate. If there
+are no saved characters, offer creation from the user's portrait and Other; never
+fill the empty state with people the user has not saved.
 
 Use `manage_character` for `list`, `get`, `create`, `update`, and `delete`:
 
@@ -131,10 +140,14 @@ submission `voiceRef` distinct; do not invent one from a display name.
 
 For discovery, audition, and cloning, follow the Voice Skill and use voices available
 for avatar video. Keep each voice's returned name, reference, and preview together.
-Show up to five suitable playable
-voices through Widget Forms, with a localized clone-voice action. A `hasPreview`
-flag without a playable `previewUrl` is insufficient. Copy URLs exactly and never
-use a character's image or video as an audio preview.
+Use the Voice Skill's ready custom voices and suitable official shortlist through
+Widget Forms, followed by a localized clone-voice action and one Other choice
+accepting voice requirements. Other returns to discovery and never starts cloning
+or generation. A `hasPreview` flag without a playable `previewUrl` is insufficient
+for an audition. The host adapter's label-only fallback for private previews takes
+priority, so do not discard a ready custom voice only because Claude Code cannot
+embed it. Copy returned URLs exactly and never use a character's image or video as
+an audio preview.
 
 Keep each voice's playable preview with its choice; Widget Forms decides how this
 host lets the user audition it. When the script
